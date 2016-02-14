@@ -1,7 +1,11 @@
-from Adafruit_MotorHAT import Adafruit_MotorHAT, Adafruit_DCMotor
+try:
+    from Adafruit_MotorHAT import Adafruit_MotorHAT, Adafruit_DCMotor
+except ImportError:
+    print 'You need to install Adafruit_MotorHAT'
+    print 'Please install Adafruit_MotorHAT for python and restart this script.'
+
 import time
 import atexit
-import readchar
 import sys
 import thread
 
@@ -13,6 +17,9 @@ drivingSpeed = 255
 handlingCommand = False
 
 
+robot_id = raw_input("Please enter your Robot ID: ")
+
+
 def handle_command(args):
         global handlingCommand
         if handlingCommand:
@@ -21,7 +28,7 @@ def handle_command(args):
         print('got something', args)
         ##if len(args) > 0 and 'command' in args[0]:
         ##    print args[0]['command']
-        if 'command' in args and 'robot_id' in args and args['robot_id'] == '{robot_id}':
+        if 'command' in args and 'robot_id' in args and args['robot_id'] == robot_id:
             #command = args[0]['command']
             command = args['command']
             if command == 'F':
