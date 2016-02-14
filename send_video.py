@@ -10,31 +10,6 @@ import platform
 #ffmpeg -f qtkit -i 0 -f mpeg1video -b 400k -r 30 -s 320x240 http://52.8.81.124:8082/hello/320/240/
 
 
-def handleDarwin():
-
-    response = getVideoPort()
-    print "video port:", response
-
-    p = subprocess.Popen(["ffmpeg", "-list_devices", "true", "-f", "qtkit", "-i", "dummy"], stdout=subprocess.PIPE, stderr=subprocess.PIPE)
-
-    out, err = p.communicate()
-
-    print err
-
-    deviceAnswer = raw_input("Enter the number of the camera device for your robot from the list above: ")
-    commandLine = 'ffmpeg -f qtkit -i %s -f mpeg1video -b 400k -r 30 -s 320x240 http://runmyrobot.com:8082/hello/320/240/' % deviceAnswer
-    
-    while(True):
-        os.system(commandLine)
-        print "Press Ctrl-C to quit"
-        time.sleep(3)
-        print "Retrying"
-    
-    print commandLine
-
-
-
-
 
 def getVideoPort():
 
@@ -45,6 +20,30 @@ def getVideoPort():
 
     return response
 
+
+
+
+def handleDarwin():
+
+    videoPort = getVideoPort()
+    print "video port:", videoPort
+
+    p = subprocess.Popen(["ffmpeg", "-list_devices", "true", "-f", "qtkit", "-i", "dummy"], stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+
+    out, err = p.communicate()
+
+    print err
+
+    deviceAnswer = raw_input("Enter the number of the camera device for your robot from the list above: ")
+    commandLine = 'ffmpeg -f qtkit -i %s -f mpeg1video -b 400k -r 30 -s 320x240 http://runmyrobot.com:%s/hello/320/240/' % (deviceAnswer, videoPort)
+    
+    while(True):
+        os.system(commandLine)
+        print "Press Ctrl-C to quit"
+        time.sleep(3)
+        print "Retrying"
+    
+    print commandLine
 
 
 
@@ -61,8 +60,8 @@ def handleWindows():
     
     devices = []
     
-    response = getVideoPort()
-    print "video port:", response
+    videoPort = getVideoPort()
+    print "video port:", videoPort
     
     for line in lines:
     
@@ -80,7 +79,7 @@ def handleWindows():
     
     deviceAnswer = raw_input("Enter the number of the camera device for your robot from the list above: ")
     device = devices[int(deviceAnswer)]
-    commandLine = 'ffmpeg -s 320x240 -f dshow -i video="%s" -f mpeg1video -b 400k -r 20 http://runmyrobot.com:8082/hello/320/240/' % device
+    commandLine = 'ffmpeg -s 320x240 -f dshow -i video="%s" -f mpeg1video -b 400k -r 20 http://runmyrobot.com:%s/hello/320/240/' % (device, videoPort)
     
     while(True):
         os.system(commandLine)
