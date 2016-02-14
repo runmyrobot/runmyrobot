@@ -12,13 +12,14 @@ import platform
 
 def handleDarwin():
 
+    response = getVideoPort()
+    print "video port:", response
+
     p = subprocess.Popen(["ffmpeg", "-list_devices", "true", "-f", "qtkit", "-i", "dummy"], stdout=subprocess.PIPE, stderr=subprocess.PIPE)
 
     out, err = p.communicate()
 
     print err
-
-
 
     deviceAnswer = raw_input("Enter the number of the camera device for your robot from the list above: ")
     commandLine = 'ffmpeg -f qtkit -i %s -f mpeg1video -b 400k -r 30 -s 320x240 http://runmyrobot.com:8082/hello/320/240/' % deviceAnswer
@@ -35,6 +36,14 @@ def handleDarwin():
 
 
 
+def getVideoPort():
+
+    cameraIDAnswer = raw_input("Enter the Camera ID for your robot, you can get it from the runmyrobot.com website: ")
+    url = 'http://runmyrobot.com:3100/init_video_port/%s' % cameraIDAnswer
+    print "GET", url
+    response = urllib2.urlopen(url).read()
+
+    return response
 
 
 
@@ -52,15 +61,8 @@ def handleWindows():
     
     devices = []
     
-    cameraIDAnswer = raw_input("Enter the Camera ID for your robot, you can get it from the runmyrobot.com website: ")
-    
-    url = 'http://runmyrobot.com:3100/init_video_port/%s' % cameraIDAnswer
-    print "GET", url
-    
-    response = urllib2.urlopen(url).read()
-    print response
-    
-    
+    response = getVideoPort()
+    print "video port:", response
     
     for line in lines:
     
@@ -90,10 +92,10 @@ def handleWindows():
     
     
 
-if platform.system() == 'Windows':
-    handleWindows()
-elif platform.system() == 'Darwin':
+if platform.system() == 'Darwin':
     handleDarwin()
+elif platform.system() == 'Windows':
+    handleWindows()
 else:
     print "unknown platform", platform.system()
 
