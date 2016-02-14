@@ -35,6 +35,8 @@ else:
 
 def handle_command(args):
 
+        print args
+
         global handlingCommand
         if handlingCommand:
             return
