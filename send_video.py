@@ -4,8 +4,7 @@ import os
 import time
 import urllib2
 import platform
-
-
+import json
 
 #ffmpeg -f qtkit -i 0 -f mpeg1video -b 400k -r 30 -s 320x240 http://52.8.81.124:8082/hello/320/240/
 
@@ -18,8 +17,7 @@ def getVideoPort():
     print "GET", url
     response = urllib2.urlopen(url).read()
 
-    return response
-
+    return json.loads(response)['mpeg_stream_port']
 
 
 
