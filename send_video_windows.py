@@ -14,6 +14,29 @@ def handleDarwin():
 
     p = subprocess.Popen(["ffmpeg", "-list_devices", "true", "-f", "qtkit", "-i", "dummy"], stdout=subprocess.PIPE, stderr=subprocess.PIPE)
 
+    out, err = p.communicate()
+
+    print err
+
+
+
+    deviceAnswer = raw_input("Enter the number of the camera device for your robot from the list above: ")
+    commandLine = 'ffmpeg -f qtkit -i %s -f mpeg1video -b 400k -r 30 -s 320x240 http://runmyrobot.com:8082/hello/320/240/' % deviceAnswer
+    
+    while(True):
+        os.system(commandLine)
+        print "Press Ctrl-C to quit"
+        time.sleep(3)
+        print "Retrying"
+    
+    print commandLine
+
+
+
+
+
+
+
 
 
 def handleWindows():
