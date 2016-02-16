@@ -47,17 +47,31 @@ def handle_command(args):
             command = args['command']
 
             if motorsEnabled:
+                motorA.setSpeed(drivingSpeed)
+                motorB.setSpeed(drivingSpeed)
                 if command == 'F':
-                    driveMotor.setSpeed(drivingSpeed)
-                    driveMotor.run(Adafruit_MotorHAT.FORWARD);
+                    motorA.run(Adafruit_MotorHAT.FORWARD);
+                    motorB.run(Adafruit_MotorHAT.FORWARD);
                 if command == 'B':
-                    driveMotor.setSpeed(drivingSpeed)
-                    driveMotor.run(Adafruit_MotorHAT.BACKWARD);
+                    motorA.run(Adafruit_MotorHAT.BACKWARD);
+                    motorB.run(Adafruit_MotorHAT.BACKWARD);
+                if command == 'L':
+                    motorA.run(Adafruit_MotorHAT.FORWARD);
+                    motorB.run(Adafruit_MotorHAT.BACKWARD);
+                if command == 'R':
+                    motorA.run(Adafruit_MotorHAT.BACKWARD);
+                    motorB.run(Adafruit_MotorHAT.FORWARD);
 
+                    
             time.sleep(0.3)
 
+            turnOffMotors()
+            
         handlingCommand = False
 
+
+
+        
 def on_handle_command(*args):
    thread.start_new_thread(handle_command, args)
 
@@ -82,8 +96,8 @@ def turnOffMotors():
 
 if motorsEnabled:
     atexit.register(turnOffMotors)
-    steeringMotor = mh.getMotor(3)
-    driveMotor = mh.getMotor(4)
+    motorA = mh.getMotor(1)
+    motorB = mh.getMotor(2)
 
 
 while True:

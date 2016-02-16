@@ -27,10 +27,7 @@ def getVideoPort():
 
 
 
-def handleDarwin():
-
-    videoPort = getVideoPort()
-    print "video port:", videoPort
+def handleDarwin(videoPort):
 
     p = subprocess.Popen(["ffmpeg", "-list_devices", "true", "-f", "qtkit", "-i", "dummy"], stdout=subprocess.PIPE, stderr=subprocess.PIPE)
 
@@ -52,7 +49,7 @@ def handleDarwin():
 
 
 
-def handleWindows():
+def handleWindows(videoPort):
 
     p = subprocess.Popen(["ffmpeg", "-list_devices", "true", "-f", "dshow", "-i", "dummy"], stdout=subprocess.PIPE, stderr=subprocess.PIPE)
     
@@ -64,9 +61,6 @@ def handleWindows():
     count = 0
     
     devices = []
-    
-    videoPort = getVideoPort()
-    print "video port:", videoPort
     
     for line in lines:
     
@@ -94,7 +88,9 @@ def handleWindows():
     
     print commandLine
     
-    
+
+videoPort = getVideoPort()
+print "video port:", videoPort
 
 if platform.system() == 'Darwin':
     handleDarwin()
