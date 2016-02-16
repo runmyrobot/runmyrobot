@@ -19,7 +19,7 @@ def getVideoPort():
     else:
         cameraIDAnswer = raw_input("Enter the Camera ID for your robot, you can get it from the runmyrobot.com website: ")
 
-    url = 'http://runmyrobot.com:3100/init_video_port/%s' % cameraIDAnswer
+    url = 'http://runmyrobot.com:3100/get_video_port/%s' % cameraIDAnswer
     print "GET", url
     response = urllib2.urlopen(url).read()
 
