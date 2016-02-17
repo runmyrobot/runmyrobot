@@ -1,0 +1,28 @@
+Traceback (most recent call last):
+  File "controller.py", line 104, in <module>
+    socketIO.wait(seconds=10)
+  File "/usr/local/lib/python2.7/dist-packages/socketIO_client/__init__.py", line 232, in wait
+    self._process_packets()
+  File "/usr/local/lib/python2.7/dist-packages/socketIO_client/__init__.py", line 254, in _process_packets
+    for engineIO_packet in self._transport.recv_packet():
+  File "/usr/local/lib/python2.7/dist-packages/socketIO_client/transports.py", line 145, in recv_packet
+    packet_text = self._connection.recv()
+  File "/usr/local/lib/python2.7/dist-packages/websocket/_core.py", line 351, in recv
+    opcode, data = self.recv_data()
+  File "/usr/local/lib/python2.7/dist-packages/websocket/_core.py", line 368, in recv_data
+    opcode, frame = self.recv_data_frame(control_frame)
+  File "/usr/local/lib/python2.7/dist-packages/websocket/_core.py", line 381, in recv_data_frame
+    frame = self.recv_frame()
+  File "/usr/local/lib/python2.7/dist-packages/websocket/_core.py", line 413, in recv_frame
+    return self.frame_buffer.recv_frame()
+  File "/usr/local/lib/python2.7/dist-packages/websocket/_abnf.py", line 312, in recv_frame
+    self.recv_header()
+  File "/usr/local/lib/python2.7/dist-packages/websocket/_abnf.py", line 261, in recv_header
+    header = self.recv_strict(2)
+  File "/usr/local/lib/python2.7/dist-packages/websocket/_abnf.py", line 346, in recv_strict
+    bytes = self.recv(min(16384, shortage))
+  File "/usr/local/lib/python2.7/dist-packages/websocket/_core.py", line 482, in _recv
+    return recv(self.sock, bufsize)
+  File "/usr/local/lib/python2.7/dist-packages/websocket/_socket.py", line 77, in recv
+    bytes = sock.recv(bufsize)
+KeyboardInterrupt
