@@ -52,18 +52,20 @@ def handle_command(args):
                 if command == 'F':
                     motorA.run(Adafruit_MotorHAT.FORWARD);
                     motorB.run(Adafruit_MotorHAT.FORWARD);
+                    time.sleep(0.3)
                 if command == 'B':
                     motorA.run(Adafruit_MotorHAT.BACKWARD);
                     motorB.run(Adafruit_MotorHAT.BACKWARD);
+                    time.sleep(0.3)
                 if command == 'L':
                     motorA.run(Adafruit_MotorHAT.FORWARD);
                     motorB.run(Adafruit_MotorHAT.BACKWARD);
+                    time.sleep(0.1)
                 if command == 'R':
                     motorA.run(Adafruit_MotorHAT.BACKWARD);
                     motorB.run(Adafruit_MotorHAT.FORWARD);
+                    time.sleep(0.1)
 
-                    
-            time.sleep(0.3)
 
             turnOffMotors()
             
