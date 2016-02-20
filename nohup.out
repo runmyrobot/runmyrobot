@@ -26,3 +26,11 @@ Traceback (most recent call last):
   File "/usr/local/lib/python2.7/dist-packages/websocket/_socket.py", line 77, in recv
     bytes = sock.recv(bufsize)
 KeyboardInterrupt
+GET http://runmyrobot.com/get_video_port/36644145
+video port: 11530
+Enter the number of the camera device for your robot: Traceback (most recent call last):
+  File "send_video.py", line 118, in <module>
+    handleLinux(videoPort)
+  File "send_video.py", line 58, in handleLinux
+    deviceAnswer = raw_input("Enter the number of the camera device for your robot: ")
+IOError: [Errno 9] Bad file descriptor

@@ -27,7 +27,8 @@ def getVideoPort():
 
 
 
-def handleDarwin(videoPort):
+
+def handleDarwin(deviceNumber, videoPort):
 
     p = subprocess.Popen(["ffmpeg", "-list_devices", "true", "-f", "qtkit", "-i", "dummy"], stdout=subprocess.PIPE, stderr=subprocess.PIPE)
 
@@ -49,13 +50,19 @@ def handleDarwin(videoPort):
 
 
 
-def handleLinux(videoPort):
+def handleLinux(deviceNumber, videoPort):
 
     #p = subprocess.Popen(["ffmpeg", "-list_devices", "true", "-f", "qtkit", "-i", "dummy"], stdout=subprocess.PIPE, stderr=subprocess.PIPE)
     #out, err = p.communicate()
     #print err
 
-    deviceAnswer = raw_input("Enter the number of the camera device for your robot: ")
+
+    if deviceNumber is None:
+        deviceAnswer = raw_input("Enter the number of the camera device for your robot: ")
+    else:
+        deviceAnswer = str(deviceNumber)
+
+        
     commandLine = 'ffmpeg -s 320x240 -f video4linux2 -i /dev/video%s -f mpeg1video -b 1k -r 20 http://runmyrobot.com:%s/hello/320/240/' % (deviceAnswer, videoPort)
 
     while(True):
@@ -69,7 +76,7 @@ def handleLinux(videoPort):
 
 
 
-def handleWindows(videoPort):
+def handleWindows(deviceNumber, videoPort):
 
     p = subprocess.Popen(["ffmpeg", "-list_devices", "true", "-f", "dshow", "-i", "dummy"], stdout=subprocess.PIPE, stderr=subprocess.PIPE)
     
@@ -112,12 +119,17 @@ def handleWindows(videoPort):
 videoPort = getVideoPort()
 print "video port:", videoPort
 
+if len(argv) >= 3:
+    deviceNumber = argv[2]
+else:
+    deviceNumber = None
+
 if platform.system() == 'Darwin':
-    handleDarwin(videoPort)
+    handleDarwin(deviceNumber, videoPort)
 elif platform.system() == 'Linux':
-    handleLinux(videoPort)
+    handleLinux(deviceNumber, videoPort)
 elif platform.system() == 'Windows':
-    handleWindows(videoPort)
+    handleWindows(devideNumber, videoPort)
 else:
     print "unknown platform", platform.system()
 
