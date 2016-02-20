@@ -119,8 +119,8 @@ def handleWindows(deviceNumber, videoPort):
 videoPort = getVideoPort()
 print "video port:", videoPort
 
-if len(argv) >= 3:
-    deviceNumber = argv[2]
+if len(sys.argv) >= 3:
+    deviceNumber = sys.argv[2]
 else:
     deviceNumber = None
 
