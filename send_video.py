@@ -108,7 +108,7 @@ def handleWindows(deviceNumber, videoPort):
     
     deviceAnswer = raw_input("Enter the number of the camera device for your robot from the list above: ")
     device = devices[int(deviceAnswer)]
-    commandLine = 'ffmpeg -s 320x240 -f dshow -i video="%s" -f mpeg1video -b 400k -r 20 http://runmyrobot.com:%s/hello/320/240/' % (device, videoPort)
+    commandLine = 'ffmpeg -s 320x240 -f dshow -i video="%s" -f mpeg1video -b 300k -r 20 http://runmyrobot.com:%s/hello/320/240/' % (device, videoPort)
     
     while(True):
         os.system(commandLine)
@@ -132,7 +132,7 @@ if platform.system() == 'Darwin':
 elif platform.system() == 'Linux':
     handleLinux(deviceNumber, videoPort)
 elif platform.system() == 'Windows':
-    handleWindows(devideNumber, videoPort)
+    handleWindows(deviceNumber, videoPort)
 else:
     print "unknown platform", platform.system()
 
