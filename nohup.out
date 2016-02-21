@@ -34,3 +34,55 @@ Enter the number of the camera device for your robot: Traceback (most recent cal
   File "send_video.py", line 58, in handleLinux
     deviceAnswer = raw_input("Enter the number of the camera device for your robot: ")
 IOError: [Errno 9] Bad file descriptor
+Traceback (most recent call last):
+  File "controller.py", line 80, in <module>
+    socketIO = SocketIO('runmyrobot.com', port, LoggingNamespace)
+  File "/usr/local/lib/python2.7/dist-packages/socketIO_client/__init__.py", line 331, in __init__
+    resource, hurry_interval_in_seconds, **kw)
+  File "/usr/local/lib/python2.7/dist-packages/socketIO_client/__init__.py", line 51, in __init__
+    self._transport
+  File "/usr/local/lib/python2.7/dist-packages/socketIO_client/__init__.py", line 60, in _transport
+    self._negotiate_transport()
+  File "/usr/local/lib/python2.7/dist-packages/socketIO_client/__init__.py", line 90, in _negotiate_transport
+    transport = self._get_transport('websocket')
+  File "/usr/local/lib/python2.7/dist-packages/socketIO_client/__init__.py", line 135, in _get_transport
+    self._engineIO_session)
+  File "/usr/local/lib/python2.7/dist-packages/socketIO_client/transports.py", line 139, in __init__
+    self._connection = websocket.create_connection(ws_url, **kw)
+  File "/usr/local/lib/python2.7/dist-packages/websocket/_core.py", line 105, in create_connection
+    websock.connect(url, **options)
+  File "/usr/local/lib/python2.7/dist-packages/websocket/_core.py", line 272, in connect
+    self.handshake_response = handshake(self.sock, *addrs, **options)
+  File "/usr/local/lib/python2.7/dist-packages/websocket/_handshake.py", line 67, in handshake
+    status, resp = _get_resp_headers(sock)
+  File "/usr/local/lib/python2.7/dist-packages/websocket/_handshake.py", line 121, in _get_resp_headers
+    status, resp_headers = read_headers(sock)
+  File "/usr/local/lib/python2.7/dist-packages/websocket/_http.py", line 211, in read_headers
+    line = recv_line(sock)
+  File "/usr/local/lib/python2.7/dist-packages/websocket/_socket.py", line 97, in recv_line
+    c = recv(sock, 1)
+  File "/usr/local/lib/python2.7/dist-packages/websocket/_socket.py", line 77, in recv
+    bytes = sock.recv(bufsize)
+KeyboardInterrupt
+ffmpeg version N-78590-g5590ab4 Copyright (c) 2000-2016 the FFmpeg developers
+  built with gcc 4.9.2 (Raspbian 4.9.2-10)
+  configuration: --arch=armel --target-os=linux --enable-gpl --enable-libx264 --enable-nonfree
+  libavutil      55. 18.100 / 55. 18.100
+  libavcodec     57. 24.103 / 57. 24.103
+  libavformat    57. 25.100 / 57. 25.100
+  libavdevice    57.  0.101 / 57.  0.101
+  libavfilter     6. 32.100 /  6. 32.100
+  libswscale      4.  0.100 /  4.  0.100
+  libswresample   2.  0.101 /  2.  0.101
+  libpostproc    54.  0.100 / 54.  0.100
+/dev/video0: Device or resource busy
+GET http://runmyrobot.com/get_video_port/36644145
+video port: 11530
+ffmpeg -s 320x240 -f video4linux2 -i /dev/video0 -f mpeg1video -b 1k -r 20 http://runmyrobot.com:11530/hello/320/240/
+Press Ctrl-C to quit
+Traceback (most recent call last):
+  File "send_video.py", line 133, in <module>
+    handleLinux(deviceNumber, videoPort)
+  File "send_video.py", line 75, in handleLinux
+    time.sleep(3)
+KeyboardInterrupt

@@ -57,6 +57,9 @@ def handleLinux(deviceNumber, videoPort):
     #print err
 
 
+    os.system("v4l2-ctl -c brightness=230 -c contrast=100 -c saturation=100")
+    
+
     if deviceNumber is None:
         deviceAnswer = raw_input("Enter the number of the camera device for your robot: ")
     else:
