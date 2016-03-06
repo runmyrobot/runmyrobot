@@ -73,7 +73,7 @@ def handleLinux(deviceNumber, videoPort):
         deviceAnswer = str(deviceNumber)
 
         
-    commandLine = 'ffmpeg -s 320x240 -f video4linux2 -i /dev/video%s -f mpeg1video -b 1k -r 20 http://runmyrobot.com:%s/hello/320/240/' % (deviceAnswer, videoPort)
+    commandLine = '/usr/local/bin/ffmpeg -s 320x240 -f video4linux2 -i /dev/video%s -f mpeg1video -b 1k -r 20 http://runmyrobot.com:%s/hello/320/240/' % (deviceAnswer, videoPort)
 
     while(True):
         print commandLine
