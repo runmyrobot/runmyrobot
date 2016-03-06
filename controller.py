@@ -15,8 +15,8 @@ import thread
 
 from socketIO_client import SocketIO, LoggingNamespace
 
-steeringSpeed = 200
-steeringHoldingSpeed = 110
+steeringSpeed = 255
+steeringHoldingSpeed = 180
 drivingSpeed = 255
 handlingCommand = False
 
@@ -33,6 +33,20 @@ else:
     port = 8022
 
 
+def times(lst, number):
+    return [x*number for x in lst]
+
+
+def runMotor(motorIndex, direction):
+    motor = mh.getMotor(motorIndex+1)
+    if direction == 1:
+        motor.setSpeed(drivingSpeed)
+        motor.run(Adafruit_MotorHAT.FORWARD)
+    if direction == -1:
+        motor.setSpeed(drivingSpeed)
+        motor.run(Adafruit_MotorHAT.BACKWARD)
+
+        
 def handle_command(args):
 
         global handlingCommand
@@ -45,26 +59,29 @@ def handle_command(args):
             print('got something', args)
 
             command = args['command']
-
+            left = (-1, -1, -1, 1)
+            right = times(left, -1)
+            forward = (1, -1, 1, 1)
+            backward = times(forward, -1)
             if motorsEnabled:
                 motorA.setSpeed(drivingSpeed)
                 motorB.setSpeed(drivingSpeed)
                 if command == 'F':
-                    motorA.run(Adafruit_MotorHAT.FORWARD);
-                    motorB.run(Adafruit_MotorHAT.FORWARD);
-                    time.sleep(0.3)
+                    for motorIndex in range(4):
+                        runMotor(motorIndex, forward[motorIndex])
+                    time.sleep(0.2)
                 if command == 'B':
-                    motorA.run(Adafruit_MotorHAT.BACKWARD);
-                    motorB.run(Adafruit_MotorHAT.BACKWARD);
-                    time.sleep(0.3)
+                    for motorIndex in range(4):
+                        runMotor(motorIndex, backward[motorIndex])
+                    time.sleep(0.2)
                 if command == 'L':
-                    motorA.run(Adafruit_MotorHAT.FORWARD);
-                    motorB.run(Adafruit_MotorHAT.BACKWARD);
-                    time.sleep(0.2)
+                    for motorIndex in range(4):
+                        runMotor(motorIndex, left[motorIndex])
+                    time.sleep(0.1)
                 if command == 'R':
-                    motorA.run(Adafruit_MotorHAT.BACKWARD);
-                    motorB.run(Adafruit_MotorHAT.FORWARD);
-                    time.sleep(0.2)
+                    for motorIndex in range(4):
+                        runMotor(motorIndex, right[motorIndex])
+                    time.sleep(0.1)
 
 
             turnOffMotors()
