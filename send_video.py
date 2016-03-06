@@ -20,8 +20,15 @@ def getVideoPort():
         cameraIDAnswer = raw_input("Enter the Camera ID for your robot, you can get it from the runmyrobot.com website: ")
 
     url = 'http://runmyrobot.com/get_video_port/%s' % cameraIDAnswer
-    print "GET", url
-    response = urllib2.urlopen(url).read()
+
+
+    for retryNumber in range(10):
+        try:
+            print "GET", url
+            response = urllib2.urlopen(url).read()
+        except:
+            print "could not open url ", url
+            time.sleep(2)
 
     return json.loads(response)['mpeg_stream_port']
 
