@@ -46,6 +46,19 @@ def runMotor(motorIndex, direction):
         motor.setSpeed(drivingSpeed)
         motor.run(Adafruit_MotorHAT.BACKWARD)
 
+robot = "skippy"
+if robot == "skippy":
+    left = (1, -1, 1, 1)
+    right = times(left, -1)
+    forward = (1, 1, 1, -1)
+    backward = times(forward, -1)
+else:
+    left = (-1, -1, -1, 1)
+    right = times(left, -1)
+    forward = (1, -1, 1, 1)
+    backward = times(forward, -1)
+
+        
         
 def handle_command(args):
 
@@ -59,10 +72,6 @@ def handle_command(args):
             print('got something', args)
 
             command = args['command']
-            left = (-1, -1, -1, 1)
-            right = times(left, -1)
-            forward = (1, -1, 1, 1)
-            backward = times(forward, -1)
             if motorsEnabled:
                 motorA.setSpeed(drivingSpeed)
                 motorB.setSpeed(drivingSpeed)

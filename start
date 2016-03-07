@@ -1,2 +1,2 @@
 nohup python controller.py 88359766 &> /dev/null &
-nohup python send_video.py 36644145 0 &> /dev/null
+nohup python send_video.py 36644145 0 &> /dev/null &

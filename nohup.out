@@ -86,3 +86,415 @@ Traceback (most recent call last):
   File "send_video.py", line 75, in handleLinux
     time.sleep(3)
 KeyboardInterrupt
+('got something', {u'robot_id': u'88359766', u'command': u'L', u'user': u'anonymous'})
+('got something', {u'robot_id': u'88359766', u'command': u'R', u'user': u'anonymous'})
+('got something', {u'robot_id': u'88359766', u'command': u'R', u'user': u'anonymous'})
+('got something', {u'robot_id': u'88359766', u'command': u'L', u'user': u'anonymous'})
+('got something', {u'robot_id': u'88359766', u'command': u'L', u'user': u'anonymous'})
+('got something', {u'robot_id': u'88359766', u'command': u'L', u'user': u'anonymous'})
+('got something', {u'robot_id': u'88359766', u'command': u'R', u'user': u'anonymous'})
+('got something', {u'robot_id': u'88359766', u'command': u'R', u'user': u'anonymous'})
+('got something', {u'robot_id': u'88359766', u'command': u'R', u'user': u'anonymous'})
+('got something', {u'robot_id': u'88359766', u'command': u'F', u'user': u'anonymous'})
+('got something', {u'robot_id': u'88359766', u'command': u'L', u'user': u'anonymous'})
+('got something', {u'robot_id': u'88359766', u'command': u'R', u'user': u'anonymous'})
+('got something', {u'robot_id': u'88359766', u'command': u'F', u'user': u'anonymous'})
+('got something', {u'robot_id': u'88359766', u'command': u'L', u'user': u'anonymous'})
+('got something', {u'robot_id': u'88359766', u'command': u'R', u'user': u'anonymous'})
+('got something', {u'robot_id': u'88359766', u'command': u'L', u'user': u'anonymous'})
+('got something', {u'robot_id': u'88359766', u'command': u'F', u'user': u'anonymous'})
+('got something', {u'robot_id': u'88359766', u'command': u'F', u'user': u'anonymous'})
+('got something', {u'robot_id': u'88359766', u'command': u'F', u'user': u'anonymous'})
+('got something', {u'robot_id': u'88359766', u'command': u'L', u'user': u'anonymous'})
+('got something', {u'robot_id': u'88359766', u'command': u'L', u'user': u'anonymous'})
+('got something', {u'robot_id': u'88359766', u'command': u'R', u'user': u'anonymous'})
+('got something', {u'robot_id': u'88359766', u'command': u'F', u'user': u'anonymous'})
+('got something', {u'robot_id': u'88359766', u'command': u'F', u'user': u'anonymous'})
+('got something', {u'robot_id': u'88359766', u'command': u'F', u'user': u'anonymous'})
+('got something', {u'robot_id': u'88359766', u'command': u'F', u'user': u'anonymous'})
+('got something', {u'robot_id': u'88359766', u'command': u'L', u'user': u'anonymous'})
+('got something', {u'robot_id': u'88359766', u'command': u'R', u'user': u'anonymous'})
+('got something', {u'robot_id': u'88359766', u'command': u'R', u'user': u'anonymous'})
+('got something', {u'robot_id': u'88359766', u'command': u'L', u'user': u'anonymous'})
+('got something', {u'robot_id': u'88359766', u'command': u'R', u'user': u'anonymous'})
+('got something', {u'robot_id': u'88359766', u'command': u'L', u'user': u'anonymous'})
+('got something', {u'robot_id': u'88359766', u'command': u'L', u'user': u'anonymous'})
+('got something', {u'robot_id': u'88359766', u'command': u'R', u'user': u'anonymous'})
+('got something', {u'robot_id': u'88359766', u'command': u'L', u'user': u'anonymous'})
+('got something', {u'robot_id': u'88359766', u'command': u'F', u'user': u'anonymous'})
+('got something', {u'robot_id': u'88359766', u'command': u'F', u'user': u'anonymous'})
+('got something', {u'robot_id': u'88359766', u'command': u'F', u'user': u'anonymous'})
+('got something', {u'robot_id': u'88359766', u'command': u'F', u'user': u'anonymous'})
+('got something', {u'robot_id': u'88359766', u'command': u'F', u'user': u'anonymous'})
+('got something', {u'robot_id': u'88359766', u'command': u'F', u'user': u'anonymous'})
+('got something', {u'robot_id': u'88359766', u'command': u'F', u'user': u'anonymous'})
+('got something', {u'robot_id': u'88359766', u'command': u'F', u'user': u'anonymous'})
+('got something', {u'robot_id': u'88359766', u'command': u'L', u'user': u'anonymous'})
+('got something', {u'robot_id': u'88359766', u'command': u'R', u'user': u'anonymous'})
+('got something', {u'robot_id': u'88359766', u'command': u'R', u'user': u'anonymous'})
+('got something', {u'robot_id': u'88359766', u'command': u'R', u'user': u'anonymous'})
+('got something', {u'robot_id': u'88359766', u'command': u'F', u'user': u'anonymous'})
+('got something', {u'robot_id': u'88359766', u'command': u'F', u'user': u'anonymous'})
+('got something', {u'robot_id': u'88359766', u'command': u'F', u'user': u'anonymous'})
+('got something', {u'robot_id': u'88359766', u'command': u'F', u'user': u'anonymous'})
+('got something', {u'robot_id': u'88359766', u'command': u'F', u'user': u'anonymous'})
+('got something', {u'robot_id': u'88359766', u'command': u'F', u'user': u'anonymous'})
+('got something', {u'robot_id': u'88359766', u'command': u'F', u'user': u'anonymous'})
+('got something', {u'robot_id': u'88359766', u'command': u'F', u'user': u'anonymous'})
+('got something', {u'robot_id': u'88359766', u'command': u'F', u'user': u'anonymous'})
+('got something', {u'robot_id': u'88359766', u'command': u'F', u'user': u'anonymous'})
+('got something', {u'robot_id': u'88359766', u'command': u'F', u'user': u'anonymous'})
+('got something', {u'robot_id': u'88359766', u'command': u'F', u'user': u'anonymous'})
+('got something', {u'robot_id': u'88359766', u'command': u'F', u'user': u'anonymous'})
+('got something', {u'robot_id': u'88359766', u'command': u'F', u'user': u'anonymous'})
+('got something', {u'robot_id': u'88359766', u'command': u'F', u'user': u'anonymous'})
+('got something', {u'robot_id': u'88359766', u'command': u'F', u'user': u'anonymous'})
+('got something', {u'robot_id': u'88359766', u'command': u'F', u'user': u'anonymous'})
+('got something', {u'robot_id': u'88359766', u'command': u'F', u'user': u'anonymous'})
+('got something', {u'robot_id': u'88359766', u'command': u'F', u'user': u'anonymous'})
+('got something', {u'robot_id': u'88359766', u'command': u'F', u'user': u'anonymous'})
+('got something', {u'robot_id': u'88359766', u'command': u'R', u'user': u'anonymous'})
+('got something', {u'robot_id': u'88359766', u'command': u'R', u'user': u'anonymous'})
+('got something', {u'robot_id': u'88359766', u'command': u'R', u'user': u'anonymous'})
+('got something', {u'robot_id': u'88359766', u'command': u'R', u'user': u'anonymous'})
+('got something', {u'robot_id': u'88359766', u'command': u'R', u'user': u'anonymous'})
+('got something', {u'robot_id': u'88359766', u'command': u'R', u'user': u'anonymous'})
+('got something', {u'robot_id': u'88359766', u'command': u'R', u'user': u'anonymous'})
+('got something', {u'robot_id': u'88359766', u'command': u'R', u'user': u'anonymous'})
+('got something', {u'robot_id': u'88359766', u'command': u'R', u'user': u'anonymous'})
+('got something', {u'robot_id': u'88359766', u'command': u'R', u'user': u'anonymous'})
+('got something', {u'robot_id': u'88359766', u'command': u'R', u'user': u'anonymous'})
+('got something', {u'robot_id': u'88359766', u'command': u'R', u'user': u'anonymous'})
+('got something', {u'robot_id': u'88359766', u'command': u'R', u'user': u'anonymous'})
+('got something', {u'robot_id': u'88359766', u'command': u'R', u'user': u'anonymous'})
+('got something', {u'robot_id': u'88359766', u'command': u'R', u'user': u'anonymous'})
+('got something', {u'robot_id': u'88359766', u'command': u'R', u'user': u'anonymous'})
+('got something', {u'robot_id': u'88359766', u'command': u'L', u'user': u'anonymous'})
+('got something', {u'robot_id': u'88359766', u'command': u'L', u'user': u'anonymous'})
+('got something', {u'robot_id': u'88359766', u'command': u'L', u'user': u'anonymous'})
+('got something', {u'robot_id': u'88359766', u'command': u'L', u'user': u'anonymous'})
+('got something', {u'robot_id': u'88359766', u'command': u'L', u'user': u'anonymous'})
+('got something', {u'robot_id': u'88359766', u'command': u'F', u'user': u'anonymous'})
+('got something', {u'robot_id': u'88359766', u'command': u'F', u'user': u'anonymous'})
+('got something', {u'robot_id': u'88359766', u'command': u'F', u'user': u'anonymous'})
+('got something', {u'robot_id': u'88359766', u'command': u'F', u'user': u'anonymous'})
+('got something', {u'robot_id': u'88359766', u'command': u'F', u'user': u'anonymous'})
+('got something', {u'robot_id': u'88359766', u'command': u'F', u'user': u'anonymous'})
+('got something', {u'robot_id': u'88359766', u'command': u'F', u'user': u'anonymous'})
+('got something', {u'robot_id': u'88359766', u'command': u'F', u'user': u'anonymous'})
+('got something', {u'robot_id': u'88359766', u'command': u'F', u'user': u'anonymous'})
+('got something', {u'robot_id': u'88359766', u'command': u'F', u'user': u'anonymous'})
+('got something', {u'robot_id': u'88359766', u'command': u'F', u'user': u'anonymous'})
+('got something', {u'robot_id': u'88359766', u'command': u'F', u'user': u'anonymous'})
+('got something', {u'robot_id': u'88359766', u'command': u'F', u'user': u'anonymous'})
+('got something', {u'robot_id': u'88359766', u'command': u'F', u'user': u'anonymous'})
+('got something', {u'robot_id': u'88359766', u'command': u'R', u'user': u'anonymous'})
+('got something', {u'robot_id': u'88359766', u'command': u'R', u'user': u'anonymous'})
+('got something', {u'robot_id': u'88359766', u'command': u'R', u'user': u'anonymous'})
+('got something', {u'robot_id': u'88359766', u'command': u'R', u'user': u'anonymous'})
+('got something', {u'robot_id': u'88359766', u'command': u'R', u'user': u'anonymous'})
+('got something', {u'robot_id': u'88359766', u'command': u'R', u'user': u'anonymous'})
+('got something', {u'robot_id': u'88359766', u'command': u'R', u'user': u'anonymous'})
+('got something', {u'robot_id': u'88359766', u'command': u'R', u'user': u'anonymous'})
+('got something', {u'robot_id': u'88359766', u'command': u'R', u'user': u'anonymous'})
+('got something', {u'robot_id': u'88359766', u'command': u'R', u'user': u'anonymous'})
+('got something', {u'robot_id': u'88359766', u'command': u'R', u'user': u'anonymous'})
+('got something', {u'robot_id': u'88359766', u'command': u'R', u'user': u'anonymous'})
+('got something', {u'robot_id': u'88359766', u'command': u'R', u'user': u'anonymous'})
+('got something', {u'robot_id': u'88359766', u'command': u'R', u'user': u'anonymous'})
+('got something', {u'robot_id': u'88359766', u'command': u'R', u'user': u'anonymous'})
+('got something', {u'robot_id': u'88359766', u'command': u'R', u'user': u'anonymous'})
+('got something', {u'robot_id': u'88359766', u'command': u'R', u'user': u'anonymous'})
+('got something', {u'robot_id': u'88359766', u'command': u'R', u'user': u'anonymous'})
+('got something', {u'robot_id': u'88359766', u'command': u'R', u'user': u'anonymous'})
+('got something', {u'robot_id': u'88359766', u'command': u'R', u'user': u'anonymous'})
+('got something', {u'robot_id': u'88359766', u'command': u'R', u'user': u'anonymous'})
+('got something', {u'robot_id': u'88359766', u'command': u'F', u'user': u'anonymous'})
+('got something', {u'robot_id': u'88359766', u'command': u'F', u'user': u'anonymous'})
+('got something', {u'robot_id': u'88359766', u'command': u'F', u'user': u'anonymous'})
+('got something', {u'robot_id': u'88359766', u'command': u'F', u'user': u'anonymous'})
+('got something', {u'robot_id': u'88359766', u'command': u'F', u'user': u'anonymous'})
+('got something', {u'robot_id': u'88359766', u'command': u'F', u'user': u'anonymous'})
+('got something', {u'robot_id': u'88359766', u'command': u'F', u'user': u'anonymous'})
+('got something', {u'robot_id': u'88359766', u'command': u'F', u'user': u'anonymous'})
+('got something', {u'robot_id': u'88359766', u'command': u'F', u'user': u'anonymous'})
+('got something', {u'robot_id': u'88359766', u'command': u'F', u'user': u'anonymous'})
+('got something', {u'robot_id': u'88359766', u'command': u'L', u'user': u'anonymous'})
+('got something', {u'robot_id': u'88359766', u'command': u'L', u'user': u'anonymous'})
+('got something', {u'robot_id': u'88359766', u'command': u'L', u'user': u'anonymous'})
+('got something', {u'robot_id': u'88359766', u'command': u'L', u'user': u'anonymous'})
+('got something', {u'robot_id': u'88359766', u'command': u'L', u'user': u'anonymous'})
+('got something', {u'robot_id': u'88359766', u'command': u'L', u'user': u'anonymous'})
+('got something', {u'robot_id': u'88359766', u'command': u'B', u'user': u'anonymous'})
+('got something', {u'robot_id': u'88359766', u'command': u'B', u'user': u'anonymous'})
+('got something', {u'robot_id': u'88359766', u'command': u'B', u'user': u'anonymous'})
+('got something', {u'robot_id': u'88359766', u'command': u'B', u'user': u'anonymous'})
+('got something', {u'robot_id': u'88359766', u'command': u'B', u'user': u'anonymous'})
+('got something', {u'robot_id': u'88359766', u'command': u'B', u'user': u'anonymous'})
+('got something', {u'robot_id': u'88359766', u'command': u'B', u'user': u'anonymous'})
+('got something', {u'robot_id': u'88359766', u'command': u'B', u'user': u'anonymous'})
+('got something', {u'robot_id': u'88359766', u'command': u'B', u'user': u'anonymous'})
+('got something', {u'robot_id': u'88359766', u'command': u'B', u'user': u'anonymous'})
+('got something', {u'robot_id': u'88359766', u'command': u'B', u'user': u'anonymous'})
+('got something', {u'robot_id': u'88359766', u'command': u'B', u'user': u'anonymous'})
+('got something', {u'robot_id': u'88359766', u'command': u'B', u'user': u'anonymous'})
+('got something', {u'robot_id': u'88359766', u'command': u'B', u'user': u'anonymous'})
+('got something', {u'robot_id': u'88359766', u'command': u'B', u'user': u'anonymous'})
+('got something', {u'robot_id': u'88359766', u'command': u'B', u'user': u'anonymous'})
+('got something', {u'robot_id': u'88359766', u'command': u'B', u'user': u'anonymous'})
+('got something', {u'robot_id': u'88359766', u'command': u'L', u'user': u'anonymous'})
+('got something', {u'robot_id': u'88359766', u'command': u'L', u'user': u'anonymous'})
+('got something', {u'robot_id': u'88359766', u'command': u'L', u'user': u'anonymous'})
+('got something', {u'robot_id': u'88359766', u'command': u'L', u'user': u'anonymous'})
+('got something', {u'robot_id': u'88359766', u'command': u'L', u'user': u'anonymous'})
+('got something', {u'robot_id': u'88359766', u'command': u'L', u'user': u'anonymous'})
+('got something', {u'robot_id': u'88359766', u'command': u'L', u'user': u'anonymous'})
+('got something', {u'robot_id': u'88359766', u'command': u'F', u'user': u'anonymous'})
+('got something', {u'robot_id': u'88359766', u'command': u'F', u'user': u'anonymous'})
+('got something', {u'robot_id': u'88359766', u'command': u'F', u'user': u'anonymous'})
+('got something', {u'robot_id': u'88359766', u'command': u'F', u'user': u'anonymous'})
+('got something', {u'robot_id': u'88359766', u'command': u'F', u'user': u'anonymous'})
+('got something', {u'robot_id': u'88359766', u'command': u'F', u'user': u'anonymous'})
+('got something', {u'robot_id': u'88359766', u'command': u'F', u'user': u'anonymous'})
+('got something', {u'robot_id': u'88359766', u'command': u'F', u'user': u'anonymous'})
+('got something', {u'robot_id': u'88359766', u'command': u'F', u'user': u'anonymous'})
+('got something', {u'robot_id': u'88359766', u'command': u'F', u'user': u'anonymous'})
+('got something', {u'robot_id': u'88359766', u'command': u'F', u'user': u'anonymous'})
+('got something', {u'robot_id': u'88359766', u'command': u'F', u'user': u'anonymous'})
+('got something', {u'robot_id': u'88359766', u'command': u'F', u'user': u'anonymous'})
+('got something', {u'robot_id': u'88359766', u'command': u'F', u'user': u'anonymous'})
+('got something', {u'robot_id': u'88359766', u'command': u'L', u'user': u'anonymous'})
+('got something', {u'robot_id': u'88359766', u'command': u'L', u'user': u'anonymous'})
+('got something', {u'robot_id': u'88359766', u'command': u'L', u'user': u'anonymous'})
+('got something', {u'robot_id': u'88359766', u'command': u'L', u'user': u'anonymous'})
+('got something', {u'robot_id': u'88359766', u'command': u'L', u'user': u'anonymous'})
+('got something', {u'robot_id': u'88359766', u'command': u'F', u'user': u'anonymous'})
+('got something', {u'robot_id': u'88359766', u'command': u'F', u'user': u'anonymous'})
+('got something', {u'robot_id': u'88359766', u'command': u'F', u'user': u'anonymous'})
+('got something', {u'robot_id': u'88359766', u'command': u'F', u'user': u'anonymous'})
+('got something', {u'robot_id': u'88359766', u'command': u'F', u'user': u'anonymous'})
+('got something', {u'robot_id': u'88359766', u'command': u'F', u'user': u'anonymous'})
+('got something', {u'robot_iffmpeg version N-78590-g5590ab4 Copyright (c) 2000-2016 the FFmpeg developers
+  built with gcc 4.9.2 (Raspbian 4.9.2-10)
+  configuration: --arch=armel --target-os=linux --enable-gpl --enable-libx264 --enable-nonfree
+  libavutil      55. 18.100 / 55. 18.100
+  libavcodec     57. 24.103 / 57. 24.103
+  libavformat    57. 25.100 / 57. 25.100
+  libavdevice    57.  0.101 / 57.  0.101
+  libavfilter     6. 32.100 /  6. 32.100
+  libswscale      4.  0.100 /  4.  0.100
+  libswresample   2.  0.101 /  2.  0.101
+  libpostproc    54.  0.100 / 54.  0.100
+/dev/video0: Device or resource busy
+ffmpeg version N-78590-g5590ab4 Copyright (c) 2000-2016 the FFmpeg developers
+  built with gcc 4.9.2 (Raspbian 4.9.2-10)
+  configuration: --arch=armel --target-os=linux --enable-gpl --enable-libx264 --enable-nonfree
+  libavutil      55. 18.100 / 55. 18.100
+  libavcodec     57. 24.103 / 57. 24.103
+  libavformat    57. 25.100 / 57. 25.100
+  libavdevice    57.  0.101 / 57.  0.101
+  libavfilter     6. 32.100 /  6. 32.100
+  libswscale      4.  0.100 /  4.  0.100
+  libswresample   2.  0.101 /  2.  0.101
+  libpostproc    54.  0.100 / 54.  0.100
+/dev/video0: Device or resource busy
+ffmpeg version N-78590-g5590ab4 Copyright (c) 2000-2016 the FFmpeg developers
+  built with gcc 4.9.2 (Raspbian 4.9.2-10)
+  configuration: --arch=armel --target-os=linux --enable-gpl --enable-libx264 --enable-nonfree
+  libavutil      55. 18.100 / 55. 18.100
+  libavcodec     57. 24.103 / 57. 24.103
+  libavformat    57. 25.100 / 57. 25.100
+  libavdevice    57.  0.101 / 57.  0.101
+  libavfilter     6. 32.100 /  6. 32.100
+  libswscale      4.  0.100 /  4.  0.100
+  libswresample   2.  0.101 /  2.  0.101
+  libpostproc    54.  0.100 / 54.  0.100
+/dev/video0: Device or resource busy
+ffmpeg version N-78590-g5590ab4 Copyright (c) 2000-2016 the FFmpeg developers
+  built with gcc 4.9.2 (Raspbian 4.9.2-10)
+  configuration: --arch=armel --target-os=linux --enable-gpl --enable-libx264 --enable-nonfree
+  libavutil      55. 18.100 / 55. 18.100
+  libavcodec     57. 24.103 / 57. 24.103
+  libavformat    57. 25.100 / 57. 25.100
+  libavdevice    57.  0.101 / 57.  0.101
+  libavfilter     6. 32.100 /  6. 32.100
+  libswscale      4.  0.100 /  4.  0.100
+  libswresample   2.  0.101 /  2.  0.101
+  libpostproc    54.  0.100 / 54.  0.100
+/dev/video0: Device or resource busy
+ffmpeg version N-78590-g5590ab4 Copyright (c) 2000-2016 the FFmpeg developers
+  built with gcc 4.9.2 (Raspbian 4.9.2-10)
+  configuration: --arch=armel --target-os=linux --enable-gpl --enable-libx264 --enable-nonfree
+  libavutil      55. 18.100 / 55. 18.100
+  libavcodec     57. 24.103 / 57. 24.103
+  libavformat    57. 25.100 / 57. 25.100
+  libavdevice    57.  0.101 / 57.  0.101
+  libavfilter     6. 32.100 /  6. 32.100
+  libswscale      4.  0.100 /  4.  0.100
+  libswresample   2.  0.101 /  2.  0.101
+  libpostproc    54.  0.100 / 54.  0.100
+/dev/video0: Device or resource busy
+ffmpeg version N-78590-g5590ab4 Copyright (c) 2000-2016 the FFmpeg developers
+  built with gcc 4.9.2 (Raspbian 4.9.2-10)
+  configuration: --arch=armel --target-os=linux --enable-gpl --enable-libx264 --enable-nonfree
+  libavutil      55. 18.100 / 55. 18.100
+  libavcodec     57. 24.103 / 57. 24.103
+  libavformat    57. 25.100 / 57. 25.100
+  libavdevice    57.  0.101 / 57.  0.101
+  libavfilter     6. 32.100 /  6. 32.100
+  libswscale      4.  0.100 /  4.  0.100
+  libswresample   2.  0.101 /  2.  0.101
+  libpostproc    54.  0.100 / 54.  0.100
+/dev/video0: Device or resource busy
+ffmpeg version N-78590-g5590ab4 Copyright (c) 2000-2016 the FFmpeg developers
+  built with gcc 4.9.2 (Raspbian 4.9.2-10)
+  configuration: --arch=armel --target-os=linux --enable-gpl --enable-libx264 --enable-nonfree
+  libavutil      55. 18.100 / 55. 18.100
+  libavcodec     57. 24.103 / 57. 24.103
+  libavformat    57. 25.100 / 57. 25.100
+  libavdevice    57.  0.101 / 57.  0.101
+  libavfilter     6. 32.100 /  6. 32.100
+  libswscale      4.  0.100 /  4.  0.100
+  libswresample   2.  0.101 /  2.  0.101
+  libpostproc    54.  0.100 / 54.  0.100
+/dev/video0: Device or resource busy
+ffmpeg version N-78590-g5590ab4 Copyright (c) 2000-2016 the FFmpeg developers
+  built with gcc 4.9.2 (Raspbian 4.9.2-10)
+  configuration: --arch=armel --target-os=linux --enable-gpl --enable-libx264 --enable-nonfree
+  libavutil      55. 18.100 / 55. 18.100
+  libavcodec     57. 24.103 / 57. 24.103
+  libavformat    57. 25.100 / 57. 25.100
+  libavdevice    57.  0.101 / 57.  0.101
+  libavfilter     6. 32.100 /  6. 32.100
+  libswscale      4.  0.100 /  4.  0.100
+  libswresample   2.  0.101 /  2.  0.101
+  libpostproc    54.  0.100 / 54.  0.100
+/dev/video0: Device or resource busy
+ffmpeg version N-78590-g5590ab4 Copyright (c) 2000-2016 the FFmpeg developers
+  built with gcc 4.9.2 (Raspbian 4.9.2-10)
+  configuration: --arch=armel --target-os=linux --enable-gpl --enable-libx264 --enable-nonfree
+  libavutil      55. 18.100 / 55. 18.100
+  libavcodec     57. 24.103 / 57. 24.103
+  libavformat    57. 25.100 / 57. 25.100
+  libavdevice    57.  0.101 / 57.  0.101
+  libavfilter     6. 32.100 /  6. 32.100
+  libswscale      4.  0.100 /  4.  0.100
+  libswresample   2.  0.101 /  2.  0.101
+  libpostproc    54.  0.100 / 54.  0.100
+/dev/video0: Device or resource busy
+ffmpeg version N-78590-g5590ab4 Copyright (c) 2000-2016 the FFmpeg developers
+  built with gcc 4.9.2 (Raspbian 4.9.2-10)
+  configuration: --arch=armel --target-os=linux --enable-gpl --enable-libx264 --enable-nonfree
+  libavutil      55. 18.100 / 55. 18.100
+  libavcodec     57. 24.103 / 57. 24.103
+  libavformat    57. 25.100 / 57. 25.100
+  libavdevice    57.  0.101 / 57.  0.101
+  libavfilter     6. 32.100 /  6. 32.100
+  libswscale      4.  0.100 /  4.  0.100
+  libswresample   2.  0.101 /  2.  0.101
+  libpostproc    54.  0.100 / 54.  0.100
+/dev/video0: Device or resource busy
+ffmpeg version N-78590-g5590ab4 Copyright (c) 2000-2016 the FFmpeg developers
+  built with gcc 4.9.2 (Raspbian 4.9.2-10)
+  configuration: --arch=armel --target-os=linux --enable-gpl --enable-libx264 --enable-nonfree
+  libavutil      55. 18.100 / 55. 18.100
+  libavcodec     57. 24.103 / 57. 24.103
+  libavformat    57. 25.100 / 57. 25.100
+  libavdevice    57.  0.101 / 57.  0.101
+  libavfilter     6. 32.100 /  6. 32.100
+  libswscale      4.  0.100 /  4.  0.100
+  libswresample   2.  0.101 /  2.  0.101
+  libpostproc    54.  0.100 / 54.  0.100
+/dev/video0: Device or resource busy
+ffmpeg version N-78590-g5590ab4 Copyright (c) 2000-2016 the FFmpeg developers
+  built with gcc 4.9.2 (Raspbian 4.9.2-10)
+  configuration: --arch=armel --target-os=linux --enable-gpl --enable-libx264 --enable-nonfree
+  libavutil      55. 18.100 / 55. 18.100
+  libavcodec     57. 24.103 / 57. 24.103
+  libavformat    57. 25.100 / 57. 25.100
+  libavdevice    57.  0.101 / 57.  0.101
+  libavfilter     6. 32.100 /  6. 32.100
+  libswscale      4.  0.100 /  4.  0.100
+  libswresample   2.  0.101 /  2.  0.101
+  libpostproc    54.  0.100 / 54.  0.100
+/dev/video0: Device or resource busy
+GET http://runmyrobot.com/get_video_port/36644145
+video port: 11530
+ffmpeg -s 320x240 -f video4linux2 -i /dev/video0 -f mpeg1video -b 1k -r 20 http://runmyrobot.com:11530/hello/320/240/
+Press Ctrl-C to quit
+Retrying
+ffmpeg -s 320x240 -f video4linux2 -i /dev/video0 -f mpeg1video -b 1k -r 20 http://runmyrobot.com:11530/hello/320/240/
+Press Ctrl-C to quit
+Retrying
+ffmpeg -s 320x240 -f video4linux2 -i /dev/video0 -f mpeg1video -b 1k -r 20 http://runmyrobot.com:11530/hello/320/240/
+Press Ctrl-C to quit
+Retrying
+ffmpeg -s 320x240 -f video4linux2 -i /dev/video0 -f mpeg1video -b 1k -r 20 http://runmyrobot.com:11530/hello/320/240/
+Press Ctrl-C to quit
+Retrying
+ffmpeg -s 320x240 -f video4linux2 -i /dev/video0 -f mpeg1video -b 1k -r 20 http://runmyrobot.com:11530/hello/320/240/
+Press Ctrl-C to quit
+Retrying
+ffmpeg -s 320x240 -f video4linux2 -i /dev/video0 -f mpeg1video -b 1k -r 20 http://runmyrobot.com:11530/hello/320/240/
+Press Ctrl-C to quit
+Retrying
+ffmpeg -s 320x240 -f video4linux2 -i /dev/video0 -f mpeg1video -b 1k -r 20 http://runmyrobot.com:11530/hello/320/240/
+Press Ctrl-C to quit
+Retrying
+ffmpeg -s 320x240 -f video4linux2 -i /dev/video0 -f mpeg1video -b 1k -r 20 http://runmyrobot.com:11530/hello/320/240/
+Press Ctrl-C to quit
+Retrying
+ffmpeg -s 320x240 -f video4linux2 -i /dev/video0 -f mpeg1video -b 1k -r 20 http://runmyrobot.com:11530/hello/320/240/
+Press Ctrl-C to quit
+Retrying
+ffmpeg -s 320x240 -f video4linux2 -i /dev/video0 -f mpeg1video -b 1k -r 20 http://runmyrobot.com:11530/hello/320/240/
+Press Ctrl-C to quit
+Retrying
+ffmpeg -s 320x240 -f video4linux2 -i /dev/video0 -f mpeg1video -b 1k -r 20 http://runmyrobot.com:11530/hello/320/240/
+Press Ctrl-C to quit
+Retrying
+ffmpeg -s 320x240 -f video4linux2 -i /dev/video0 -f mpeg1video -b 1k -r 20 http://runmyrobot.com:11530/hello/320/240/
+Press Ctrl-C to quit
+Traceback (most recent call last):
+  File "send_video.py", line 133, in <module>
+    handleLinux(deviceNumber, videoPort)
+  File "send_video.py", line 75, in handleLinux
+    time.sleep(3)
+KeyboardInterrupt
+ffmpeg version N-78590-g5590ab4 Copyright (c) 2000-2016 the FFmpeg developers
+  built with gcc 4.9.2 (Raspbian 4.9.2-10)
+  configuration: --arch=armel --target-os=linux --enable-gpl --enable-libx264 --enable-nonfree
+  libavutil      55. 18.100 / 55. 18.100
+  libavcodec     57. 24.103 / 57. 24.103
+  libavformat    57. 25.100 / 57. 25.100
+  libavdevice    57.  0.101 / 57.  0.101
+  libavfilter     6. 32.100 /  6. 32.100
+  libswscale      4.  0.100 /  4.  0.100
+  libswresample   2.  0.101 /  2.  0.101
+  libpostproc    54.  0.100 / 54.  0.100
+/dev/video0: Device or resource busy
+ffmpeg version N-78590-g5590ab4 Copyright (c) 2000-2016 the FFmpeg developers
+  built with gcc 4.9.2 (Raspbian 4.9.2-10)
+  configuration: --arch=armel --target-os=linux --enable-gpl --enable-libx264 --enable-nonfree
+  libavutil      55. 18.100 / 55. 18.100
+  libavcodec     57. 24.103 / 57. 24.103
+  libavformat    57. 25.100 / 57. 25.100
+  libavdevice    57.  0.101 / 57.  0.101
+  libavfilter     6. 32.100 /  6. 32.100
+  libswscale      4.  0.100 /  4.  0.100
+  libswresample   2.  0.101 /  2.  0.101
+  libpostproc    54.  0.100 / 54.  0.100
+/dev/video0: Device or resource busy
+GET http://runmyrobot.com/get_video_port/36644145
+video port: 11530
+ffmpeg -s 320x240 -f video4linux2 -i /dev/video0 -f mpeg1video -b 1k -r 20 http://runmyrobot.com:11530/hello/320/240/
+Press Ctrl-C to quit
+Retrying
+ffmpeg -s 320x240 -f video4linux2 -i /dev/video0 -f mpeg1video -b 1k -r 20 http://runmyrobot.com:11530/hello/320/240/
+Press Ctrl-C to quit
+Traceback (most recent call last):
+  File "send_video.py", line 133, in <module>
+    handleLinux(deviceNumber, videoPort)
+  File "send_video.py", line 75, in handleLinux
+    time.sleep(3)
+KeyboardInterrupt
