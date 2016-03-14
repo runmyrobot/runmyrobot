@@ -27,11 +27,13 @@ else:
     robot_id = raw_input("Please enter your Robot ID: ")
 
 if len(sys.argv) >= 3:
+    print "using dev port 8122"
     port = 8122
-    print "using port 8122"
 else:
+    print "using prod port 8022"
     port = 8022
 
+socketIO = SocketIO('runmyrobot.com', port, LoggingNamespace)
 
 def times(lst, number):
     return [x*number for x in lst]
@@ -103,7 +105,7 @@ def handle_command(args):
 def on_handle_command(*args):
    thread.start_new_thread(handle_command, args)
 
-socketIO = SocketIO('runmyrobot.com', port, LoggingNamespace)
+from communication import socketIO
 socketIO.on('command_to_robot', on_handle_command)
 
 def myWait():
