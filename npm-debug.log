@@ -1,0 +1,69 @@
+0 info it worked if it ends with ok
+1 verbose cli [ '/usr/bin/nodejs',
+1 verbose cli   '/usr/bin/npm',
+1 verbose cli   'install',
+1 verbose cli   'socketIO_client' ]
+2 info using npm@1.4.21
+3 info using node@v0.10.29
+4 verbose cache add [ 'socketIO_client', null ]
+5 verbose cache add name=undefined spec="socketIO_client" args=["socketIO_client",null]
+6 verbose parsed url { protocol: null,
+6 verbose parsed url   slashes: null,
+6 verbose parsed url   auth: null,
+6 verbose parsed url   host: null,
+6 verbose parsed url   port: null,
+6 verbose parsed url   hostname: null,
+6 verbose parsed url   hash: null,
+6 verbose parsed url   search: null,
+6 verbose parsed url   query: null,
+6 verbose parsed url   pathname: 'socketIO_client',
+6 verbose parsed url   path: 'socketIO_client',
+6 verbose parsed url   href: 'socketIO_client' }
+7 silly lockFile 3800202a-socketIO-client socketIO_client
+8 verbose lock socketIO_client /home/pi/.npm/3800202a-socketIO-client.lock
+9 silly lockFile 3800202a-socketIO-client socketIO_client
+10 silly lockFile 3800202a-socketIO-client socketIO_client
+11 verbose addNamed [ 'socketIO_client', '' ]
+12 verbose addNamed [ null, '*' ]
+13 silly lockFile 7756d628-socketIO-client socketIO_client@
+14 verbose lock socketIO_client@ /home/pi/.npm/7756d628-socketIO-client.lock
+15 silly addNameRange { name: 'socketIO_client', range: '*', hasData: false }
+16 verbose request where is /socketIO_client
+17 verbose request registry https://registry.npmjs.org/
+18 verbose request id 7b4e49d82c314680
+19 verbose url raw /socketIO_client
+20 verbose url resolving [ 'https://registry.npmjs.org/', './socketIO_client' ]
+21 verbose url resolved https://registry.npmjs.org/socketIO_client
+22 verbose request where is https://registry.npmjs.org/socketIO_client
+23 info trying registry request attempt 1 at 03:14:54
+24 http GET https://registry.npmjs.org/socketIO_client
+25 http 404 https://registry.npmjs.org/socketIO_client
+26 silly registry.get cb [ 404,
+26 silly registry.get   { 'content-type': 'application/json',
+26 silly registry.get     'cache-control': 'max-age=0',
+26 silly registry.get     'content-length': '2',
+26 silly registry.get     'accept-ranges': 'bytes',
+26 silly registry.get     date: 'Mon, 14 Mar 2016 03:14:54 GMT',
+26 silly registry.get     via: '1.1 varnish',
+26 silly registry.get     age: '0',
+26 silly registry.get     connection: 'keep-alive',
+26 silly registry.get     'x-served-by': 'cache-lax1422-LAX',
+26 silly registry.get     'x-cache': 'MISS',
+26 silly registry.get     'x-cache-hits': '0',
+26 silly registry.get     'x-timer': 'S1457925294.814971,VS0,VE89' } ]
+27 silly lockFile 7756d628-socketIO-client socketIO_client@
+28 silly lockFile 7756d628-socketIO-client socketIO_client@
+29 error 404 Not Found
+29 error 404
+29 error 404 'socketIO_client' is not in the npm registry.
+29 error 404 You should bug the author to publish it
+29 error 404
+29 error 404 Note that you can also install from a
+29 error 404 tarball, folder, or http url, or git url.
+30 error System Linux 4.1.17-v7+
+31 error command "/usr/bin/nodejs" "/usr/bin/npm" "install" "socketIO_client"
+32 error cwd /home/pi/runmyrobot
+33 error node -v v0.10.29
+34 error npm -v 1.4.21
+35 error code E404
+36 verbose exit [ 1, true ]
