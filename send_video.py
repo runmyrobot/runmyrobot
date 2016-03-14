@@ -209,7 +209,13 @@ def main():
 
         print "starting video capture"
         inputDeviceID = startVideoCapture()
-        time.sleep(3000)
+
+        for count in range(3000):
+            time.sleep(1)
+
+            # if the video process dies, restart it
+            if ffmpegProcess.poll() is not None:
+                inputDeviceID = startVideoCapture()
 
 
 
