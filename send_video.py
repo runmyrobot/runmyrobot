@@ -192,11 +192,10 @@ def main():
     global ffmpegProcess
 
     while True:
-        print "starting video capture"
-        inputDeviceID = startVideoCapture()
 
         print "stopping video capture"
         ffmpegProcess.kill()
+
         print "taking snapshot"
         snapShot(platform.system(), inputDeviceID)
 
@@ -205,6 +204,8 @@ def main():
 
         socketIO.emit('snapshot', base64.b64encode(data))
 
+        print "starting video capture"
+        inputDeviceID = startVideoCapture()
         time.sleep(3000)
 
 
