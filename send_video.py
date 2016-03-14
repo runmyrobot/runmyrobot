@@ -193,6 +193,8 @@ def main():
 
     while True:
 
+        inputDeviceID = startVideoCapture()
+
         print "stopping video capture"
         if ffmpegProcess is not None:
             ffmpegProcess.kill()
