@@ -194,7 +194,8 @@ def main():
     while True:
 
         print "stopping video capture"
-        ffmpegProcess.kill()
+        if ffmpegProcess is not None:
+            ffmpegProcess.kill()
 
         print "taking snapshot"
         snapShot(platform.system(), inputDeviceID)
