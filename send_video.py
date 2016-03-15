@@ -154,6 +154,8 @@ def handleWindows(deviceNumber, videoPort):
 
 def snapShot(operatingSystem, inputDeviceID):
 
+    os.remove('snapshot.jpg')
+
     commandLineDict = {
         'Darwin': 'ffmpeg -y -f qtkit -i %s -vframes 1 snapshot.jpg' % inputDeviceID,
         'Linux': '/usr/local/bin/ffmpeg -y -s 320x240 -f video4linux2 -i /dev/video%s -vframes 1 snapshot.jpg' % inputDeviceID,
