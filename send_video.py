@@ -154,7 +154,10 @@ def handleWindows(deviceNumber, videoPort):
 
 def snapShot(operatingSystem, inputDeviceID):
 
-    os.remove('snapshot.jpg')
+    try:
+        os.remove('snapshot.jpg')
+    except:
+        print "did not remove file"
 
     commandLineDict = {
         'Darwin': 'ffmpeg -y -f qtkit -i %s -vframes 1 snapshot.jpg' % inputDeviceID,
@@ -195,24 +198,30 @@ def main():
 
     while True:
 
+        print "stopping video capture1 --------------------------------------------------------------------"
+        if ffmpegProcess is not None:
+            ffmpegProcess.kill()
         inputDeviceID = startVideoCapture()
 
-        print "stopping video capture"
+        print "stopping video capture2 --------------------------------------------------------------------"
         if ffmpegProcess is not None:
             ffmpegProcess.kill()
 
+        print "sleeping"
+        time.sleep(3)
         print "taking snapshot"
         snapShot(platform.system(), inputDeviceID)
 
         with open ("snapshot.jpg", 'rb') as f:
             data = f.read()
 
-        socketIO.emit('snapshot', base64.b64encode(data))
+        print "emit"
+        #socketIO.emit('snapshot', base64.b64encode(data))
 
         print "starting video capture"
         inputDeviceID = startVideoCapture()
 
-        for count in range(3000):
+        for count in range(2):
             time.sleep(1)
 
             # if the video process dies, restart it
