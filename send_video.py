@@ -13,7 +13,7 @@ import base64
 
 from socketIO_client import SocketIO, LoggingNamespace
 
-ffmpegProcess = None
+
 
 if len(sys.argv) >= 4:
     print "using dev port 8122"
@@ -62,11 +62,12 @@ def getVideoPort():
 
 def runFfmpeg(commandLine):
 
-    global ffmpegProcess
     print commandLine
     ffmpegProcess = subprocess.Popen(shlex.split(commandLine))
     print "command started"
 
+    return ffmpegProcess
+    
 
 
 def handleDarwin(deviceNumber, videoPort):
@@ -80,11 +81,9 @@ def handleDarwin(deviceNumber, videoPort):
     deviceAnswer = raw_input("Enter the number of the camera device for your robot from the list above: ")
     commandLine = 'ffmpeg -f qtkit -i %s -f mpeg1video -b 400k -r 30 -s 320x240 http://runmyrobot.com:%s/hello/320/240/' % (deviceAnswer, videoPort)
     
-    runFfmpeg(commandLine)
+    process = runFfmpeg(commandLine)
 
-
-    return deviceAnswer
-
+    return {'process': process, 'device_answer': deviceAnswer}
 
 
 def handleLinux(deviceNumber, videoPort):
@@ -105,9 +104,9 @@ def handleLinux(deviceNumber, videoPort):
         
     commandLine = '/usr/local/bin/ffmpeg -s 320x240 -f video4linux2 -i /dev/video%s -f mpeg1video -b 1k -r 20 http://runmyrobot.com:%s/hello/320/240/' % (deviceAnswer, videoPort)
 
-    runFfmpeg(commandLine)
+    process = runFfmpeg(commandLine)
 
-    return deviceAnswer
+    return {'process': process, 'device_answer': deviceAnswer}
 
 
 
@@ -146,9 +145,12 @@ def handleWindows(deviceNumber, videoPort):
     device = devices[int(deviceAnswer)]
     commandLine = 'ffmpeg -s 320x240 -f dshow -i video="%s" -f mpeg1video -b 200k -r 20 http://runmyrobot.com:%s/hello/320/240/' % (device, videoPort)
     
-    runFfmpeg(commandLine)
 
-    return device
+    process = runFfmpeg(commandLine)
+
+    return {'process': process, 'device_answer': device}
+    
+
 
 
 
@@ -178,37 +180,39 @@ def startVideoCapture():
     else:
         deviceNumber = None
 
-    deviceAnswer = None
+    result = None
     if platform.system() == 'Darwin':
-        deviceAnswer = handleDarwin(deviceNumber, videoPort)
+        result = handleDarwin(deviceNumber, videoPort)
     elif platform.system() == 'Linux':
-        deviceAnswer = handleLinux(deviceNumber, videoPort)
+        result = handleLinux(deviceNumber, videoPort)
     elif platform.system() == 'Windows':
-        deviceAnswer = handleWindows(deviceNumber, videoPort)
+        result = handleWindows(deviceNumber, videoPort)
     else:
         print "unknown platform", platform.system()
 
-    return deviceAnswer
+    return result
 
 
 
 def main():
 
-    global ffmpegProcess
+    streamProcessDict = None
 
     while True:
 
-        print "stopping video capture1 --------------------------------------------------------------------"
-        if ffmpegProcess is not None:
-            ffmpegProcess.kill()
-        inputDeviceID = startVideoCapture()
 
-        print "stopping video capture2 --------------------------------------------------------------------"
-        if ffmpegProcess is not None:
-            ffmpegProcess.kill()
+        if streamProcessDict is not None:
+            print "stopping previously running ffmpeg (needs to happen if this is not the first iteration)"
+            streamProcessDict['process'].kill()
 
-        print "sleeping"
-        time.sleep(3)
+        print "starting process just to get device result" # this should be a separate function so you don't have to do this
+        streamProcessDict = startVideoCapture()
+        inputDeviceID = streamProcessDict['device_answer']
+        print "stopping video capture"
+        streamProcessDict['process'].kill()
+
+        #print "sleeping"
+        #time.sleep(3)
         print "taking snapshot"
         snapShot(platform.system(), inputDeviceID)
 
@@ -216,17 +220,19 @@ def main():
             data = f.read()
 
         print "emit"
-        #socketIO.emit('snapshot', base64.b64encode(data))
+        socketIO.emit('snapshot', base64.b64encode(data))
 
         print "starting video capture"
-        inputDeviceID = startVideoCapture()
+        streamProcessDict = startVideoCapture()
 
-        for count in range(2):
+        
+        period = 3000 # period in seconds between snaps
+        for count in range(period):
             time.sleep(1)
 
-            # if the video process dies, restart it
-            if ffmpegProcess.poll() is not None:
-                inputDeviceID = startVideoCapture()
+            # if the video stream process dies, restart it
+            if streamProcessDict['process'].poll() is not None:
+                streamProcessDict = startVideoCapture()
 
 
 
