@@ -48,13 +48,13 @@ def runMotor(motorIndex, direction):
         motor.setSpeed(drivingSpeed)
         motor.run(Adafruit_MotorHAT.BACKWARD)
 
-robot = "skippy"
-if robot == "skippy":
+
+if robot_id != "22027911": # if not Zip
     left = (1, -1, 1, 1)
     right = times(left, -1)
     forward = (1, 1, 1, -1)
     backward = times(forward, -1)
-else:
+else:  # Zip
     left = (-1, -1, -1, 1)
     right = times(left, -1)
     forward = (1, -1, 1, 1)
@@ -105,7 +105,7 @@ def handle_command(args):
 def on_handle_command(*args):
    thread.start_new_thread(handle_command, args)
 
-from communication import socketIO
+#from communication import socketIO
 socketIO.on('command_to_robot', on_handle_command)
 
 def myWait():
