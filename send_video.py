@@ -93,7 +93,7 @@ def handleLinux(deviceNumber, videoPort):
     #print err
 
 
-    os.system("v4l2-ctl -c brightness=230 -c contrast=100 -c saturation=100")
+    os.system("v4l2-ctl -c brightness=175 -c contrast=100 -c saturation=100")
     
 
     if deviceNumber is None:
@@ -102,7 +102,7 @@ def handleLinux(deviceNumber, videoPort):
         deviceAnswer = str(deviceNumber)
 
         
-    commandLine = '/usr/local/bin/ffmpeg -s 320x240 -f video4linux2 -i /dev/video%s -f mpeg1video -b 1k -r 20 http://runmyrobot.com:%s/hello/320/240/' % (deviceAnswer, videoPort)
+    commandLine = '/usr/local/bin/ffmpeg -s 320x240 -f video4linux2 -i /dev/video%s -f mpeg1video -b 100k -r 20 http://runmyrobot.com:%s/hello/320/240/' % (deviceAnswer, videoPort)
 
     process = runFfmpeg(commandLine)
 
