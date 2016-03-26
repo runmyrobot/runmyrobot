@@ -102,7 +102,7 @@ def handleLinux(deviceNumber, videoPort):
         deviceAnswer = str(deviceNumber)
 
         
-    commandLine = '/usr/local/bin/ffmpeg -s 320x240 -f video4linux2 -i /dev/video%s -f mpeg1video -b 100k -r 20 http://runmyrobot.com:%s/hello/320/240/' % (deviceAnswer, videoPort)
+    commandLine = '/usr/local/bin/ffmpeg -s 320x240 -f video4linux2 -i /dev/video%s -f mpeg1video -b 1k -r 20 http://runmyrobot.com:%s/hello/320/240/' % (deviceAnswer, videoPort)
 
     process = runFfmpeg(commandLine)
 
@@ -154,7 +154,7 @@ def handleWindows(deviceNumber, videoPort):
 
 
 
-def snapShot(operatingSystem, inputDeviceID):
+def snapShot(operatingSystem, inputDeviceID, filename="snapshot.jpg"):
 
     try:
         os.remove('snapshot.jpg')
@@ -162,9 +162,9 @@ def snapShot(operatingSystem, inputDeviceID):
         print "did not remove file"
 
     commandLineDict = {
-        'Darwin': 'ffmpeg -y -f qtkit -i %s -vframes 1 snapshot.jpg' % inputDeviceID,
-        'Linux': '/usr/local/bin/ffmpeg -y -s 320x240 -f video4linux2 -i /dev/video%s -vframes 1 snapshot.jpg' % inputDeviceID,
-        'Windows': 'ffmpeg -y -s 320x240 -f dshow -i video="%s" -vframes 1 snapshot.jpg' % inputDeviceID}
+        'Darwin': 'ffmpeg -y -f qtkit -i %s -vframes 1 %s' % (inputDeviceID, filename),
+        'Linux': '/usr/local/bin/ffmpeg -y -f video4linux2 -i /dev/video%s -vframes 1 -q:v 1000 %s' % (inputDeviceID, filename),
+        'Windows': 'ffmpeg -y -s 320x240 -f dshow -i video="%s" -vframes 1 %s' % (inputDeviceID, filename)}
 
     os.system(commandLineDict[operatingSystem])
 
@@ -213,6 +213,22 @@ def main():
 
         #print "sleeping"
         #time.sleep(3)
+
+
+        while True:
+
+            print "taking single frame image"
+            snapShot(platform.system(), inputDeviceID, filename="single_frame_image.jpg")
+
+            with open ("single_frame_image.jpg", 'rb') as f:
+                data = f.read()
+
+            print "emit"
+            socketIO.emit('single_frame_image', base64.b64encode(data))
+            time.sleep(0)
+
+
+
         print "taking snapshot"
         snapShot(platform.system(), inputDeviceID)
 
@@ -221,6 +237,9 @@ def main():
 
         print "emit"
         socketIO.emit('snapshot', base64.b64encode(data))
+
+
+
 
         print "starting video capture"
         streamProcessDict = startVideoCapture()
