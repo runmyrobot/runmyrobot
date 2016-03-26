@@ -134,8 +134,11 @@ outputFile = FNULL
 
 
 
-
+# turn on cellular modem
 turnOnSparqee()
+
+# connect to the internet via ppp
+os.system('/home/pi/sakis3g connect --console --nostorage --pppd APN="Internetd.gdsp" BAUD=115200 CUSTOM_TTY="/dev/ttyAMA0" MODEM="OTHER" OTHER="CUSTOM_TTY" APN_USER="user" APN_PASS="pass" CUSTOM_APN="hello" --noprobe')
 
 
 print "output file:", outputFile

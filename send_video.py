@@ -93,7 +93,7 @@ def handleLinux(deviceNumber, videoPort):
     #print err
 
 
-    os.system("v4l2-ctl -c brightness=175 -c contrast=100 -c saturation=100")
+    os.system("v4l2-ctl -c brightness=150 -c contrast=100 -c saturation=100")
     
 
     if deviceNumber is None:
@@ -163,9 +163,10 @@ def snapShot(operatingSystem, inputDeviceID, filename="snapshot.jpg"):
 
     commandLineDict = {
         'Darwin': 'ffmpeg -y -f qtkit -i %s -vframes 1 %s' % (inputDeviceID, filename),
-        'Linux': '/usr/local/bin/ffmpeg -y -f video4linux2 -i /dev/video%s -vframes 1 -q:v 1000 %s' % (inputDeviceID, filename),
+        'Linux': '/usr/local/bin/ffmpeg -y -f video4linux2 -i /dev/video%s -vframes 1 -q:v 1000 -vf scale=160:120 %s' % (inputDeviceID, filename),
         'Windows': 'ffmpeg -y -s 320x240 -f dshow -i video="%s" -vframes 1 %s' % (inputDeviceID, filename)}
 
+    print commandLineDict[operatingSystem]
     os.system(commandLineDict[operatingSystem])
 
 
@@ -215,17 +216,29 @@ def main():
         #time.sleep(3)
 
 
+        frameCount = 0
+
         while True:
+
+
 
             print "taking single frame image"
             snapShot(platform.system(), inputDeviceID, filename="single_frame_image.jpg")
 
             with open ("single_frame_image.jpg", 'rb') as f:
+
+                # every so many frames, post a snapshot to twitter
+                if frameCount % 450 == 0:
+                        data = f.read()
+                        print "emit"
+                        socketIO.emit('snapshot', base64.b64encode(data))
                 data = f.read()
 
             print "emit"
             socketIO.emit('single_frame_image', base64.b64encode(data))
             time.sleep(0)
+
+            frameCount += 1
 
 
 
