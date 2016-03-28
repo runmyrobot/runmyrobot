@@ -228,14 +228,15 @@ def main():
             with open ("single_frame_image.jpg", 'rb') as f:
 
                 # every so many frames, post a snapshot to twitter
-                if frameCount % 450 == 0:
+                #if frameCount % 450 == 0:
+                if frameCount % 6000 == 0:
                         data = f.read()
                         print "emit"
-                        socketIO.emit('snapshot', base64.b64encode(data))
+                        socketIO.emit('snapshot', {'frame_count':frameCount, 'image':base64.b64encode(data)})
                 data = f.read()
 
             print "emit"
-            socketIO.emit('single_frame_image', base64.b64encode(data))
+            socketIO.emit('single_frame_image', {'frame_count':frameCount, 'image':base64.b64encode(data)})
             time.sleep(0)
 
             frameCount += 1
