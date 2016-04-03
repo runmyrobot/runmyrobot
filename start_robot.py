@@ -49,7 +49,7 @@ def turnOnSparqee():
     try:
 
             #SERIAL
-            ser = serial.Serial(port='/dev/ttyAMA0', baudrate=115200, timeout=1)
+            ser = serial.Serial(port='/dev/ttyAMA0', baudrate=460800, timeout=1)
 	    print "ser:", ser
 
 	    # set UART-to-modem communication speed
@@ -158,13 +158,17 @@ os.chdir(path)
 outputFile = FNULL
 
 
+# set uart communication speed
+print "setting uart communication speed"
+os.system("kermit /home/pi/runmyrobot/uart_speed.kermit")
+print "finished setting uart communication speed"
 
 
 # turn on cellular modem
 turnOnSparqee()
 
 # connect to the internet via ppp
-os.system('sudo /home/pi/sakis3g connect --console --nostorage --pppd APN="hello" BAUD=115200 CUSTOM_TTY="/dev/ttyAMA0" MODEM="OTHER" OTHER="CUSTOM_TTY" APN_USER="user" APN_PASS="pass" CUSTOM_APN="hello" --noprobe' + "> /tmp/sparqeelog 2>&1")
+os.system('sudo /home/pi/sakis3g connect --console --nostorage --pppd APN="hello" BAUD=460800 CUSTOM_TTY="/dev/ttyAMA0" MODEM="OTHER" OTHER="CUSTOM_TTY" APN_USER="user" APN_PASS="pass" CUSTOM_APN="hello" --noprobe' + "> /tmp/sparqeelog 2>&1")
 
 
 print "output file:", outputFile

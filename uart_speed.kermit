@@ -1,0 +1,9 @@
+set input echo on
+set port /dev/ttyAMA0
+set speed 115200
+set carrier-watch off
+set flow-control none
+output at+zbitrate=460800\13
+set speed 460800
+exit
+

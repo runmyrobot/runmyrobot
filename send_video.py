@@ -165,7 +165,7 @@ def snapShot(operatingSystem, inputDeviceID, filename="snapshot.jpg"):
 
     commandLineDict = {
         'Darwin': 'ffmpeg -y -f qtkit -i %s -vframes 1 %s' % (inputDeviceID, filename),
-        'Linux': '/usr/local/bin/ffmpeg -y -f video4linux2 -i /dev/video%s -vframes 1 -q:v 100 -vf scale=160:120 %s' % (inputDeviceID, filename),
+        'Linux': '/usr/local/bin/ffmpeg -y -f video4linux2 -i /dev/video%s -vframes 1 -q:v 1000 -vf scale=320:240 %s' % (inputDeviceID, filename),
         'Windows': 'ffmpeg -y -s 320x240 -f dshow -i video="%s" -vframes 1 %s' % (inputDeviceID, filename)}
 
     print commandLineDict[operatingSystem]
@@ -227,7 +227,8 @@ def main():
     
         #frameCount = int(round(time.time() * 1000))
 
-        while True:
+        videoWithSnapshots = True
+        while videoWithSnapshots:
 
             frameCount = timeInMilliseconds()
 
