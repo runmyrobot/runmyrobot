@@ -1,0 +1,1 @@
+/home/pi/sakis3g connect --console --nostorage --ppd APN="Internetd.gdsp" BAUD=460800 CUSTOM_TTY="/dev/ttyAMA0" MODEM="OTHER" OTHER="CUSTOM_TTY" APN_USER="user" APN_PASS="pass" CUSTOM_APN="hello"

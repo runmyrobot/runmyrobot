@@ -1,0 +1,161 @@
+<!DOCTYPE html>
+<html dir="ltr" lang="en">
+<head>
+<meta charset="utf-8" />
+<title>On Device Activation</title>
+<meta name="viewport" content="width=device-width">
+<meta name="description" content="" />
+<meta name="keywords" content="" />
+<link rel="shortcut icon" href="favicon.ico" />
+<style>
+div,span,h1,p,a,body {
+	margin: 0;
+	padding: 0;
+	border: 0;
+	font-size: 100%;
+	vertical-align: baseline;
+	font-family: Arial;
+}
+
+body {
+	background: #ccc;
+	font-family: Arial;
+}
+
+h1 {
+	font-size: 68px;
+	font-weight: bold;
+	margin-bottom: 20px;
+}
+
+p {
+	font-size: 16px;
+	margin-bottom: 20px;
+}
+
+ul {
+	margin: 0 0 40px -15px;
+}
+
+li {
+	margin-bottom: 10px;
+}
+
+button {
+	background: #E20074;
+	border: 1px solid #DADADA;
+	border-radius: 5px;
+	color: #FFF;
+	cursor: pointer;
+	font-size: 15px;
+	height: 46px;
+	margin: 20px 0;
+	text-transform: uppercase;
+	width: 200px;
+}
+
+button:hover {
+	background: #ec54a2;
+}
+
+.header {
+	height: 130px;
+}
+
+.header .tmobile-logo {
+	float: right;
+	width: 250px;
+	height: 100px;
+	background: url(/upsell/images/connect_me_logo.png)
+		no-repeat center center;
+	background-size: 250px 82px;
+}
+
+.header .tmobile-logo-black {
+	display: none;
+}
+
+.header .tmobile-logo-pink {
+	display: none;
+}
+
+html,body,.section_ {
+	height: 100%;
+}
+
+.content {
+	width: 768px;
+	background: #E6E7E8;
+	margin: 0 auto;
+	height: 100%;
+}
+
+.content:after {
+	background: #e6e7e8;
+	content: '';
+	display: block;
+	height: 100%;
+	position: fixed;
+}
+
+.section {
+	margin: 0 95px;
+	padding-top: 20px;
+}
+
+@media screen and (max-width: 767px) {
+	body {
+		background: #E6E7E8;
+	}
+	h1 {
+		font-size: 54px;
+	}
+	p {
+		font-size: 15px;
+	}
+	.content {
+		width: 100%;
+	}
+	.section {
+		margin: 0 20px;
+	}
+	.header {
+		height: 100px;
+	}
+	.tmobile-logo-black {
+		color: #000000;
+		font-size: 1100% !important;
+		height: 100px !important;
+		left: 30px !important;
+	}
+	.tmobile-logo-pink {
+		font-size: 1100% !important;
+		height: 100px !important;
+	}
+}
+</style>
+</head>
+<body>
+	<div class="section_">
+		<div class="content">
+			<div class="section">
+				<div class="header">
+					<div class="tmobile-logo">
+						<div class="tmobile-logo-black icon icon_Logo_black"></div>
+						<div class="tmobile-logo-pink icon icon_Logo_pink"></div>
+					</div>
+				</div>
+				<h2>T-Mobile Connect Me</h2>
+				<p>Hey, we've been expecting you. You're probably looking to:</p>
+				<ul>
+					<li>Activate your new device</li>
+					<li>Get more data</li>
+					<li>Stop reading this and get up n' running</li>
+				</ul>
+				<p>Ok, let's go!</p>
+				<button onClick="location.href='http://mim.t-mobile.com/'">Get Started</button>
+			</div>
+		</div>
+	</div>
+</body>
+</html>

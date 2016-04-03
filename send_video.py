@@ -14,6 +14,8 @@ import base64
 from socketIO_client import SocketIO, LoggingNamespace
 
 
+print "test1"
+
 
 if len(sys.argv) >= 4:
     print "using dev port 8122"
@@ -22,9 +24,9 @@ else:
     print "using prod port 8022"
     port = 8022
 
-
+print "initializing socket io"
 socketIO = SocketIO('runmyrobot.com', port, LoggingNamespace)
-
+print "finished initializing socket io"
 
 #ffmpeg -f qtkit -i 0 -f mpeg1video -b 400k -r 30 -s 320x240 http://52.8.81.124:8082/hello/320/240/
 
@@ -163,7 +165,7 @@ def snapShot(operatingSystem, inputDeviceID, filename="snapshot.jpg"):
 
     commandLineDict = {
         'Darwin': 'ffmpeg -y -f qtkit -i %s -vframes 1 %s' % (inputDeviceID, filename),
-        'Linux': '/usr/local/bin/ffmpeg -y -f video4linux2 -i /dev/video%s -vframes 1 -q:v 1000 -vf scale=160:120 %s' % (inputDeviceID, filename),
+        'Linux': '/usr/local/bin/ffmpeg -y -f video4linux2 -i /dev/video%s -vframes 1 -q:v 100 -vf scale=160:120 %s' % (inputDeviceID, filename),
         'Windows': 'ffmpeg -y -s 320x240 -f dshow -i video="%s" -vframes 1 %s' % (inputDeviceID, filename)}
 
     print commandLineDict[operatingSystem]
@@ -194,8 +196,14 @@ def startVideoCapture():
     return result
 
 
+def timeInMilliseconds():
+    return int(round(time.time() * 1000))
+
+
 
 def main():
+
+    print "main"
 
     streamProcessDict = None
 
@@ -216,11 +224,12 @@ def main():
         #time.sleep(3)
 
 
-        frameCount = 0
+    
+        #frameCount = int(round(time.time() * 1000))
 
         while True:
 
-
+            frameCount = timeInMilliseconds()
 
             print "taking single frame image"
             snapShot(platform.system(), inputDeviceID, filename="single_frame_image.jpg")
@@ -239,7 +248,7 @@ def main():
             socketIO.emit('single_frame_image', {'frame_count':frameCount, 'image':base64.b64encode(data)})
             time.sleep(0)
 
-            frameCount += 1
+            #frameCount += 1
 
 
 
@@ -269,6 +278,8 @@ def main():
 
 
 
+
+print "test2"
 
 if __name__ == "__main__":
     main()

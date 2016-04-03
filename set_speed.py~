@@ -1,0 +1,17 @@
+from time import sleep
+import serial
+#SERIAL
+ser = serial.Serial(port='/dev/ttyAMA0', baudrate=115200, timeout=1)
+print "ser:", ser
+
+# set UART-to-modem communication speed
+print "setting communication speed"
+ser.write("at+zbitrate=460800\r")
+sleep(1)
+print ser.read(ser.inWaiting())
+sleep(1)
+ser.close()
+sleep(1)
+print "finished setting communication speed"
+
+

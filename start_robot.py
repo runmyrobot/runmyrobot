@@ -50,6 +50,24 @@ def turnOnSparqee():
 
             #SERIAL
             ser = serial.Serial(port='/dev/ttyAMA0', baudrate=115200, timeout=1)
+	    print "ser:", ser
+
+	    # set UART-to-modem communication speed
+	    #print "setting communication speed"
+	    #ser.write("at+zbitrate=460800\r")
+            #sleep(1)
+            #print ser.read(ser.inWaiting())
+            #sleep(1)
+	    #ser.close()
+	    #sleep(1)
+	    #print "finished setting communication speed"
+	    # open port now at the higher speed
+            #ser = serial.Serial(port='/dev/ttyAMA0', baudrate=460800, timeout=1)
+	    #ser.write("at+zbitrate?\r")
+            #sleep(1)
+            #print ser.read(ser.inWaiting())
+
+
 
             GPIO.setmode(GPIO.BOARD)
 
@@ -87,7 +105,7 @@ def turnOnSparqee():
             print "------------------"
 
 
-            for i in range(3):
+            for i in range(6):
                     ser.write("ate1\r")
                     sleep(1)	
                     print ser.read(ser.inWaiting())
@@ -103,6 +121,14 @@ def turnOnSparqee():
                     #ser.flush()
                     #ser.flushInput()
                     #ser.flushOutput()
+                    ser.write("at+zbitrate?\r")
+                    sleep(1)
+		    #if i > 3:
+			#    print "setting speed"
+			#    print ser.read(ser.inWaiting())
+			#    ser.write("at+zbitrate=460800\r")
+			#    sleep(1)	
+			#    print ser.read(ser.inWaiting())
                     print "------------------"
 
     finally:
@@ -138,22 +164,26 @@ outputFile = FNULL
 turnOnSparqee()
 
 # connect to the internet via ppp
-os.system('/home/pi/sakis3g connect --console --nostorage --pppd APN="Internetd.gdsp" BAUD=115200 CUSTOM_TTY="/dev/ttyAMA0" MODEM="OTHER" OTHER="CUSTOM_TTY" APN_USER="user" APN_PASS="pass" CUSTOM_APN="hello" --noprobe')
+os.system('sudo /home/pi/sakis3g connect --console --nostorage --pppd APN="hello" BAUD=115200 CUSTOM_TTY="/dev/ttyAMA0" MODEM="OTHER" OTHER="CUSTOM_TTY" APN_USER="user" APN_PASS="pass" CUSTOM_APN="hello" --noprobe' + "> /tmp/sparqeelog 2>&1")
 
 
 print "output file:", outputFile
 
-outputFile = open("/tmp/robotoutputcontroller.txt", 'w')
-cmd = ['nohup', 'python', 'controller.py', args.robot_id]
+outputFile1 = open("/tmp/robotoutputcontroller.txt", 'w')
+cmd = ['sudo', 'python', 'controller.py', args.robot_id]
 print cmd
-subprocess.Popen(cmd, stdout=outputFile, stderr=subprocess.STDOUT)
+subprocess.Popen(cmd, stdout=outputFile1, stderr=subprocess.STDOUT)
 #subprocess.call(cmd)
 
-outputFile = open("/tmp/robotoutputsendvideo.txt", 'w')
-cmd = ['nohup', 'python', 'send_video.py', args.camera_id, '0']
+outputFile2 = open("/tmp/robotoutputsendvideo.txt", 'w')
+cmd = ['python', 'send_video.py', args.camera_id, '0']
 print cmd
-subprocess.Popen(cmd, stdout=outputFile, stderr=subprocess.STDOUT)
+subprocess.Popen(cmd, stdout=outputFile2, stderr=subprocess.STDOUT)
 #subprocess.call(cmd)
 
 
+while 1:
+	outputFile1.flush()
+	outputFile2.flush()
+	sleep(1)
 
