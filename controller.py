@@ -27,13 +27,17 @@ else:
     robot_id = raw_input("Please enter your Robot ID: ")
 
 if len(sys.argv) >= 3:
+    print 'DEV MODE ***************'
     print "using dev port 8122"
     port = 8122
 else:
+    print 'PROD MODE *************'
     print "using prod port 8022"
     port = 8022
 
+print 'using socket io to connect to runmyrobot.com'
 socketIO = SocketIO('runmyrobot.com', port, LoggingNamespace)
+print 'finished using socket io to connect to runmyrobot.com'
 
 def times(lst, number):
     return [x*number for x in lst]

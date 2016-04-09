@@ -227,7 +227,7 @@ def main():
     
         #frameCount = int(round(time.time() * 1000))
 
-        videoWithSnapshots = True
+        videoWithSnapshots = False
         while videoWithSnapshots:
 
             frameCount = timeInMilliseconds()
@@ -272,6 +272,10 @@ def main():
         period = 3000 # period in seconds between snaps
         for count in range(period):
             time.sleep(1)
+
+            if count % 120 == 30:
+                print "stopping video capture just in case it has reached a state where it's looping forever, not sending video, and not dying as a process, which can happen"
+                streamProcessDict['process'].kill()
 
             # if the video stream process dies, restart it
             if streamProcessDict['process'].poll() is not None:
