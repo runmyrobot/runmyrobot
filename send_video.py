@@ -50,10 +50,11 @@ def getVideoPort():
     url = 'http://runmyrobot.com/get_video_port/%s' % cameraIDAnswer
 
 
-    for retryNumber in range(10):
+    for retryNumber in range(2000):
         try:
             print "GET", url
             response = urllib2.urlopen(url).read()
+            break
         except:
             print "could not open url ", url
             time.sleep(2)
