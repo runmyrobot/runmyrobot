@@ -13,6 +13,9 @@ import atexit
 import sys
 import thread
 
+straightDelay = 0.4
+turnDelay = 0.4
+
 from socketIO_client import SocketIO, LoggingNamespace
 
 steeringSpeed = 255
@@ -59,9 +62,9 @@ if robot_id != "22027911": # if not Zip
     forward = (1, 1, 1, -1)
     backward = times(forward, -1)
 else:  # Zip
-    left = (-1, -1, -1, 1)
+    left = (1, 1, 1, 1)
     right = times(left, -1)
-    forward = (1, -1, 1, 1)
+    forward = (-1, 1, -1, 1)
     backward = times(forward, -1)
 
         
@@ -84,19 +87,19 @@ def handle_command(args):
                 if command == 'F':
                     for motorIndex in range(4):
                         runMotor(motorIndex, forward[motorIndex])
-                    time.sleep(0.2)
+                    time.sleep(straightDelay)
                 if command == 'B':
                     for motorIndex in range(4):
                         runMotor(motorIndex, backward[motorIndex])
-                    time.sleep(0.2)
+                    time.sleep(straightDelay)
                 if command == 'L':
                     for motorIndex in range(4):
                         runMotor(motorIndex, left[motorIndex])
-                    time.sleep(0.1)
+                    time.sleep(turnDelay)
                 if command == 'R':
                     for motorIndex in range(4):
                         runMotor(motorIndex, right[motorIndex])
-                    time.sleep(0.1)
+                    time.sleep(turnDelay)
 
 
             turnOffMotors()

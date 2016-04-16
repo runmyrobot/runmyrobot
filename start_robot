@@ -1,2 +1,3 @@
+cd ~/runmyrobot
 nohup python controller.py YOURROBOTID &> /dev/null &
 nohup python send_video.py YOURCAMERAID 0 &> /dev/null &
