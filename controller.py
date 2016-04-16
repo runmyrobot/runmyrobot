@@ -14,7 +14,7 @@ import sys
 import thread
 
 straightDelay = 0.4
-turnDelay = 0.4
+turnDelay = 0.8
 
 from socketIO_client import SocketIO, LoggingNamespace
 
@@ -54,6 +54,12 @@ def runMotor(motorIndex, direction):
     if direction == -1:
         motor.setSpeed(drivingSpeed)
         motor.run(Adafruit_MotorHAT.BACKWARD)
+    if direction == 0.5:
+        motor.setSpeed(128)
+        motor.run(Adafruit_MotorHAT.FORWARD)
+    if direction == -0.5:
+        motor.setSpeed(128)
+        motor.run(Adafruit_MotorHAT.BACKWARD)
 
 
 if robot_id != "22027911": # if not Zip
@@ -62,8 +68,8 @@ if robot_id != "22027911": # if not Zip
     forward = (1, 1, 1, -1)
     backward = times(forward, -1)
 else:  # Zip
-    left = (1, 1, 1, 1)
-    right = times(left, -1)
+    left = (0, 1, 0, 1) # was 1,1,1,1
+    right = (-1, 0, -1, 0)
     forward = (-1, 1, -1, 1)
     backward = times(forward, -1)
 
