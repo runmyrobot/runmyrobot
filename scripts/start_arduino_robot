@@ -1,0 +1,10 @@
+echo killall python
+killall python
+echo killall nodejs
+killall nodejs
+echo killall ffmpeg
+killall ffmpeg
+cd /home/pi/runmyrobot
+nohup /home/pi/runmyrobot/scripts/repeat_start python send_video.py 6789 0 &>/dev/null&
+cd /home/pi/arduino_robot_node
+nohup /home/pi/runmyrobot/scripts/repeat_start nodejs robot_node.js &>/dev/null&
