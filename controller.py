@@ -13,7 +13,7 @@ import atexit
 import sys
 import thread
 
-straightDelay = 0.4
+straightDelay = 1.6
 turnDelay = 0.8
 
 from socketIO_client import SocketIO, LoggingNamespace
@@ -68,8 +68,8 @@ if robot_id != "22027911": # if not Zip
     forward = (1, 1, 1, -1)
     backward = times(forward, -1)
 else:  # Zip
-    left = (0, 1, 0, 1) # was 1,1,1,1
-    right = (-1, 0, -1, 0)
+    left = (1, 1, 1, 1) # was 1,1,1,1
+    right = (-1, -1, -1, -1)
     forward = (-1, 1, -1, 1)
     backward = times(forward, -1)
 
