@@ -12,6 +12,7 @@ import time
 import atexit
 import sys
 import thread
+import subprocess
 
 straightDelay = 1.6
 turnDelay = 0.8
@@ -142,6 +143,14 @@ if motorsEnabled:
     motorA = mh.getMotor(1)
     motorB = mh.getMotor(2)
 
+def infoUpdate():
+    socketIO.emit('information', subprocess.check_output(["hostname", "-I"]))
 
+
+waitCounter = 0
+infoUpdate()
 while True:
     socketIO.wait(seconds=10)
+    if (waitCounter % 10) == 0:
+        infoUpdate()
+    waitCounter += 1
