@@ -274,7 +274,7 @@ def main():
         for count in range(period):
             time.sleep(1)
 
-            if count % 120 == 30:
+            if count % 240 == 220:
                 print "stopping video capture just in case it has reached a state where it's looping forever, not sending video, and not dying as a process, which can happen"
                 streamProcessDict['process'].kill()
 
