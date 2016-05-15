@@ -105,7 +105,7 @@ def handleLinux(deviceNumber, videoPort):
         deviceAnswer = str(deviceNumber)
 
         
-    commandLine = '/usr/local/bin/ffmpeg -s 160x120 -f video4linux2 -i /dev/video%s -f mpeg1video -b 1k -r 20 http://runmyrobot.com:%s/hello/160/120/' % (deviceAnswer, videoPort)
+    commandLine = '/usr/local/bin/ffmpeg -s 320x240 -f video4linux2 -i /dev/video%s -f mpeg1video -b 1k -r 20 http://runmyrobot.com:%s/hello/320/240/' % (deviceAnswer, videoPort)
 
     process = runFfmpeg(commandLine)
 
@@ -270,11 +270,11 @@ def main():
         streamProcessDict = startVideoCapture()
 
         
-        period = 3000 # period in seconds between snaps
+        period = 60 # period in seconds between snaps
         for count in range(period):
             time.sleep(1)
 
-            if count % 180 == 170:
+            if count % 50 == 30:
                 print "stopping video capture just in case it has reached a state where it's looping forever, not sending video, and not dying as a process, which can happen"
                 streamProcessDict['process'].kill()
 
