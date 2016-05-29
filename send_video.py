@@ -270,7 +270,7 @@ def main():
         streamProcessDict = startVideoCapture()
 
         
-        period = 60 # period in seconds between snaps
+        period = 30*60 # period in seconds between snaps
         for count in range(period):
             time.sleep(1)
 
