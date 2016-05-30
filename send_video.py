@@ -208,6 +208,9 @@ def main():
 
     streamProcessDict = None
 
+
+    twitterSnapCount = 0
+
     while True:
 
 
@@ -251,14 +254,17 @@ def main():
 
 
 
+
         print "taking snapshot"
         snapShot(platform.system(), inputDeviceID)
-
         with open ("snapshot.jpg", 'rb') as f:
             data = f.read()
-
         print "emit"
-        socketIO.emit('snapshot', {'image':base64.b64encode(data)})
+
+        # skip sending the first image because it's mostly black, maybe completely black
+        #todo: should find out why this black image happens
+        if twitterSnapCount > 0:
+            socketIO.emit('snapshot', {'image':base64.b64encode(data)})
 
 
 
@@ -267,7 +273,7 @@ def main():
         streamProcessDict = startVideoCapture()
 
         
-        period = 30*60 # period in seconds between snaps
+        period = 2*60*60 # period in seconds between snaps
         for count in range(period):
             time.sleep(1)
 
@@ -278,6 +284,18 @@ def main():
             # if the video stream process dies, restart it
             if streamProcessDict['process'].poll() is not None:
                 streamProcessDict = startVideoCapture()
+
+
+
+
+        #print "taking snapshot"
+        #snapShot(platform.system(), inputDeviceID)
+        #with open ("snapshot.jpg", 'rb') as f:
+        #    data = f.read()
+        #print "emit"
+        #socketIO.emit('snapshot', {'image':base64.b64encode(data)})
+
+        twitterSnapCount += 1
 
 
 
