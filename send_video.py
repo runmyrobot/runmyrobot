@@ -223,9 +223,6 @@ def main():
 
         #print "sleeping"
         #time.sleep(3)
-
-
-    
         #frameCount = int(round(time.time() * 1000))
 
         videoWithSnapshots = False
@@ -261,7 +258,7 @@ def main():
             data = f.read()
 
         print "emit"
-        socketIO.emit('snapshot', base64.b64encode(data))
+        socketIO.emit('snapshot', {'image':base64.b64encode(data)})
 
 
 
