@@ -63,7 +63,12 @@ def runMotor(motorIndex, direction):
         motor.run(Adafruit_MotorHAT.BACKWARD)
 
 
-if robot_id != "22027911": # if not Zip
+if robot_id == "3444925": # if Noname
+    left = (1, 1, 0, 0)
+    right = times(left, -1)
+    forward = (-1, 1, 0, 0)
+    backward = times(forward, -1)
+elif robot_id != "22027911": # if not Zip
     left = (1, -1, 1, 1)
     right = times(left, -1)
     forward = (1, 1, 1, -1)
