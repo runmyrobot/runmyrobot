@@ -69,8 +69,8 @@ if robot_id != "22027911": # if not Zip
     forward = (1, 1, 1, -1)
     backward = times(forward, -1)
 else:  # Zip
-    left = (1, 1, 1, 1) # was 1,1,1,1
-    right = (-1, -1, -1, -1)
+    left = (0, 1, 1, 0) # was 1,1,1,1
+    right = (0, -1, -1, 0)
     forward = (-1, 1, -1, 1)
     backward = times(forward, -1)
 
