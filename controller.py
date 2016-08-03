@@ -64,11 +64,11 @@ def runMotor(motorIndex, direction):
 
 
 if robot_id == "3444925": # if Timmy
-    left = (1, 1, 0, 0)
+    left = (1, 1, 1, 1)
     right = times(left, -1)
-    forward = (-1, 1, 0, 0)
+    forward = (-1, 1, -1, 1)
     backward = times(forward, -1)
-    turnDelay = 0.1
+    turnDelay = 0.8
 elif robot_id != "22027911": # if not Zip
     left = (1, -1, 1, 1)
     right = times(left, -1)
