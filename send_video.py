@@ -42,10 +42,6 @@ socketIO.on('command_to_camera', onHandleCameraCommand)
 
 def getVideoPort():
 
-    if len(sys.argv) > 1:
-        cameraIDAnswer = sys.argv[1]
-    else:
-        cameraIDAnswer = raw_input("Enter the Camera ID for your robot, you can get it from the runmyrobot.com website: ")
 
     url = 'http://runmyrobot.com/get_video_port/%s' % cameraIDAnswer
 
@@ -303,5 +299,14 @@ def main():
 print "test2"
 
 if __name__ == "__main__":
+
+
+    if len(sys.argv) > 1:
+        cameraIDAnswer = sys.argv[1]
+    else:
+        cameraIDAnswer = raw_input("Enter the Camera ID for your robot, you can get it from the runmyrobot.com website: ")
+
+    
     main()
+
 
