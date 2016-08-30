@@ -287,7 +287,7 @@ def main():
             if count % 40 == 0:
                 print "checking to see if ffmpeg is running"
                 if streamProcessDict['process'].poll() is None:
-                    socketIO.emit('video_stream_process_is_running', {})
+                    socketIO.emit('video_stream_process_exists', {})
                 
                 
             # if the video stream process dies, restart it
