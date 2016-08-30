@@ -15,7 +15,7 @@ import thread
 import subprocess
 
 straightDelay = 1.6
-turnDelay = 0.8
+
 
 from socketIO_client import SocketIO, LoggingNamespace
 
@@ -63,18 +63,36 @@ def runMotor(motorIndex, direction):
         motor.run(Adafruit_MotorHAT.BACKWARD)
 
 
-if robot_id != "22027911": # if not Zip
+if robot_id == "3444925": # if Timmy
+    left = (1, 1, 1, 1)
+    right = times(left, -1)
+    forward = (-1, 1, 1, -1)
+    backward = times(forward, -1)
+    turnDelay = 0.8
+elif robot_id == "88359766": # Skippy
     left = (1, -1, 1, 1)
     right = times(left, -1)
     forward = (1, 1, 1, -1)
     backward = times(forward, -1)
-else:  # Zip
-    left = (1, 1, 1, 1) # was 1,1,1,1
-    right = (-1, -1, -1, -1)
+    turnDelay = 0.8
+elif robot_id == "22027911": # Zip
+    left = (0, 1, 1, 0) # was 1,1,1,1
+    right = (0, -1, -1, 0)
     forward = (-1, 1, -1, 1)
     backward = times(forward, -1)
-
-        
+    turnDelay = 0.8
+elif robot_id == "52225122": # Pippy
+    left = (1, 1, 1, 1)
+    right = times(left, -1)
+    forward = (-1, 1, 1, -1)
+    backward = times(forward, -1)
+    turnDelay = 0.8
+else:
+    left = (0, 1, 1, 0) # was 1,1,1,1
+    right = (0, -1, -1, 0)
+    forward = (-1, 1, -1, 1)
+    backward = times(forward, -1)
+    turnDelay = 0.8
         
 def handle_command(args):
 
@@ -83,6 +101,14 @@ def handle_command(args):
             return
         handlingCommand = True
 
+        #if 'robot_id' in args:
+        #    print "args robot id:", args['robot_id']
+
+        #if 'command' in args:
+        #    print "args command:", args['command']
+
+        #print "args:", args
+            
         if 'command' in args and 'robot_id' in args and args['robot_id'] == robot_id:
 
             print('got something', args)

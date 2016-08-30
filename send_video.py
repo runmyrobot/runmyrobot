@@ -268,7 +268,10 @@ def main():
         print "starting video capture"
         streamProcessDict = startVideoCapture()
 
-        
+
+        # This loop counts out a delay that occurs between twitter snapshots.
+        # Every 50 seconds, it kills and restarts ffmpeg.
+        # Every 40 seconds, it sends a signal to the server indicating that ffmpeg is alive.
         period = 2*60*60 # period in seconds between snaps
         for count in range(period):
             time.sleep(1)
@@ -277,6 +280,12 @@ def main():
                 print "stopping video capture just in case it has reached a state where it's looping forever, not sending video, and not dying as a process, which can happen"
                 streamProcessDict['process'].kill()
 
+            if count % 40 == 0:
+                print "checking to see if ffmpeg is running"
+                if streamProcessDict['process'].poll() is None:
+                    socketIO.emit('video_stream_process_exists', {})
+                
+                
             # if the video stream process dies, restart it
             if streamProcessDict['process'].poll() is not None:
                 streamProcessDict = startVideoCapture()

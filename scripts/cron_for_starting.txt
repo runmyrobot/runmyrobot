@@ -1,0 +1,3 @@
+# using sudo crontab -e and putting this line at the bottom
+
+@reboot /bin/bash /home/pi/start_robot
