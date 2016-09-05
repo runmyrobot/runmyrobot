@@ -284,7 +284,7 @@ def main():
             if count % 40 == 0:
                 print "send status about this process and its child process ffmpeg"
                 ffmpegProcessExists = streamProcessDict['process'].poll() is None
-                socketIO.emit('send_video_status', {'send_video_process_exists': true,
+                socketIO.emit('send_video_status', {'send_video_process_exists': True,
                                                     'ffmpeg_process_exists': ffmpegProcessExists,
                                                     'camera_id':cameraIDAnswer})
                 
