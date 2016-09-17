@@ -71,6 +71,7 @@ def runFfmpeg(commandLine):
 
 def handleDarwin(deviceNumber, videoPort):
 
+    
     p = subprocess.Popen(["ffmpeg", "-list_devices", "true", "-f", "qtkit", "-i", "dummy"], stdout=subprocess.PIPE, stderr=subprocess.PIPE)
 
     out, err = p.communicate()
@@ -87,13 +88,18 @@ def handleDarwin(deviceNumber, videoPort):
 
 def handleLinux(deviceNumber, videoPort):
 
+    print "sleeping to give the camera time to start working"
+    time.sleep(2)
+    print "finished sleeping"
+
+    
     #p = subprocess.Popen(["ffmpeg", "-list_devices", "true", "-f", "qtkit", "-i", "dummy"], stdout=subprocess.PIPE, stderr=subprocess.PIPE)
     #out, err = p.communicate()
     #print err
 
 
-    #os.system("v4l2-ctl -c brightness=150 -c contrast=100 -c saturation=100")
-    os.system("v4l2-ctl -c brightness=7 -c contrast=25 -c saturation=40")
+    os.system("v4l2-ctl -c brightness=160 -c contrast=100 -c saturation=100")
+    #os.system("v4l2-ctl -c brightness=10 -c contrast=25 -c saturation=40")
     
 
     if deviceNumber is None:
@@ -251,17 +257,17 @@ def main():
 
 
 
+        if 1:
+            print "taking snapshot"
+            snapShot(platform.system(), inputDeviceID)
+            with open ("snapshot.jpg", 'rb') as f:
+                data = f.read()
+            print "emit"
 
-        print "taking snapshot"
-        snapShot(platform.system(), inputDeviceID)
-        with open ("snapshot.jpg", 'rb') as f:
-            data = f.read()
-        print "emit"
-
-        # skip sending the first image because it's mostly black, maybe completely black
-        #todo: should find out why this black image happens
-        if twitterSnapCount > 0:
-            socketIO.emit('snapshot', {'image':base64.b64encode(data)})
+            # skip sending the first image because it's mostly black, maybe completely black
+            #todo: should find out why this black image happens
+            if twitterSnapCount > 0:
+                socketIO.emit('snapshot', {'image':base64.b64encode(data)})
 
 
 
@@ -277,20 +283,25 @@ def main():
         for count in range(period):
             time.sleep(1)
 
-            if count % 50 == 30:
+            if count % 500 == 30:
                 print "stopping video capture just in case it has reached a state where it's looping forever, not sending video, and not dying as a process, which can happen"
                 streamProcessDict['process'].kill()
 
-            if count % 40 == 0:
+            if count % 80 == 75:
                 print "send status about this process and its child process ffmpeg"
                 ffmpegProcessExists = streamProcessDict['process'].poll() is None
                 socketIO.emit('send_video_status', {'send_video_process_exists': True,
                                                     'ffmpeg_process_exists': ffmpegProcessExists,
                                                     'camera_id':cameraIDAnswer})
-                
+
+            #if count % 190 == 180:
+            #    print "reboot system in case the webcam is not working"
+            #    os.system("sudo reboot")
                 
             # if the video stream process dies, restart it
             if streamProcessDict['process'].poll() is not None:
+                # wait 5 seconds before trying to start ffmpeg
+                time.sleep(5)
                 streamProcessDict = startVideoCapture()
 
 
