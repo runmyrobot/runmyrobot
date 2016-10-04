@@ -99,7 +99,7 @@ def handleLinux(deviceNumber, videoPort):
 
 
 
-    os.system("v4l2-ctl -c brightness=160 -c contrast=100 -c saturation=100")
+    os.system("v4l2-ctl -c brightness=200 -c contrast=100 -c saturation=100")
     #os.system("v4l2-ctl -c brightness=10 -c contrast=25 -c saturation=40")
 
     
