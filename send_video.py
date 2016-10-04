@@ -98,8 +98,10 @@ def handleLinux(deviceNumber, videoPort):
     #print err
 
 
+
     os.system("v4l2-ctl -c brightness=160 -c contrast=100 -c saturation=100")
     #os.system("v4l2-ctl -c brightness=10 -c contrast=25 -c saturation=40")
+
     
 
     if deviceNumber is None:
@@ -284,7 +286,7 @@ def main():
         for count in range(period):
             time.sleep(1)
 
-            if count % 500 == 30:
+            if count % 81 == 30:
                 print "stopping video capture just in case it has reached a state where it's looping forever, not sending video, and not dying as a process, which can happen"
                 streamProcessDict['process'].kill()
 
