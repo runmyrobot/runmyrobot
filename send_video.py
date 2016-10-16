@@ -220,6 +220,11 @@ def main():
     while True:
 
 
+
+        socketIO.emit('send_video_status', {'send_video_process_exists': True,
+                                            'camera_id':cameraIDAnswer})
+
+        
         if streamProcessDict is not None:
             print "stopping previously running ffmpeg (needs to happen if this is not the first iteration)"
             streamProcessDict['process'].kill()
@@ -286,6 +291,10 @@ def main():
         for count in range(period):
             time.sleep(1)
 
+            if count % 20 == 0:
+                socketIO.emit('send_video_status', {'send_video_process_exists': True,
+                                                    'camera_id':cameraIDAnswer})
+            
             if count % 81 == 30:
                 print "stopping video capture just in case it has reached a state where it's looping forever, not sending video, and not dying as a process, which can happen"
                 streamProcessDict['process'].kill()
