@@ -87,12 +87,13 @@ elif robot_id == "52225122": # Pippy
     forward = (-1, 1, 1, -1)
     backward = times(forward, -1)
     turnDelay = 0.8
-else:
-    left = (0, 1, 1, 0) # was 1,1,1,1
-    right = (0, -1, -1, 0)
-    forward = (-1, 1, -1, 1)
+else: # default settings
+    left = (1, 1, 1, 1)
+    right = times(left, -1)
+    forward = (-1, 1, 1, -1)
     backward = times(forward, -1)
     turnDelay = 0.8
+
         
 def handle_command(args):
 
