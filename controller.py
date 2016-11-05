@@ -73,7 +73,7 @@ if robotID == "3444925": # if Timmy
     forward = (-1, 1, 1, -1)
     backward = times(forward, -1)
     turnDelay = 0.8
-elif robotID == "88359766": # Skippy
+elif robot_id == "88359766": # Skippy_old
     left = (1, -1, 1, 1)
     right = times(left, -1)
     forward = (1, 1, 1, -1)
@@ -91,6 +91,12 @@ elif robotID == "52225122": # Pippy
     forward = (-1, 1, 1, -1)
     backward = times(forward, -1)
     turnDelay = 0.8
+elif robot_id == "72378514": # Skippy
+    left = (1, 1, 1, 1)
+    right = times(left, -1)
+    forward = (-1, 1, -1, 1)
+    backward = times(forward, -1)
+    turnDelay = 0.8    
 else: # default settings
     left = (1, 1, 1, 1)
     right = times(left, -1)
