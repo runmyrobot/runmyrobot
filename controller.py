@@ -1,3 +1,4 @@
+
 try:
     from Adafruit_MotorHAT import Adafruit_MotorHAT, Adafruit_DCMotor
     motorsEnabled = True
@@ -13,22 +14,25 @@ import atexit
 import sys
 import thread
 import subprocess
+import time
+import RPi.GPIO as GPIO
+from socketIO_client import SocketIO, LoggingNamespace
+
+GPIO.setmode(GPIO.BCM)
+chargeIONumber = 17
+GPIO.setup(chargeIONumber, GPIO.IN)
 
 straightDelay = 1.6
-
-
-from socketIO_client import SocketIO, LoggingNamespace
 
 steeringSpeed = 255
 steeringHoldingSpeed = 180
 drivingSpeed = 255
 handlingCommand = False
 
-
 if len(sys.argv) >= 2:
-    robot_id = sys.argv[1]
+    robotID = sys.argv[1]
 else:
-    robot_id = raw_input("Please enter your Robot ID: ")
+    robotID = raw_input("Please enter your Robot ID: ")
 
 if len(sys.argv) >= 3:
     print 'DEV MODE ***************'
@@ -63,25 +67,25 @@ def runMotor(motorIndex, direction):
         motor.run(Adafruit_MotorHAT.BACKWARD)
 
 
-if robot_id == "3444925": # if Timmy
+if robotID == "3444925": # if Timmy
     left = (1, 1, 1, 1)
     right = times(left, -1)
     forward = (-1, 1, 1, -1)
     backward = times(forward, -1)
     turnDelay = 0.8
-elif robot_id == "88359766": # Skippy
+elif robotID == "88359766": # Skippy
     left = (1, -1, 1, 1)
     right = times(left, -1)
     forward = (1, 1, 1, -1)
     backward = times(forward, -1)
     turnDelay = 0.8
-elif robot_id == "22027911": # Zip
+elif robotID == "22027911": # Zip
     left = (0, 1, 1, 0) # was 1,1,1,1
     right = (0, -1, -1, 0)
     forward = (-1, 1, -1, 1)
     backward = times(forward, -1)
     turnDelay = 0.8
-elif robot_id == "52225122": # Pippy
+elif robotID == "52225122": # Pippy
     left = (1, 1, 1, 1)
     right = times(left, -1)
     forward = (-1, 1, 1, -1)
@@ -92,7 +96,7 @@ else: # default settings
     right = times(left, -1)
     forward = (-1, 1, 1, -1)
     backward = times(forward, -1)
-    turnDelay = 0.8
+    turnDelay = 0.4
 
         
 def handle_command(args):
@@ -110,7 +114,7 @@ def handle_command(args):
 
         #print "args:", args
             
-        if 'command' in args and 'robot_id' in args and args['robot_id'] == robot_id:
+        if 'command' in args and 'robot_id' in args and args['robot_id'] == robotID:
 
             print('got something', args)
 
@@ -170,14 +174,31 @@ if motorsEnabled:
     motorA = mh.getMotor(1)
     motorB = mh.getMotor(2)
 
-def infoUpdate():
-    socketIO.emit('information', subprocess.check_output(["hostname", "-I"]))
+def ipInfoUpdate():
+    socketIO.emit('ip_information', subprocess.check_output(["hostname", "-I"]))
+
+def sendChargeState():
+    charging = GPIO.input(chargeIONumber) == 1
+    chargeState = {'robot_id': robotID, 'charging': charging}
+    socketIO.emit('charge_state', chargeState)
+    print "charge state:", chargeState
+
+def sendChargeStateCallback(x):
+    sendChargeState()
+
+GPIO.add_event_detect(chargeIONumber, GPIO.BOTH)
+GPIO.add_event_callback(chargeIONumber, sendChargeStateCallback)
+
 
 
 waitCounter = 0
-infoUpdate()
+ipInfoUpdate()
 while True:
     socketIO.wait(seconds=10)
     if (waitCounter % 10) == 0:
-        infoUpdate()
+        ipInfoUpdate()
+        sendChargeState()
+
     waitCounter += 1
+
+
