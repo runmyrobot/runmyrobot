@@ -295,7 +295,7 @@ def main():
                 socketIO.emit('send_video_status', {'send_video_process_exists': True,
                                                     'camera_id':cameraIDAnswer})
             
-            if count % 81 == 30:
+            if count % 161 == 30:
                 print "stopping video capture just in case it has reached a state where it's looping forever, not sending video, and not dying as a process, which can happen"
                 streamProcessDict['process'].kill()
 
