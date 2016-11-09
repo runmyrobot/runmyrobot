@@ -164,7 +164,7 @@ def handleWindows(deviceNumber, videoPort):
 
 
 
-def snapShot(operatingSystem, inputDeviceID, filename="snapshot.jpg"):
+def snapShot(operatingSystem, inputDeviceID, filename="snapshot.jpg"):    
 
     try:
         os.remove('snapshot.jpg')
