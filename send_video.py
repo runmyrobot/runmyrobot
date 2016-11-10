@@ -98,7 +98,7 @@ def handleLinux(deviceNumber, videoPort):
     #print err
 
     #os.system("v4l2-ctl -c brightness=10 -c contrast=25 -c saturation=40")
-    os.system("v4l2-ctl -c brightness=40 -c contrast=40 -c saturation=40") # Skippy   
+    os.system("v4l2-ctl -c brightness=180 -c contrast=40 -c saturation=60") # Skippy   
     #os.system("v4l2-ctl -c brightness=50 -c contrast=50 -c saturation=80")
     #os.system("v4l2-ctl -c brightness=200 -c contrast=100 -c saturation=100")
     

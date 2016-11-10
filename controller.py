@@ -96,7 +96,7 @@ elif robotID == "72378514": # Skippy
     right = times(left, -1)
     forward = (-1, 1, -1, 1)
     backward = times(forward, -1)
-    turnDelay = 0.8    
+    turnDelay = 0.4
 else: # default settings
     left = (1, 1, 1, 1)
     right = times(left, -1)
