@@ -97,13 +97,20 @@ elif robotID == "72378514": # Skippy
     forward = (-1, 1, -1, 1)
     backward = times(forward, -1)
     turnDelay = 0.4
-else: # default settings
+elif robotID == "19359999": # Mikey
     left = (1, 1, 1, 1)
     right = times(left, -1)
     forward = (-1, 1, 1, -1)
     backward = times(forward, -1)
     turnDelay = 0.4
+else: # default settings
+    left = (1, 1, 1, 1)
+    right = times(left, -1)
+    forward = (-1, 1, -1, 1)
+    backward = times(forward, -1)
+    turnDelay = 0.4
 
+    
         
 def handle_command(args):
 
