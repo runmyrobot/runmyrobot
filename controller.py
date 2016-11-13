@@ -24,10 +24,14 @@ GPIO.setup(chargeIONumber, GPIO.IN)
 
 straightDelay = 1.6
 
-steeringSpeed = 255
+#steeringSpeed = 255
+steeringSpeed = 200
 steeringHoldingSpeed = 180
-drivingSpeed = 255
+#drivingSpeed = 255
+drivingSpeed = 200
 handlingCommand = False
+
+
 
 if len(sys.argv) >= 2:
     robotID = sys.argv[1]
