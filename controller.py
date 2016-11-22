@@ -81,6 +81,12 @@ elif robot_id == "22027911": # Zip
     forward = (-1, 1, -1, 1)
     backward = times(forward, -1)
     turnDelay = 0.8
+elif robot_id == "78929358": # ZombieZip
+    left = (0, 1, 1, 0) # was 1,1,1,1
+    right = (0, -1, -1, 0)
+    forward = (-1, 1, -1, 1)
+    backward = times(forward, -1)
+    turnDelay = 0.8
 elif robot_id == "52225122": # Pippy
     left = (1, 1, 1, 1)
     right = times(left, -1)
@@ -141,13 +147,28 @@ def handle_command(args):
         handlingCommand = False
 
 
+def handleStartReverseSshProcess(args):
+    print "THEODORE calling reverse ssh command"
+    subprocess.call(["ssh", "-i", "/home/pi/reverse_ssh_key0.pem", "-N", "-R", "2222:localhost:22", "ubuntu@52.8.25.95"])
 
+def handleEndReverseSshProcess(args):
+    print "THEODORE calling end reverse ssh command"
+    subprocess.call(["killall", "ssh"])
         
 def on_handle_command(*args):
    thread.start_new_thread(handle_command, args)
 
 #from communication import socketIO
 socketIO.on('command_to_robot', on_handle_command)
+
+def startReverseSshProcess(*args):
+   thread.start_new_thread(handleStartReverseSshProcess, args)
+
+def endReverseSshProcess(*args):
+   thread.start_new_thread(handleEndReverseSshProcess, args)
+
+socketIO.on('reverse_ssh_8872381747239', startReverseSshProcess)
+socketIO.on('end_reverse_ssh_8872381747239', endReverseSshProcess)
 
 def myWait():
   socketIO.wait()
@@ -173,9 +194,13 @@ if motorsEnabled:
 def infoUpdate():
     socketIO.emit('information', subprocess.check_output(["hostname", "-I"]))
 
+def identifyRobotId():
+    socketIO.emit('identify_robot_id', robot_id);
+
 
 waitCounter = 0
 infoUpdate()
+identifyRobotId()
 while True:
     socketIO.wait(seconds=10)
     if (waitCounter % 10) == 0:
