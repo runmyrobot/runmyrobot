@@ -8,6 +8,7 @@ import platform
 import json
 import sys
 import base64
+import random
 
 
 
@@ -39,6 +40,15 @@ def onHandleCameraCommand(*args):
 socketIO.on('command_to_camera', onHandleCameraCommand)
 
 
+
+def randomSleep():
+    """A short wait is good for quick recovery, but sometimes a longer delay is needed or it will just keep trying and failing short intervals, like because the system thinks the port is still in use and every retry makes the system think it's still in use. So, this has a high likelihood of picking a short interval, but will pick a long one sometimes."""
+
+    timeToWait = random.choice((0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 1, 3, 5))
+    print "sleeping", timeToWait
+    time.sleep(timeToWait)
+
+    
 
 def getVideoPort():
 
@@ -89,7 +99,7 @@ def handleDarwin(deviceNumber, videoPort):
 def handleLinux(deviceNumber, videoPort):
 
     print "sleeping to give the camera time to start working"
-    time.sleep(2)
+    randomSleep()
     print "finished sleeping"
 
     
@@ -97,10 +107,10 @@ def handleLinux(deviceNumber, videoPort):
     #out, err = p.communicate()
     #print err
 
-
-    os.system("v4l2-ctl -c brightness=200 -c contrast=100 -c saturation=100")
     #os.system("v4l2-ctl -c brightness=10 -c contrast=25 -c saturation=40")
-
+    os.system("v4l2-ctl -c brightness=180 -c contrast=40 -c saturation=60") # Skippy   
+    #os.system("v4l2-ctl -c brightness=50 -c contrast=50 -c saturation=80")
+    #os.system("v4l2-ctl -c brightness=200 -c contrast=100 -c saturation=100")
     
 
     if deviceNumber is None:
@@ -164,7 +174,7 @@ def handleWindows(deviceNumber, videoPort):
 
 
 
-def snapShot(operatingSystem, inputDeviceID, filename="snapshot.jpg"):
+def snapShot(operatingSystem, inputDeviceID, filename="snapshot.jpg"):    
 
     try:
         os.remove('snapshot.jpg')
@@ -296,7 +306,7 @@ def main():
                 socketIO.emit('send_video_status', {'send_video_process_exists': True,
                                                     'camera_id':cameraIDAnswer})
             
-            if count % 81 == 30:
+            if count % 161 == 30:
                 print "stopping video capture just in case it has reached a state where it's looping forever, not sending video, and not dying as a process, which can happen"
                 streamProcessDict['process'].kill()
 
@@ -313,8 +323,9 @@ def main():
                 
             # if the video stream process dies, restart it
             if streamProcessDict['process'].poll() is not None:
-                # wait 5 seconds before trying to start ffmpeg
-                time.sleep(5)
+                # wait before trying to start ffmpeg
+                print "ffmpeg process is dead, waiting before trying to restart"
+                randomSleep()
                 streamProcessDict = startVideoCapture()
 
 
