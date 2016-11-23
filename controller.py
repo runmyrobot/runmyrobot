@@ -233,12 +233,8 @@ def identifyRobotId():
 
 
 waitCounter = 0
-<<<<<<< HEAD
-infoUpdate()
 identifyRobotId()
-=======
 ipInfoUpdate()
->>>>>>> c7866587a3d6be3ce489c3942f22f2046707338c
 while True:
     socketIO.wait(seconds=10)
     if (waitCounter % 10) == 0:
