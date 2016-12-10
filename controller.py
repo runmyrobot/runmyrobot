@@ -24,9 +24,9 @@ GPIO.setup(chargeIONumber, GPIO.IN)
 
 straightDelay = 1.6
 
-steeringSpeed = 255
-steeringHoldingSpeed = 180
-drivingSpeed = 255
+steeringSpeed = 160
+steeringHoldingSpeed = 160
+drivingSpeed = 160
 handlingCommand = False
 
 if len(sys.argv) >= 2:
