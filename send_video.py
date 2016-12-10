@@ -8,6 +8,7 @@ import platform
 import json
 import sys
 import base64
+import random
 
 
 
@@ -39,6 +40,15 @@ def onHandleCameraCommand(*args):
 socketIO.on('command_to_camera', onHandleCameraCommand)
 
 
+
+def randomSleep():
+    """A short wait is good for quick recovery, but sometimes a longer delay is needed or it will just keep trying and failing short intervals, like because the system thinks the port is still in use and every retry makes the system think it's still in use. So, this has a high likelihood of picking a short interval, but will pick a long one sometimes."""
+
+    timeToWait = random.choice((0.25, 0.25, 0.25, 0.25, 0.25, 0.25, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 5))
+    print "sleeping", timeToWait
+    time.sleep(timeToWait)
+
+    
 
 def getVideoPort():
 
@@ -89,7 +99,7 @@ def handleDarwin(deviceNumber, videoPort):
 def handleLinux(deviceNumber, videoPort):
 
     print "sleeping to give the camera time to start working"
-    time.sleep(2)
+    randomSleep()
     print "finished sleeping"
 
     
@@ -313,8 +323,9 @@ def main():
                 
             # if the video stream process dies, restart it
             if streamProcessDict['process'].poll() is not None:
-                # wait 5 seconds before trying to start ffmpeg
-                time.sleep(5)
+                # wait before trying to start ffmpeg
+                print "ffmpeg process is dead, waiting before trying to restart"
+                randomSleep()
                 streamProcessDict = startVideoCapture()
 
 
