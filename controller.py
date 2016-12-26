@@ -72,7 +72,7 @@ if robotID == "3444925": # if Timmy
     right = times(left, -1)
     forward = (-1, 1, 1, -1)
     backward = times(forward, -1)
-    turnDelay = 0.8
+    turnDelay = 0.4
 elif robotID == "88359766": # Skippy_old
     left = (1, -1, 1, 1)
     right = times(left, -1)
