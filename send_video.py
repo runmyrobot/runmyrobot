@@ -107,8 +107,10 @@ def handleLinux(deviceNumber, videoPort):
     #out, err = p.communicate()
     #print err
 
+
+    os.system("v4l2-ctl -c brightness=10 -c contrast=25 -c saturation=40") # Timmy
     #os.system("v4l2-ctl -c brightness=10 -c contrast=25 -c saturation=40")
-    os.system("v4l2-ctl -c brightness=180 -c contrast=40 -c saturation=60") # Skippy   
+    os.system("v4l2-ctl -c brightness=240 -c contrast=75 -c saturation=60") # Skippy   
     #os.system("v4l2-ctl -c brightness=50 -c contrast=50 -c saturation=80")
     #os.system("v4l2-ctl -c brightness=200 -c contrast=100 -c saturation=100")
     
@@ -171,6 +173,50 @@ def handleWindows(deviceNumber, videoPort):
     return {'process': process, 'device_answer': device}
     
 
+    
+def handleWindowsScreenCapture(deviceNumber, videoPort):
+
+    p = subprocess.Popen(["ffmpeg", "-list_devices", "true", "-f", "dshow", "-i", "dummy"], stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+    
+    
+    out, err = p.communicate()
+    
+    lines = err.split('\n')
+    
+    count = 0
+    
+    devices = []
+    
+    for line in lines:
+    
+        #if "]  \"" in line:
+        #    print "line:", line
+    
+        m = re.search('.*\\"(.*)\\"', line)
+        if m != None:
+            #print line
+            if m.group(1)[0:1] != '@':
+                print count, m.group(1)
+                devices.append(m.group(1))
+                count += 1
+    
+
+    if deviceNumber is None:
+        deviceAnswer = raw_input("Enter the number of the camera device for your robot from the list above: ")
+    else:
+        deviceAnswer = str(deviceNumber)
+
+        
+        
+    device = devices[int(deviceAnswer)]
+    commandLine = 'ffmpeg -f dshow -i video="screen-capture-recorder" -vf "scale=640:480" -f mpeg1video -b 50k -r 20 http://runmyrobot.com:%s/hello/640/480/' % videoPort
+    
+    print "command line:", commandLine
+    
+    process = runFfmpeg(commandLine)
+
+    return {'process': process, 'device_answer': device}
+    
 
 
 
@@ -207,7 +253,7 @@ def startVideoCapture():
     elif platform.system() == 'Linux':
         result = handleLinux(deviceNumber, videoPort)
     elif platform.system() == 'Windows':
-        result = handleWindows(deviceNumber, videoPort)
+        result = handleWindowsScreenCapture(deviceNumber, videoPort)
     else:
         print "unknown platform", platform.system()
 
@@ -276,7 +322,7 @@ def main():
 
 
 
-        if 1:
+        if platform.system() != 'Windows':
             print "taking snapshot"
             snapShot(platform.system(), inputDeviceID)
             with open ("snapshot.jpg", 'rb') as f:
