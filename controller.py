@@ -244,7 +244,7 @@ if motorsEnabled:
 
 def ipInfoUpdate():
     socketIO.emit('ip_information',
-                  {'hostname': subprocess.check_output(["hostname", "-I"]), 'robot_id': robotID})
+                  {'ip': subprocess.check_output(["hostname", "-I"]), 'robot_id': robotID})
 
 def sendChargeState():
     charging = GPIO.input(chargeIONumber) == 1
