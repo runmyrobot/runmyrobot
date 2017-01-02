@@ -29,9 +29,12 @@ steeringSpeed = 190
 steeringHoldingSpeed = 190
 #drivingSpeed = 255
 global drivingSpeed
-drivingSpeed = 210
+
+
+drivingSpeed = 200
 handlingCommand = False
-turningSpeedActuallyUsed = 210
+turningSpeedActuallyUsed = 200
+
 
 
 
@@ -172,15 +175,19 @@ def handle_command(args):
                 if command == 'U':
                     mhArm.getMotor(1).setSpeed(127)
                     mhArm.getMotor(1).run(Adafruit_MotorHAT.BACKWARD)
+                    time.sleep(0.05)
                 if command == 'D':
                     mhArm.getMotor(1).setSpeed(127)
                     mhArm.getMotor(1).run(Adafruit_MotorHAT.FORWARD)           
+                    time.sleep(0.05)
                 if command == 'O':
                     mhArm.getMotor(2).setSpeed(127)
                     mhArm.getMotor(2).run(Adafruit_MotorHAT.BACKWARD)
+                    time.sleep(0.05)
                 if command == 'C':
                     mhArm.getMotor(2).setSpeed(127)
                     mhArm.getMotor(2).run(Adafruit_MotorHAT.FORWARD)           
+                    time.sleep(0.05)
 
             turnOffMotors()
             
@@ -239,7 +246,8 @@ if motorsEnabled:
     motorB = mh.getMotor(2)
 
 def ipInfoUpdate():
-    socketIO.emit('ip_information', subprocess.check_output(["hostname", "-I"]))
+    socketIO.emit('ip_information',
+                  {'ip': subprocess.check_output(["hostname", "-I"]), 'robot_id': robotID})
 
 def sendChargeState():
     charging = GPIO.input(chargeIONumber) == 1
