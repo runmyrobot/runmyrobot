@@ -25,11 +25,16 @@ GPIO.setup(chargeIONumber, GPIO.IN)
 straightDelay = 1.6
 
 #steeringSpeed = 255
-steeringSpeed = 200
-steeringHoldingSpeed = 180
+steeringSpeed = 190
+steeringHoldingSpeed = 190
 #drivingSpeed = 255
+global drivingSpeed
+
+
 drivingSpeed = 200
 handlingCommand = False
+turningSpeedActuallyUsed = 200
+
 
 
 
@@ -76,7 +81,7 @@ if robotID == "3444925": # if Timmy
     right = times(left, -1)
     forward = (-1, 1, 1, -1)
     backward = times(forward, -1)
-    turnDelay = 0.8
+    turnDelay = 0.4
 elif robotID == "88359766": # Skippy_old
     left = (1, -1, 1, 1)
     right = times(left, -1)
@@ -84,6 +89,12 @@ elif robotID == "88359766": # Skippy_old
     backward = times(forward, -1)
     turnDelay = 0.8
 elif robotID == "22027911": # Zip
+    left = (0, 1, 1, 0) # was 1,1,1,1
+    right = (0, -1, -1, 0)
+    forward = (-1, 1, -1, 1)
+    backward = times(forward, -1)
+    turnDelay = 0.8
+elif robotID == "78929358": # ZombieZip
     left = (0, 1, 1, 0) # was 1,1,1,1
     right = (0, -1, -1, 0)
     forward = (-1, 1, -1, 1)
@@ -124,6 +135,8 @@ else: # default settings
         
 def handle_command(args):
 
+        global drivingSpeed
+    
         global handlingCommand
         if handlingCommand:
             return
@@ -146,35 +159,69 @@ def handle_command(args):
                 motorA.setSpeed(drivingSpeed)
                 motorB.setSpeed(drivingSpeed)
                 if command == 'F':
+                    drivingSpeed = 110
                     for motorIndex in range(4):
                         runMotor(motorIndex, forward[motorIndex])
                     time.sleep(straightDelay)
                 if command == 'B':
+                    drivingSpeed = 110
                     for motorIndex in range(4):
                         runMotor(motorIndex, backward[motorIndex])
                     time.sleep(straightDelay)
                 if command == 'L':
+                    drivingSpeed = turningSpeedActuallyUsed
                     for motorIndex in range(4):
                         runMotor(motorIndex, left[motorIndex])
                     time.sleep(turnDelay)
                 if command == 'R':
+                    drivingSpeed = turningSpeedActuallyUsed
                     for motorIndex in range(4):
                         runMotor(motorIndex, right[motorIndex])
                     time.sleep(turnDelay)
-
+                if command == 'U':
+                    mhArm.getMotor(1).setSpeed(127)
+                    mhArm.getMotor(1).run(Adafruit_MotorHAT.BACKWARD)
+                    time.sleep(0.05)
+                if command == 'D':
+                    mhArm.getMotor(1).setSpeed(127)
+                    mhArm.getMotor(1).run(Adafruit_MotorHAT.FORWARD)           
+                    time.sleep(0.05)
+                if command == 'O':
+                    mhArm.getMotor(2).setSpeed(127)
+                    mhArm.getMotor(2).run(Adafruit_MotorHAT.BACKWARD)
+                    time.sleep(0.05)
+                if command == 'C':
+                    mhArm.getMotor(2).setSpeed(127)
+                    mhArm.getMotor(2).run(Adafruit_MotorHAT.FORWARD)           
+                    time.sleep(0.05)
 
             turnOffMotors()
             
         handlingCommand = False
 
 
+def handleStartReverseSshProcess(args):
+    print "THEODORE calling reverse ssh command"
+    subprocess.call(["ssh", "-i", "/home/pi/reverse_ssh_key0.pem", "-N", "-R", "2222:localhost:22", "ubuntu@52.8.25.95"])
 
+def handleEndReverseSshProcess(args):
+    print "THEODORE calling end reverse ssh command"
+    subprocess.call(["killall", "ssh"])
         
 def on_handle_command(*args):
    thread.start_new_thread(handle_command, args)
 
 #from communication import socketIO
 socketIO.on('command_to_robot', on_handle_command)
+
+def startReverseSshProcess(*args):
+   thread.start_new_thread(handleStartReverseSshProcess, args)
+
+def endReverseSshProcess(*args):
+   thread.start_new_thread(handleEndReverseSshProcess, args)
+
+socketIO.on('reverse_ssh_8872381747239', startReverseSshProcess)
+socketIO.on('end_reverse_ssh_8872381747239', endReverseSshProcess)
 
 def myWait():
   socketIO.wait()
@@ -184,21 +231,29 @@ def myWait():
 if motorsEnabled:
     # create a default object, no changes to I2C address or frequency
     mh = Adafruit_MotorHAT(addr=0x60)
-
+    mhArm = Adafruit_MotorHAT(addr=0x61)
+    
 
 def turnOffMotors():
     mh.getMotor(1).run(Adafruit_MotorHAT.RELEASE)
     mh.getMotor(2).run(Adafruit_MotorHAT.RELEASE)
     mh.getMotor(3).run(Adafruit_MotorHAT.RELEASE)
     mh.getMotor(4).run(Adafruit_MotorHAT.RELEASE)
+    mhArm.getMotor(1).run(Adafruit_MotorHAT.RELEASE)
+    mhArm.getMotor(2).run(Adafruit_MotorHAT.RELEASE)
+    mhArm.getMotor(3).run(Adafruit_MotorHAT.RELEASE)
+    mhArm.getMotor(4).run(Adafruit_MotorHAT.RELEASE)
+  
 
+    
 if motorsEnabled:
     atexit.register(turnOffMotors)
     motorA = mh.getMotor(1)
     motorB = mh.getMotor(2)
 
 def ipInfoUpdate():
-    socketIO.emit('ip_information', subprocess.check_output(["hostname", "-I"]))
+    socketIO.emit('ip_information',
+                  {'ip': subprocess.check_output(["hostname", "-I"]), 'robot_id': robotID})
 
 def sendChargeState():
     charging = GPIO.input(chargeIONumber) == 1
@@ -213,8 +268,12 @@ GPIO.add_event_detect(chargeIONumber, GPIO.BOTH)
 GPIO.add_event_callback(chargeIONumber, sendChargeStateCallback)
 
 
+def identifyRobotId():
+    socketIO.emit('identify_robot_id', robotID);
+
 
 waitCounter = 0
+identifyRobotId()
 ipInfoUpdate()
 while True:
     socketIO.wait(seconds=10)
