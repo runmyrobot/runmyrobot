@@ -25,13 +25,16 @@ GPIO.setup(chargeIONumber, GPIO.IN)
 straightDelay = 1.6
 
 #steeringSpeed = 255
-steeringSpeed = 110
-steeringHoldingSpeed = 110
+steeringSpeed = 190
+steeringHoldingSpeed = 190
 #drivingSpeed = 255
 global drivingSpeed
-drivingSpeed = 110
+
+
+drivingSpeed = 200
 handlingCommand = False
-turningSpeedActuallyUsed = 180
+turningSpeedActuallyUsed = 200
+
 
 
 
@@ -78,7 +81,7 @@ if robotID == "3444925": # if Timmy
     right = times(left, -1)
     forward = (-1, 1, 1, -1)
     backward = times(forward, -1)
-    turnDelay = 0.8
+    turnDelay = 0.4
 elif robotID == "88359766": # Skippy_old
     left = (1, -1, 1, 1)
     right = times(left, -1)
@@ -113,6 +116,12 @@ elif robotID == "19359999": # Mikey
     left = (1, 1, 1, 1)
     right = times(left, -1)
     forward = (-1, 1, 1, -1)
+    backward = times(forward, -1)
+    turnDelay = 0.4
+elif robotID == "86583531": # Dilbert
+    left = (1, 1, 1, 1)
+    right = times(left, -1)
+    forward = (-1, 1, -1, 1)
     backward = times(forward, -1)
     turnDelay = 0.4
 else: # default settings
@@ -172,15 +181,19 @@ def handle_command(args):
                 if command == 'U':
                     mhArm.getMotor(1).setSpeed(127)
                     mhArm.getMotor(1).run(Adafruit_MotorHAT.BACKWARD)
+                    time.sleep(0.05)
                 if command == 'D':
                     mhArm.getMotor(1).setSpeed(127)
                     mhArm.getMotor(1).run(Adafruit_MotorHAT.FORWARD)           
+                    time.sleep(0.05)
                 if command == 'O':
                     mhArm.getMotor(2).setSpeed(127)
                     mhArm.getMotor(2).run(Adafruit_MotorHAT.BACKWARD)
+                    time.sleep(0.05)
                 if command == 'C':
                     mhArm.getMotor(2).setSpeed(127)
                     mhArm.getMotor(2).run(Adafruit_MotorHAT.FORWARD)           
+                    time.sleep(0.05)
 
             turnOffMotors()
             
@@ -239,7 +252,8 @@ if motorsEnabled:
     motorB = mh.getMotor(2)
 
 def ipInfoUpdate():
-    socketIO.emit('ip_information', subprocess.check_output(["hostname", "-I"]))
+    socketIO.emit('ip_information',
+                  {'ip': subprocess.check_output(["hostname", "-I"]), 'robot_id': robotID})
 
 def sendChargeState():
     charging = GPIO.input(chargeIONumber) == 1
