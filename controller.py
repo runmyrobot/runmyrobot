@@ -107,6 +107,12 @@ elif robotID == "19359999": # Mikey
     forward = (-1, 1, 1, -1)
     backward = times(forward, -1)
     turnDelay = 0.4
+elif robotID == "86583531": # Dilbert
+    left = (1, 1, 1, 1)
+    right = times(left, -1)
+    forward = (-1, 1, -1, 1)
+    backward = times(forward, -1)
+    turnDelay = 0.4
 else: # default settings
     left = (1, 1, 1, 1)
     right = times(left, -1)
