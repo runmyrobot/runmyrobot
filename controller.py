@@ -33,7 +33,8 @@ global drivingSpeed
 
 drivingSpeed = 200
 handlingCommand = False
-turningSpeedActuallyUsed = 200
+turningSpeedActuallyUsed = 130
+drivingSpeedActuallyUsed = 130
 
 
 
@@ -153,12 +154,12 @@ def handle_command(args):
                 motorA.setSpeed(drivingSpeed)
                 motorB.setSpeed(drivingSpeed)
                 if command == 'F':
-                    drivingSpeed = 110
+                    drivingSpeed = drivingSpeedActuallyUsed
                     for motorIndex in range(4):
                         runMotor(motorIndex, forward[motorIndex])
                     time.sleep(straightDelay)
                 if command == 'B':
-                    drivingSpeed = 110
+                    drivingSpeed = drivingSpeedActuallyUsed
                     for motorIndex in range(4):
                         runMotor(motorIndex, backward[motorIndex])
                     time.sleep(straightDelay)
