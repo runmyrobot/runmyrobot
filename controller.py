@@ -1,4 +1,11 @@
 
+
+server = "runmyrobot.com"
+#server = "52.52.213.92"
+
+
+
+
 try:
     from Adafruit_MotorHAT import Adafruit_MotorHAT, Adafruit_DCMotor
     motorsEnabled = True
@@ -52,9 +59,9 @@ else:
     print "using prod port 8022"
     port = 8022
 
-print 'using socket io to connect to runmyrobot.com'
-socketIO = SocketIO('runmyrobot.com', port, LoggingNamespace)
-print 'finished using socket io to connect to runmyrobot.com'
+print 'using socket io to connect to', server
+socketIO = SocketIO(server, port, LoggingNamespace)
+print 'finished using socket io to connect to', server
 
 def times(lst, number):
     return [x*number for x in lst]
