@@ -322,8 +322,8 @@ def main():
             #frameCount += 1
 
 
-
-        if platform.system() != 'Windows':
+        if False:
+         if platform.system() != 'Windows':
             print "taking snapshot"
             snapShot(platform.system(), inputDeviceID)
             with open ("snapshot.jpg", 'rb') as f:
