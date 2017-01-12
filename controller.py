@@ -40,7 +40,8 @@ global drivingSpeed
 
 drivingSpeed = 200
 handlingCommand = False
-turningSpeedActuallyUsed = 200
+turningSpeedActuallyUsed = 130
+drivingSpeedActuallyUsed = 130
 
 
 
@@ -125,6 +126,12 @@ elif robotID == "19359999": # Mikey
     forward = (-1, 1, 1, -1)
     backward = times(forward, -1)
     turnDelay = 0.4
+elif robotID == "86583531": # Dilbert
+    left = (1, 1, 1, 1)
+    right = times(left, -1)
+    forward = (-1, 1, -1, 1)
+    backward = times(forward, -1)
+    turnDelay = 0.4
 else: # default settings
     left = (1, 1, 1, 1)
     right = times(left, -1)
@@ -160,12 +167,12 @@ def handle_command(args):
                 motorA.setSpeed(drivingSpeed)
                 motorB.setSpeed(drivingSpeed)
                 if command == 'F':
-                    drivingSpeed = 110
+                    drivingSpeed = drivingSpeedActuallyUsed
                     for motorIndex in range(4):
                         runMotor(motorIndex, forward[motorIndex])
                     time.sleep(straightDelay)
                 if command == 'B':
-                    drivingSpeed = 110
+                    drivingSpeed = drivingSpeedActuallyUsed
                     for motorIndex in range(4):
                         runMotor(motorIndex, backward[motorIndex])
                     time.sleep(straightDelay)

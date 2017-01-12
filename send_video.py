@@ -115,10 +115,10 @@ def handleLinux(deviceNumber, videoPort):
     #os.system("v4l2-ctl -c brightness=10 -c contrast=25 -c saturation=40") # Timmy
     #os.system("v4l2-ctl -c brightness=10 -c contrast=25 -c saturation=40")
     #os.system("v4l2-ctl -c brightness=240 -c contrast=75 -c saturation=60") # Skippy   
-    os.system("v4l2-ctl -c brightness=150 -c contrast=50 -c saturation=80") # Marvin
+    #os.system("v4l2-ctl -c brightness=150 -c contrast=50 -c saturation=80") # Marvin
     #os.system("v4l2-ctl -c brightness=50 -c contrast=50 -c saturation=80")
     #os.system("v4l2-ctl -c brightness=200 -c contrast=100 -c saturation=100")
-    
+    os.system("v4l2-ctl -c brightness=20 -c contrast=50 -c saturation=60") # Jenny
 
     if deviceNumber is None:
         deviceAnswer = raw_input("Enter the number of the camera device for your robot: ")
@@ -326,8 +326,8 @@ def main():
             #frameCount += 1
 
 
-
-        if platform.system() != 'Windows':
+        if False:
+         if platform.system() != 'Windows':
             print "taking snapshot"
             snapShot(platform.system(), inputDeviceID)
             with open ("snapshot.jpg", 'rb') as f:
