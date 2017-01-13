@@ -40,8 +40,8 @@ global drivingSpeed
 
 drivingSpeed = 200
 handlingCommand = False
-turningSpeedActuallyUsed = 130
-drivingSpeedActuallyUsed = 130
+turningSpeedActuallyUsed = 90
+drivingSpeedActuallyUsed = 90
 
 
 
