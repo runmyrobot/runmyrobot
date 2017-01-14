@@ -32,16 +32,16 @@ GPIO.setup(chargeIONumber, GPIO.IN)
 straightDelay = 1.6
 
 #steeringSpeed = 255
-steeringSpeed = 190
-steeringHoldingSpeed = 190
+steeringSpeed = 90
+steeringHoldingSpeed = 90
 #drivingSpeed = 255
 global drivingSpeed
 
 
-drivingSpeed = 200
+drivingSpeed = 90
 handlingCommand = False
-turningSpeedActuallyUsed = 90
-drivingSpeedActuallyUsed = 90
+turningSpeedActuallyUsed = 50
+drivingSpeedActuallyUsed = 50
 
 
 
