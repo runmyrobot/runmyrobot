@@ -45,7 +45,7 @@ The second parameter 0 is assuming you have one camera plugged into your Pi and 
 
 
 
-How to enhance your bot with an Android phone:
+<h2> How to Enhance Your Bot with an Android Phone </h2>
 
 Android phone will provides streaming Audio (robot to user), text to speech, and orientation information to prevent flipping. You can download the app-debug.apk file and run it as an app on your phone. Note that the phone needs to be oriented face up with the right side of the phone facing the forward moving direction of the robot.
 
