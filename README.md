@@ -1,25 +1,22 @@
 # runmyrobot
 
-<h2> Open Robot Control Code For Connecting to RunMyRobot.com </h2>
+<h1> Open Robot Control Code For Connecting to RunMyRobot.com </h1>
 
-Robot controller and video scripts
-
-
-Robot Controller
-
-Installation:
-
-(1) Install motor HAT
-https://learn.adafruit.com/adafruit-dc-and-stepper-motor-hat-for-raspberry-pi/installing-software
-
-(2) pip install socketIO-client
+<h2> Installing robot control and video scripts </h2>
 
 
-How to run:
+The RasPi will need the following things install so it can talk to your motor and talk to the internet.
+
+(1) Install motor HAT software:
+```https://learn.adafruit.com/adafruit-dc-and-stepper-motor-hat-for-raspberry-pi/installing-software```
+
+(2) Install socket.io client for python:
+```pip install socketIO-client```
+
+
+<h2> Bring you Bot to life: Programs to run on the Raspberry Pi </h2>
 
 Go to new robot page to create a robot. If you already have one, got to manage robots. There you'll find your Robot ID and Camera ID.
-
-<h2> Programs to run on the Raspberry Pi: </h2>
 
 These two scripts need to be running in the background to bring your robot to life: controller.py, send_video.py. Here are instructions about how to start them.
 
@@ -30,7 +27,6 @@ python controller.py YOUR_ROBOT_ID
 For example:
 
 ```python controller.py 789123```
-
 
 
 
