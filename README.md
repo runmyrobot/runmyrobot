@@ -30,6 +30,8 @@ python send_video.py 12345 0
 The second parameter 0 is assuming you have one camera plugged into your Pi and you are using it, which is usually the case.
 
 
-Also, if you'd like to use an Android phone, which provides streaming Audio, text to speech, and orientation information to prevent flipping, download the apk file also. Note that the phone needs to be oriented face up with the right side of the phone facing the forward moving direction of the robot.
+
+How to enhance your bot with an Android phone:
+Android phone will provides streaming Audio (robot to user), text to speech, and orientation information to prevent flipping. You can download the app-debug.apk file and run it as an app on your phone. Note that the phone needs to be oriented face up with the right side of the phone facing the forward moving direction of the robot.
 
 
