@@ -18,6 +18,10 @@ Go to new robot page to create a robot. If you already have one, got to manage r
 
 Here are the programs you need to start on the Raspberry Pi:
 
+
+
+Starting the Robot Controller for the Robot
+
 python controller.py YOUR_ROBOT_ID
 
 For example:
@@ -25,14 +29,19 @@ For example:
 ```python controller.py 789123```
 
 
-Video Streamer for Robot
+
+
+Starting the Video Streamer for the Robot
+
 
 ```python send_video.py YOUR_CAMERA_ID YOUR_VIDEO_DEVICE_NUMBER```
 
 For example:
+
 ```python send_video.py 12345 0```
 
 The second parameter 0 is assuming you have one camera plugged into your Pi and you are using it, which is usually the case.
+
 
 
 
