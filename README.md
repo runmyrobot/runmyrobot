@@ -16,7 +16,7 @@ How to run:
 
 Go to new robot page to create a robot. If you already have one, got to manage robots. There you'll find your Robot ID and Camera ID.
 
-<h2> Programs to run on the Raspberry Pi: <h2>
+<h2> Programs to run on the Raspberry Pi: </h2>
 
 These two scripts need to be running in the background to bring your robot to life: controller.py, send_video.py. Here are instructions about how to start them.
 
