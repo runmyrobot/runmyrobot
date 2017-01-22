@@ -58,6 +58,8 @@ Android phone will provides streaming Audio (robot to user), text to speech, and
 
 We use ffmpeg to stream audio and socket.io to send control messages.
 
+<h2> How to contribute </h2>
 
+The is a community project. Making your own bot? Adding your own control stuff? Cool! We'd like to hear from you.
 
 
