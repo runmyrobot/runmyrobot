@@ -1,4 +1,11 @@
 
+
+server = "runmyrobot.com"
+#server = "52.52.213.92"
+
+
+
+
 try:
     from Adafruit_MotorHAT import Adafruit_MotorHAT, Adafruit_DCMotor
     motorsEnabled = True
@@ -25,13 +32,17 @@ GPIO.setup(chargeIONumber, GPIO.IN)
 straightDelay = 1.6
 
 #steeringSpeed = 255
-steeringSpeed = 110
-steeringHoldingSpeed = 110
+steeringSpeed = 90
+steeringHoldingSpeed = 90
 #drivingSpeed = 255
 global drivingSpeed
-drivingSpeed = 110
+
+
+drivingSpeed = 90
 handlingCommand = False
-turningSpeedActuallyUsed = 180
+turningSpeedActuallyUsed = 50
+drivingSpeedActuallyUsed = 50
+
 
 
 
@@ -49,9 +60,9 @@ else:
     print "using prod port 8022"
     port = 8022
 
-print 'using socket io to connect to runmyrobot.com'
-socketIO = SocketIO('runmyrobot.com', port, LoggingNamespace)
-print 'finished using socket io to connect to runmyrobot.com'
+print 'using socket io to connect to', server
+socketIO = SocketIO(server, port, LoggingNamespace)
+print 'finished using socket io to connect to', server
 
 def times(lst, number):
     return [x*number for x in lst]
@@ -115,6 +126,12 @@ elif robotID == "19359999": # Mikey
     forward = (-1, 1, 1, -1)
     backward = times(forward, -1)
     turnDelay = 0.4
+elif robotID == "86583531": # Dilbert
+    left = (1, 1, 1, 1)
+    right = times(left, -1)
+    forward = (-1, 1, -1, 1)
+    backward = times(forward, -1)
+    turnDelay = 0.4
 else: # default settings
     left = (1, 1, 1, 1)
     right = times(left, -1)
@@ -150,12 +167,12 @@ def handle_command(args):
                 motorA.setSpeed(drivingSpeed)
                 motorB.setSpeed(drivingSpeed)
                 if command == 'F':
-                    drivingSpeed = 110
+                    drivingSpeed = drivingSpeedActuallyUsed
                     for motorIndex in range(4):
                         runMotor(motorIndex, forward[motorIndex])
                     time.sleep(straightDelay)
                 if command == 'B':
-                    drivingSpeed = 110
+                    drivingSpeed = drivingSpeedActuallyUsed
                     for motorIndex in range(4):
                         runMotor(motorIndex, backward[motorIndex])
                     time.sleep(straightDelay)
@@ -172,15 +189,19 @@ def handle_command(args):
                 if command == 'U':
                     mhArm.getMotor(1).setSpeed(127)
                     mhArm.getMotor(1).run(Adafruit_MotorHAT.BACKWARD)
+                    time.sleep(0.05)
                 if command == 'D':
                     mhArm.getMotor(1).setSpeed(127)
                     mhArm.getMotor(1).run(Adafruit_MotorHAT.FORWARD)           
+                    time.sleep(0.05)
                 if command == 'O':
                     mhArm.getMotor(2).setSpeed(127)
                     mhArm.getMotor(2).run(Adafruit_MotorHAT.BACKWARD)
+                    time.sleep(0.05)
                 if command == 'C':
                     mhArm.getMotor(2).setSpeed(127)
                     mhArm.getMotor(2).run(Adafruit_MotorHAT.FORWARD)           
+                    time.sleep(0.05)
 
             turnOffMotors()
             
@@ -239,7 +260,8 @@ if motorsEnabled:
     motorB = mh.getMotor(2)
 
 def ipInfoUpdate():
-    socketIO.emit('ip_information', subprocess.check_output(["hostname", "-I"]))
+    socketIO.emit('ip_information',
+                  {'ip': subprocess.check_output(["hostname", "-I"]), 'robot_id': robotID})
 
 def sendChargeState():
     charging = GPIO.input(chargeIONumber) == 1

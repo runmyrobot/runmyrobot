@@ -10,6 +10,8 @@ import sys
 import base64
 import random
 
+server = "runmyrobot.com"
+#server = "52.52.213.92"
 
 
 from socketIO_client import SocketIO, LoggingNamespace
@@ -26,7 +28,9 @@ else:
     port = 8022
 
 print "initializing socket io"
-socketIO = SocketIO('runmyrobot.com', port, LoggingNamespace)
+print "server:", server
+print "port:", port
+socketIO = SocketIO(server, port, LoggingNamespace)
 print "finished initializing socket io"
 
 #ffmpeg -f qtkit -i 0 -f mpeg1video -b 400k -r 30 -s 320x240 http://52.8.81.124:8082/hello/320/240/
@@ -53,7 +57,7 @@ def randomSleep():
 def getVideoPort():
 
 
-    url = 'http://runmyrobot.com/get_video_port/%s' % cameraIDAnswer
+    url = 'http://%s/get_video_port/%s' % (server, cameraIDAnswer)
 
 
     for retryNumber in range(2000):
@@ -89,7 +93,7 @@ def handleDarwin(deviceNumber, videoPort):
     print err
 
     deviceAnswer = raw_input("Enter the number of the camera device for your robot from the list above: ")
-    commandLine = 'ffmpeg -f qtkit -i %s -f mpeg1video -b 400k -r 30 -s 320x240 http://runmyrobot.com:%s/hello/320/240/' % (deviceAnswer, videoPort)
+    commandLine = 'ffmpeg -f qtkit -i %s -f mpeg1video -b 400k -r 30 -s 320x240 http://%s:%s/hello/320/240/' % (deviceAnswer, server, videoPort)
     
     process = runFfmpeg(commandLine)
 
@@ -108,12 +112,15 @@ def handleLinux(deviceNumber, videoPort):
     #print err
 
 
-    os.system("v4l2-ctl -c brightness=10 -c contrast=25 -c saturation=40") # Timmy
+    #os.system("v4l2-ctl -c brightness=10 -c contrast=25 -c saturation=40") # Timmy
     #os.system("v4l2-ctl -c brightness=10 -c contrast=25 -c saturation=40")
-    os.system("v4l2-ctl -c brightness=240 -c contrast=75 -c saturation=60") # Skippy   
+    #os.system("v4l2-ctl -c brightness=240 -c contrast=75 -c saturation=60") # Skippy   
+    #os.system("v4l2-ctl -c brightness=150 -c contrast=50 -c saturation=80") # Marvin
+    #os.system("v4l2-ctl -c brightness=150 -c contrast=50 -c saturation=80") # Marvin
+    os.system("v4l2-ctl -c brightness=150 -c contrast=50 -c saturation=80") # Canary
     #os.system("v4l2-ctl -c brightness=50 -c contrast=50 -c saturation=80")
     #os.system("v4l2-ctl -c brightness=200 -c contrast=100 -c saturation=100")
-    
+    #os.system("v4l2-ctl -c brightness=20 -c contrast=50 -c saturation=60") # Jenny
 
     if deviceNumber is None:
         deviceAnswer = raw_input("Enter the number of the camera device for your robot: ")
@@ -122,7 +129,7 @@ def handleLinux(deviceNumber, videoPort):
 
         
     #commandLine = '/usr/local/bin/ffmpeg -s 320x240 -f video4linux2 -i /dev/video%s -f mpeg1video -b 1k -r 20 http://runmyrobot.com:%s/hello/320/240/' % (deviceAnswer, videoPort)
-    commandLine = '/usr/local/bin/ffmpeg -s 640x480 -f video4linux2 -i /dev/video%s -f mpeg1video -b 1k -r 20 http://runmyrobot.com:%s/hello/640/480/' % (deviceAnswer, videoPort)
+    commandLine = '/usr/local/bin/ffmpeg -s 640x480 -f video4linux2 -i /dev/video%s -f mpeg1video -b 150k -r 20 http://%s:%s/hello/640/480/' % (deviceAnswer, server, videoPort)
     #commandLine = '/usr/local/bin/ffmpeg -s 1280x720 -f video4linux2 -i /dev/video%s -f mpeg1video -b 1k -r 20 http://runmyrobot.com:%s/hello/1280/720/' % (deviceAnswer, videoPort)
 
 
@@ -165,7 +172,7 @@ def handleWindows(deviceNumber, videoPort):
         deviceAnswer = str(deviceNumber)
 
     device = devices[int(deviceAnswer)]
-    commandLine = 'ffmpeg -s 320x240 -f dshow -i video="%s" -f mpeg1video -b 200k -r 20 http://runmyrobot.com:%s/hello/320/240/' % (device, videoPort)
+    commandLine = 'ffmpeg -s 320x240 -f dshow -i video="%s" -f mpeg1video -b 200k -r 20 http://%s:%s/hello/320/240/' % (device, server, videoPort)
     
 
     process = runFfmpeg(commandLine)
@@ -209,7 +216,7 @@ def handleWindowsScreenCapture(deviceNumber, videoPort):
         
         
     device = devices[int(deviceAnswer)]
-    commandLine = 'ffmpeg -f dshow -i video="screen-capture-recorder" -vf "scale=640:480" -f mpeg1video -b 50k -r 20 http://runmyrobot.com:%s/hello/640/480/' % videoPort
+    commandLine = 'ffmpeg -f dshow -i video="screen-capture-recorder" -vf "scale=640:480" -f mpeg1video -b 50k -r 20 http://%s:%s/hello/640/480/' % (server, videoPort)
     
     print "command line:", commandLine
     
@@ -321,8 +328,8 @@ def main():
             #frameCount += 1
 
 
-
-        if platform.system() != 'Windows':
+        if False:
+         if platform.system() != 'Windows':
             print "taking snapshot"
             snapShot(platform.system(), inputDeviceID)
             with open ("snapshot.jpg", 'rb') as f:
@@ -397,7 +404,7 @@ if __name__ == "__main__":
     if len(sys.argv) > 1:
         cameraIDAnswer = sys.argv[1]
     else:
-        cameraIDAnswer = raw_input("Enter the Camera ID for your robot, you can get it from the runmyrobot.com website: ")
+        cameraIDAnswer = raw_input("Enter the Camera ID for your robot, you can get it by pointing a browser to the runmyrobot server %s: " % server)
 
     
     main()
