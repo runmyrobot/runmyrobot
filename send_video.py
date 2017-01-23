@@ -260,7 +260,8 @@ def startVideoCapture():
     elif platform.system() == 'Linux':
         result = handleLinux(deviceNumber, videoPort)
     elif platform.system() == 'Windows':
-        result = handleWindowsScreenCapture(deviceNumber, videoPort)
+        #result = handleWindowsScreenCapture(deviceNumber, videoPort)
+        result = handleWindows(deviceNumber, videoPort)
     else:
         print "unknown platform", platform.system()
 
