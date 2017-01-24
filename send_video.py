@@ -116,6 +116,7 @@ def handleLinux(deviceNumber, videoPort):
     #os.system("v4l2-ctl -c brightness=10 -c contrast=25 -c saturation=40")
     #os.system("v4l2-ctl -c brightness=240 -c contrast=75 -c saturation=60") # Skippy   
     #os.system("v4l2-ctl -c brightness=150 -c contrast=50 -c saturation=80") # Marvin
+    #os.system("v4l2-ctl -c brightness=150 -c contrast=50 -c saturation=80") # Marvin
     os.system("v4l2-ctl -c brightness=150 -c contrast=50 -c saturation=80") # Canary
     #os.system("v4l2-ctl -c brightness=50 -c contrast=50 -c saturation=80")
     #os.system("v4l2-ctl -c brightness=200 -c contrast=100 -c saturation=100")
@@ -259,7 +260,8 @@ def startVideoCapture():
     elif platform.system() == 'Linux':
         result = handleLinux(deviceNumber, videoPort)
     elif platform.system() == 'Windows':
-        result = handleWindowsScreenCapture(deviceNumber, videoPort)
+        #result = handleWindowsScreenCapture(deviceNumber, videoPort)
+        result = handleWindows(deviceNumber, videoPort)
     else:
         print "unknown platform", platform.system()
 

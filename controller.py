@@ -1,8 +1,8 @@
 
 
+
 server = "runmyrobot.com"
 #server = "52.52.213.92"
-
 
 
 
@@ -30,18 +30,19 @@ chargeIONumber = 17
 GPIO.setup(chargeIONumber, GPIO.IN)
 
 straightDelay = 1.6
-
-#steeringSpeed = 255
 steeringSpeed = 90
 steeringHoldingSpeed = 90
-#drivingSpeed = 255
+
 global drivingSpeed
+
+
 
 
 drivingSpeed = 90
 handlingCommand = False
 turningSpeedActuallyUsed = 35
 drivingSpeedActuallyUsed = 35
+
 
 
 
@@ -60,9 +61,11 @@ else:
     print "using prod port 8022"
     port = 8022
 
+
 print 'using socket io to connect to', server
 socketIO = SocketIO(server, port, LoggingNamespace)
 print 'finished using socket io to connect to', server
+
 
 def times(lst, number):
     return [x*number for x in lst]
@@ -152,8 +155,17 @@ def handle_command(args):
         global drivingSpeed
     
         global handlingCommand
+
+
+        print "received command:", args
+        # Note: If you are adding features to your bot,
+        # you can get direct access to incomming commands right here.
+
+        
+
         if handlingCommand:
             return
+
         handlingCommand = True
 
         #if 'robot_id' in args:
@@ -162,7 +174,7 @@ def handle_command(args):
         #if 'command' in args:
         #    print "args command:", args['command']
 
-        #print "args:", args
+
             
         if 'command' in args and 'robot_id' in args and args['robot_id'] == robotID:
 
