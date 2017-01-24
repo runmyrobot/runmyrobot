@@ -40,8 +40,8 @@ global drivingSpeed
 
 drivingSpeed = 90
 handlingCommand = False
-turningSpeedActuallyUsed = 50
-drivingSpeedActuallyUsed = 50
+turningSpeedActuallyUsed = 35
+drivingSpeedActuallyUsed = 35
 
 
 
@@ -132,6 +132,12 @@ elif robotID == "86583531": # Dilbert
     forward = (-1, 1, -1, 1)
     backward = times(forward, -1)
     turnDelay = 0.4
+elif robotID == "11543083": # RedBird
+    left = (-1, -1, -1, -1)
+    right = times(left, -1)
+    forward = (1, -1, 1, -1)
+    backward = times(forward, -1)
+    turnDelay = 0.25
 else: # default settings
     left = (1, 1, 1, 1)
     right = times(left, -1)
