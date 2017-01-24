@@ -33,8 +33,8 @@ global drivingSpeed
 
 drivingSpeed = 200
 handlingCommand = False
-turningSpeedActuallyUsed = 130
-drivingSpeedActuallyUsed = 130
+turningSpeedActuallyUsed = 100
+drivingSpeedActuallyUsed = 100
 
 
 
@@ -139,6 +139,13 @@ def handle_command(args):
         global drivingSpeed
     
         global handlingCommand
+
+        print "received command:", args
+        # Note: If you are adding features to your bot,
+        # you can get direct access to incomming commands right here.
+
+        
+        
         if handlingCommand:
             return
         handlingCommand = True
@@ -149,7 +156,7 @@ def handle_command(args):
         #if 'command' in args:
         #    print "args command:", args['command']
 
-        #print "args:", args
+
             
         if 'command' in args and 'robot_id' in args and args['robot_id'] == robotID:
 
