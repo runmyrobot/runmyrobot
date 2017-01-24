@@ -1,4 +1,11 @@
 
+
+
+server = "runmyrobot.com"
+#server = "52.52.213.92"
+
+
+
 try:
     from Adafruit_MotorHAT import Adafruit_MotorHAT, Adafruit_DCMotor
     motorsEnabled = True
@@ -23,18 +30,19 @@ chargeIONumber = 17
 GPIO.setup(chargeIONumber, GPIO.IN)
 
 straightDelay = 1.6
+steeringSpeed = 90
+steeringHoldingSpeed = 90
 
-#steeringSpeed = 255
-steeringSpeed = 190
-steeringHoldingSpeed = 190
-#drivingSpeed = 255
 global drivingSpeed
 
 
-drivingSpeed = 200
+
+
+drivingSpeed = 90
 handlingCommand = False
-turningSpeedActuallyUsed = 100
-drivingSpeedActuallyUsed = 100
+turningSpeedActuallyUsed = 50
+drivingSpeedActuallyUsed = 50
+
 
 
 
@@ -53,9 +61,11 @@ else:
     print "using prod port 8022"
     port = 8022
 
-print 'using socket io to connect to runmyrobot.com'
-socketIO = SocketIO('runmyrobot.com', port, LoggingNamespace)
-print 'finished using socket io to connect to runmyrobot.com'
+
+print 'using socket io to connect to', server
+socketIO = SocketIO(server, port, LoggingNamespace)
+print 'finished using socket io to connect to', server
+
 
 def times(lst, number):
     return [x*number for x in lst]
@@ -140,14 +150,16 @@ def handle_command(args):
     
         global handlingCommand
 
+
         print "received command:", args
         # Note: If you are adding features to your bot,
         # you can get direct access to incomming commands right here.
 
         
-        
+
         if handlingCommand:
             return
+
         handlingCommand = True
 
         #if 'robot_id' in args:
