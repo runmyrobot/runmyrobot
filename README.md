@@ -2,6 +2,10 @@
 
 <h1> Open Robot Control Code For Connecting to RunMyRobot.com </h1>
 
+RunMyRobot is a site for interacts with other using telepresence robots. User create their own robots and add them to the site.
+https://runmyrobot.com
+
+
 <h2> Installing robot control and video scripts </h2>
 
 
