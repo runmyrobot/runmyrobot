@@ -16,6 +16,9 @@ except ImportError:
     print "Ctrl-C to quit"
     motorsEnabled = False
 
+    
+from Adafruit_PWM_Servo_Driver import PWM
+    
 import time
 import atexit
 import sys
@@ -36,14 +39,19 @@ steeringHoldingSpeed = 90
 global drivingSpeed
 
 
-
-
 drivingSpeed = 90
 handlingCommand = False
 turningSpeedActuallyUsed = 35
 drivingSpeedActuallyUsed = 35
 
 
+# Initialise the PWM device
+pwm = PWM(0x42)
+# Note if you'd like more debug output you can instead run:
+#pwm = PWM(0x40, debug=True)
+servoMin = 150  # Min pulse length out of 4096
+servoMax = 600  # Max pulse length out of 4096
+armServo = [300, 300, 300]
 
 
 
@@ -66,6 +74,34 @@ print 'using socket io to connect to', server
 socketIO = SocketIO(server, port, LoggingNamespace)
 print 'finished using socket io to connect to', server
 
+
+def setServoPulse(channel, pulse):
+  pulseLength = 1000000                   # 1,000,000 us per second
+  pulseLength /= 60                       # 60 Hz
+  print "%d us per period" % pulseLength
+  pulseLength /= 4096                     # 12 bits of resolution
+  print "%d us per bit" % pulseLength
+  pulse *= 1000
+  pulse /= pulseLength
+  pwm.setPWM(channel, 0, pulse)
+
+  
+pwm.setPWMFreq(60)                        # Set frequency to 60 Hz
+
+
+def incrementArmServo(channel, amount):
+
+    armServo[channel] += amount
+
+    print "arm servo positions:", armServo
+
+    if armServo[channel] > servoMax:
+        armServo[channel] = servoMax
+    if armServo[channel] < servoMin:
+        armServo[channel] = servoMin
+    pwm.setPWM(channel, 0, armServo[channel])
+
+        
 
 def times(lst, number):
     return [x*number for x in lst]
@@ -157,7 +193,7 @@ def handle_command(args):
         global handlingCommand
 
 
-        print "received command:", args
+        #print "received command:", args
         # Note: If you are adding features to your bot,
         # you can get direct access to incomming commands right here.
 
@@ -205,20 +241,24 @@ def handle_command(args):
                         runMotor(motorIndex, right[motorIndex])
                     time.sleep(turnDelay)
                 if command == 'U':
-                    mhArm.getMotor(1).setSpeed(127)
-                    mhArm.getMotor(1).run(Adafruit_MotorHAT.BACKWARD)
+                    #mhArm.getMotor(1).setSpeed(127)
+                    #mhArm.getMotor(1).run(Adafruit_MotorHAT.BACKWARD)
+                    incrementArmServo(1, 10)
                     time.sleep(0.05)
                 if command == 'D':
-                    mhArm.getMotor(1).setSpeed(127)
-                    mhArm.getMotor(1).run(Adafruit_MotorHAT.FORWARD)           
+                    #mhArm.getMotor(1).setSpeed(127)
+                    #mhArm.getMotor(1).run(Adafruit_MotorHAT.FORWARD)
+                    incrementArmServo(1, -10)
                     time.sleep(0.05)
                 if command == 'O':
-                    mhArm.getMotor(2).setSpeed(127)
-                    mhArm.getMotor(2).run(Adafruit_MotorHAT.BACKWARD)
+                    #mhArm.getMotor(2).setSpeed(127)
+                    #mhArm.getMotor(2).run(Adafruit_MotorHAT.BACKWARD)
+                    incrementArmServo(2, 10)
                     time.sleep(0.05)
                 if command == 'C':
-                    mhArm.getMotor(2).setSpeed(127)
-                    mhArm.getMotor(2).run(Adafruit_MotorHAT.FORWARD)           
+                    #mhArm.getMotor(2).setSpeed(127)
+                    #mhArm.getMotor(2).run(Adafruit_MotorHAT.FORWARD)           
+                    incrementArmServo(2, -10)
                     time.sleep(0.05)
 
             turnOffMotors()
@@ -257,7 +297,7 @@ def myWait():
 if motorsEnabled:
     # create a default object, no changes to I2C address or frequency
     mh = Adafruit_MotorHAT(addr=0x60)
-    mhArm = Adafruit_MotorHAT(addr=0x61)
+    #mhArm = Adafruit_MotorHAT(addr=0x61)
     
 
 def turnOffMotors():
@@ -265,10 +305,10 @@ def turnOffMotors():
     mh.getMotor(2).run(Adafruit_MotorHAT.RELEASE)
     mh.getMotor(3).run(Adafruit_MotorHAT.RELEASE)
     mh.getMotor(4).run(Adafruit_MotorHAT.RELEASE)
-    mhArm.getMotor(1).run(Adafruit_MotorHAT.RELEASE)
-    mhArm.getMotor(2).run(Adafruit_MotorHAT.RELEASE)
-    mhArm.getMotor(3).run(Adafruit_MotorHAT.RELEASE)
-    mhArm.getMotor(4).run(Adafruit_MotorHAT.RELEASE)
+    #mhArm.getMotor(1).run(Adafruit_MotorHAT.RELEASE)
+    #mhArm.getMotor(2).run(Adafruit_MotorHAT.RELEASE)
+    #mhArm.getMotor(3).run(Adafruit_MotorHAT.RELEASE)
+    #mhArm.getMotor(4).run(Adafruit_MotorHAT.RELEASE)
   
 
     
