@@ -1,3 +1,9 @@
 # using sudo crontab -e and putting this line at the bottom
 
 @reboot /bin/bash /home/pi/start_robot
+
+
+# optional cron entry to kill the controller occationally, which will cause it to be restarted:
+# The problem this addresses is that sometimes the controller stops working but keeps running.
+*/5 * * * * sudo pkill -x -f 'python controller.py YOUR_ROBOT_ID'
+
