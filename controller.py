@@ -23,7 +23,12 @@ import thread
 import subprocess
 import time
 import RPi.GPIO as GPIO
+import datetime
 from socketIO_client import SocketIO, LoggingNamespace
+
+
+    
+        
 
 GPIO.setmode(GPIO.BCM)
 chargeIONumber = 17
@@ -40,10 +45,20 @@ global drivingSpeed
 
 drivingSpeed = 90
 handlingCommand = False
-turningSpeedActuallyUsed = 35
-drivingSpeedActuallyUsed = 35
+turningSpeedActuallyUsed = 190
+dayTimeDrivingSpeedActuallyUsed = 170
+nightTimeDrivingSpeedActuallyUsed = 80
 
 
+
+
+
+
+#def setMotorsToIdle():
+#    s = 65
+#    for i in range(1, 2):
+#        mh.getMotor(i).setSpeed(s)
+#        mh.getMotor(i).run(Adafruit_MotorHAT.FORWARD)
 
 
 
@@ -152,6 +167,18 @@ else: # default settings
         
 def handle_command(args):
 
+
+        now = datetime.datetime.now()
+        now_time = now.time()
+        # if it's late, make the robot slower
+        if now_time >= datetime.time(21,30) or now_time <= datetime.time(9,30):
+            print "within the late time interval"
+            drivingSpeedActuallyUsed = nightTimeDrivingSpeedActuallyUsed
+        else:
+            drivingSpeedActuallyUsed = dayTimeDrivingSpeedActuallyUsed
+        
+
+    
         global drivingSpeed
     
         global handlingCommand
@@ -222,6 +249,7 @@ def handle_command(args):
                     time.sleep(0.05)
 
             turnOffMotors()
+            #setMotorsToIdle()
             
         handlingCommand = False
 
@@ -298,6 +326,9 @@ def identifyRobotId():
     socketIO.emit('identify_robot_id', robotID);
 
 
+
+#setMotorsToIdle()
+    
 waitCounter = 0
 identifyRobotId()
 ipInfoUpdate()
