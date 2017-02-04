@@ -49,8 +49,8 @@ drivingSpeedActuallyUsed = 35
 pwm = PWM(0x42)
 # Note if you'd like more debug output you can instead run:
 #pwm = PWM(0x40, debug=True)
-servoMin = 150  # Min pulse length out of 4096
-servoMax = 600  # Max pulse length out of 4096
+servoMin = [150, 150, 400]  # Min pulse length out of 4096
+servoMax = [600, 600, 565]  # Max pulse length out of 4096
 armServo = [300, 300, 300]
 
 
@@ -95,10 +95,10 @@ def incrementArmServo(channel, amount):
 
     print "arm servo positions:", armServo
 
-    if armServo[channel] > servoMax:
-        armServo[channel] = servoMax
-    if armServo[channel] < servoMin:
-        armServo[channel] = servoMin
+    if armServo[channel] > servoMax[channel]:
+        armServo[channel] = servoMax[channel]
+    if armServo[channel] < servoMin[channel]:
+        armServo[channel] = servoMin[channel]
     pwm.setPWM(channel, 0, armServo[channel])
 
         
@@ -253,12 +253,12 @@ def handle_command(args):
                 if command == 'O':
                     #mhArm.getMotor(2).setSpeed(127)
                     #mhArm.getMotor(2).run(Adafruit_MotorHAT.BACKWARD)
-                    incrementArmServo(2, 10)
+                    incrementArmServo(2, -10)
                     time.sleep(0.05)
                 if command == 'C':
                     #mhArm.getMotor(2).setSpeed(127)
                     #mhArm.getMotor(2).run(Adafruit_MotorHAT.FORWARD)           
-                    incrementArmServo(2, -10)
+                    incrementArmServo(2, 10)
                     time.sleep(0.05)
 
             turnOffMotors()
