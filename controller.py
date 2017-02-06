@@ -47,8 +47,8 @@ global drivingSpeed
 drivingSpeed = 90
 handlingCommand = False
 turningSpeedActuallyUsed = 190
-dayTimeDrivingSpeedActuallyUsed = 170
-nightTimeDrivingSpeedActuallyUsed = 80
+dayTimeDrivingSpeedActuallyUsed = 200
+nightTimeDrivingSpeedActuallyUsed = 200
 
 
 
