@@ -117,10 +117,11 @@ def handleLinux(deviceNumber, videoPort):
     #os.system("v4l2-ctl -c brightness=240 -c contrast=75 -c saturation=60") # Skippy   
     #os.system("v4l2-ctl -c brightness=150 -c contrast=50 -c saturation=80") # Marvin
     #os.system("v4l2-ctl -c brightness=150 -c contrast=50 -c saturation=80") # Marvin
-    os.system("v4l2-ctl -c brightness=150 -c contrast=50 -c saturation=80") # Canary
+    #os.system("v4l2-ctl -c brightness=150 -c contrast=50 -c saturation=80") # Canary
     #os.system("v4l2-ctl -c brightness=50 -c contrast=50 -c saturation=80")
     #os.system("v4l2-ctl -c brightness=200 -c contrast=100 -c saturation=100")
     #os.system("v4l2-ctl -c brightness=20 -c contrast=50 -c saturation=60") # Jenny
+    os.system("v4l2-ctl -c brightness=10 -c contrast=50 -c saturation=60") # BlueberrySurprise
 
     if deviceNumber is None:
         deviceAnswer = raw_input("Enter the number of the camera device for your robot: ")
