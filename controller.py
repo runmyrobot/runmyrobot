@@ -16,6 +16,9 @@ except ImportError:
     print "Ctrl-C to quit"
     motorsEnabled = False
 
+    
+from Adafruit_PWM_Servo_Driver import PWM
+    
 import time
 import atexit
 import sys
@@ -23,7 +26,12 @@ import thread
 import subprocess
 import time
 import RPi.GPIO as GPIO
+import datetime
 from socketIO_client import SocketIO, LoggingNamespace
+
+
+    
+        
 
 GPIO.setmode(GPIO.BCM)
 chargeIONumber = 17
@@ -36,14 +44,34 @@ steeringHoldingSpeed = 90
 global drivingSpeed
 
 
-
-
 drivingSpeed = 90
 handlingCommand = False
-turningSpeedActuallyUsed = 200
-drivingSpeedActuallyUsed = 200
+
+#turningSpeedActuallyUsed = 200
+#drivingSpeedActuallyUsed = 200
+
+turningSpeedActuallyUsed = 190
+dayTimeDrivingSpeedActuallyUsed = 200
+nightTimeDrivingSpeedActuallyUsed = 200
 
 
+
+
+
+
+# Initialise the PWM device
+pwm = PWM(0x42)
+# Note if you'd like more debug output you can instead run:
+#pwm = PWM(0x40, debug=True)
+servoMin = [150, 150, 400]  # Min pulse length out of 4096
+servoMax = [600, 600, 565]  # Max pulse length out of 4096
+armServo = [300, 300, 300]
+
+#def setMotorsToIdle():
+#    s = 65
+#    for i in range(1, 2):
+#        mh.getMotor(i).setSpeed(s)
+#        mh.getMotor(i).run(Adafruit_MotorHAT.FORWARD)
 
 
 
@@ -66,6 +94,34 @@ print 'using socket io to connect to', server
 socketIO = SocketIO(server, port, LoggingNamespace)
 print 'finished using socket io to connect to', server
 
+
+def setServoPulse(channel, pulse):
+  pulseLength = 1000000                   # 1,000,000 us per second
+  pulseLength /= 60                       # 60 Hz
+  print "%d us per period" % pulseLength
+  pulseLength /= 4096                     # 12 bits of resolution
+  print "%d us per bit" % pulseLength
+  pulse *= 1000
+  pulse /= pulseLength
+  pwm.setPWM(channel, 0, pulse)
+
+  
+pwm.setPWMFreq(60)                        # Set frequency to 60 Hz
+
+
+def incrementArmServo(channel, amount):
+
+    armServo[channel] += amount
+
+    print "arm servo positions:", armServo
+
+    if armServo[channel] > servoMax[channel]:
+        armServo[channel] = servoMax[channel]
+    if armServo[channel] < servoMin[channel]:
+        armServo[channel] = servoMin[channel]
+    pwm.setPWM(channel, 0, armServo[channel])
+
+        
 
 def times(lst, number):
     return [x*number for x in lst]
@@ -135,6 +191,12 @@ elif robotID == "86583531": # Dilbert
     forward = (-1, 1, -1, 1)
     backward = times(forward, -1)
     turnDelay = 0.4
+elif robotID == "11543083": # RedBird
+    left = (-1, -1, -1, -1)
+    right = times(left, -1)
+    forward = (1, -1, 1, -1)
+    backward = times(forward, -1)
+    turnDelay = 0.25
 else: # default settings
     left = (1, 1, 1, 1)
     right = times(left, -1)
@@ -146,12 +208,24 @@ else: # default settings
         
 def handle_command(args):
 
+
+        now = datetime.datetime.now()
+        now_time = now.time()
+        # if it's late, make the robot slower
+        if now_time >= datetime.time(21,30) or now_time <= datetime.time(9,30):
+            print "within the late time interval"
+            drivingSpeedActuallyUsed = nightTimeDrivingSpeedActuallyUsed
+        else:
+            drivingSpeedActuallyUsed = dayTimeDrivingSpeedActuallyUsed
+        
+
+    
         global drivingSpeed
     
         global handlingCommand
 
 
-        print "received command:", args
+        #print "received command:", args
         # Note: If you are adding features to your bot,
         # you can get direct access to incomming commands right here.
 
@@ -199,23 +273,28 @@ def handle_command(args):
                         runMotor(motorIndex, right[motorIndex])
                     time.sleep(turnDelay)
                 if command == 'U':
-                    mhArm.getMotor(1).setSpeed(127)
-                    mhArm.getMotor(1).run(Adafruit_MotorHAT.BACKWARD)
+                    #mhArm.getMotor(1).setSpeed(127)
+                    #mhArm.getMotor(1).run(Adafruit_MotorHAT.BACKWARD)
+                    incrementArmServo(1, 10)
                     time.sleep(0.05)
                 if command == 'D':
-                    mhArm.getMotor(1).setSpeed(127)
-                    mhArm.getMotor(1).run(Adafruit_MotorHAT.FORWARD)           
+                    #mhArm.getMotor(1).setSpeed(127)
+                    #mhArm.getMotor(1).run(Adafruit_MotorHAT.FORWARD)
+                    incrementArmServo(1, -10)
                     time.sleep(0.05)
                 if command == 'O':
-                    mhArm.getMotor(2).setSpeed(127)
-                    mhArm.getMotor(2).run(Adafruit_MotorHAT.BACKWARD)
+                    #mhArm.getMotor(2).setSpeed(127)
+                    #mhArm.getMotor(2).run(Adafruit_MotorHAT.BACKWARD)
+                    incrementArmServo(2, -10)
                     time.sleep(0.05)
                 if command == 'C':
-                    mhArm.getMotor(2).setSpeed(127)
-                    mhArm.getMotor(2).run(Adafruit_MotorHAT.FORWARD)           
+                    #mhArm.getMotor(2).setSpeed(127)
+                    #mhArm.getMotor(2).run(Adafruit_MotorHAT.FORWARD)           
+                    incrementArmServo(2, 10)
                     time.sleep(0.05)
 
             turnOffMotors()
+            #setMotorsToIdle()
             
         handlingCommand = False
 
@@ -251,7 +330,7 @@ def myWait():
 if motorsEnabled:
     # create a default object, no changes to I2C address or frequency
     mh = Adafruit_MotorHAT(addr=0x60)
-    mhArm = Adafruit_MotorHAT(addr=0x61)
+    #mhArm = Adafruit_MotorHAT(addr=0x61)
     
 
 def turnOffMotors():
@@ -259,10 +338,10 @@ def turnOffMotors():
     mh.getMotor(2).run(Adafruit_MotorHAT.RELEASE)
     mh.getMotor(3).run(Adafruit_MotorHAT.RELEASE)
     mh.getMotor(4).run(Adafruit_MotorHAT.RELEASE)
-    mhArm.getMotor(1).run(Adafruit_MotorHAT.RELEASE)
-    mhArm.getMotor(2).run(Adafruit_MotorHAT.RELEASE)
-    mhArm.getMotor(3).run(Adafruit_MotorHAT.RELEASE)
-    mhArm.getMotor(4).run(Adafruit_MotorHAT.RELEASE)
+    #mhArm.getMotor(1).run(Adafruit_MotorHAT.RELEASE)
+    #mhArm.getMotor(2).run(Adafruit_MotorHAT.RELEASE)
+    #mhArm.getMotor(3).run(Adafruit_MotorHAT.RELEASE)
+    #mhArm.getMotor(4).run(Adafruit_MotorHAT.RELEASE)
   
 
     
@@ -292,6 +371,9 @@ def identifyRobotId():
     socketIO.emit('identify_robot_id', robotID);
 
 
+
+#setMotorsToIdle()
+    
 waitCounter = 0
 identifyRobotId()
 ipInfoUpdate()
