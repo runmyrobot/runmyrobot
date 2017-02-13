@@ -44,6 +44,18 @@ def onHandleCameraCommand(*args):
 socketIO.on('command_to_camera', onHandleCameraCommand)
 
 
+def onHandleTakeSnapshotCommand(*args):
+    print "taking snapshot"
+    inputDeviceID = streamProcessDict['device_answer']
+    snapShot(platform.system(), inputDeviceID)
+    with open ("snapshot.jpg", 'rb') as f:
+        data = f.read()
+    print "emit"
+    
+    socketIO.emit('snapshot', {'image':base64.b64encode(data)})
+
+socketIO.on('take_snapshot_command', onHandleTakeSnapshotCommand)
+
 
 def randomSleep():
     """A short wait is good for quick recovery, but sometimes a longer delay is needed or it will just keep trying and failing short intervals, like because the system thinks the port is still in use and every retry makes the system think it's still in use. So, this has a high likelihood of picking a short interval, but will pick a long one sometimes."""
