@@ -1,4 +1,4 @@
-
+import platform
 
 
 server = "runmyrobot.com"
@@ -376,7 +376,10 @@ def identifyRobotId():
     
 waitCounter = 0
 identifyRobotId()
-ipInfoUpdate()
+if platform.system() == 'Darwin':
+    ipInfoUpdate()
+elif platform.system() == 'Linux':
+    ipInfoUpdate()
 while True:
     socketIO.wait(seconds=10)
     if (waitCounter % 10) == 0:
