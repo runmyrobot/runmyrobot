@@ -44,7 +44,7 @@ def onHandleCameraCommand(*args):
 socketIO.on('command_to_camera', onHandleCameraCommand)
 
 
-def onHandleTakeSnapshotCommand(*args):
+def handleTakeSnapshotCommand(*args):
     print "taking snapshot"
     inputDeviceID = streamProcessDict['device_answer']
     snapShot(platform.system(), inputDeviceID)
@@ -54,7 +54,10 @@ def onHandleTakeSnapshotCommand(*args):
     
     socketIO.emit('snapshot', {'image':base64.b64encode(data)})
 
-socketIO.on('take_snapshot_command', onHandleTakeSnapshotCommand)
+def on_handle_take_snapshot_command(*args):
+   thread.start_new_thread(handleTakeSnapshotCommand, args)
+
+socketIO.on('take_snapshot_command', on_handle_take_snapshot_command)
 
 
 def randomSleep():
