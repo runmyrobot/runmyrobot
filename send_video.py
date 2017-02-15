@@ -1,4 +1,5 @@
 import subprocess
+import thread
 import shlex
 import re
 import os
@@ -11,7 +12,7 @@ import base64
 import random
 
 server = "runmyrobot.com"
-#server = "52.52.213.92"
+#server = "192.168.1.20"
 
 
 from socketIO_client import SocketIO, LoggingNamespace
@@ -44,17 +45,25 @@ def onHandleCameraCommand(*args):
 socketIO.on('command_to_camera', onHandleCameraCommand)
 
 
-def handleTakeSnapshotCommand(*args):
-    print "taking snapshot"
-    inputDeviceID = streamProcessDict['device_answer']
+def handleTakeSnapshotCommand(args):
+    #inputDeviceID = streamProcessDict['device_answer']
+    inputDeviceID = 0
     snapShot(platform.system(), inputDeviceID)
-    with open ("snapshot.jpg", 'rb') as f:
-        data = f.read()
-    print "emit"
-    
-    socketIO.emit('snapshot', {'image':base64.b64encode(data)})
+    if os.path.isfile("snapshot.jpg") is True:
+        with open ("snapshot.jpg", 'rb') as f:
+            data = f.read()
+        print "emit"
+        socketIO.emit('snapshot', {'image':base64.b64encode(data), 'robot_id': args['robot_id'], 'username': args['username']})
+    else:
+        print "no snapshot file"
+
+#with open ("snapshot.jpg", 'rb') as f:
+#    data = f.read()
+#socketIO.emit('snapshot', {'image':base64.b64encode(data)})
 
 def on_handle_take_snapshot_command(*args):
+   print "THEODORE about to start new thread for handleTakeSnapshotCommand"
+   print "THEODORE args are %s" % args
    thread.start_new_thread(handleTakeSnapshotCommand, args)
 
 socketIO.on('take_snapshot_command', on_handle_take_snapshot_command)
@@ -304,8 +313,7 @@ def main():
 
     while True:
 
-
-
+        socketIO.wait(seconds=100)
         socketIO.emit('send_video_status', {'send_video_process_exists': True,
                                             'camera_id':cameraIDAnswer})
 
