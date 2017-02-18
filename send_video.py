@@ -44,6 +44,18 @@ def onHandleCameraCommand(*args):
 socketIO.on('command_to_camera', onHandleCameraCommand)
 
 
+def onHandleTakeSnapshotCommand(*args):
+    print "taking snapshot"
+    inputDeviceID = streamProcessDict['device_answer']
+    snapShot(platform.system(), inputDeviceID)
+    with open ("snapshot.jpg", 'rb') as f:
+        data = f.read()
+    print "emit"
+    
+    socketIO.emit('snapshot', {'image':base64.b64encode(data)})
+
+socketIO.on('take_snapshot_command', onHandleTakeSnapshotCommand)
+
 
 def randomSleep():
     """A short wait is good for quick recovery, but sometimes a longer delay is needed or it will just keep trying and failing short intervals, like because the system thinks the port is still in use and every retry makes the system think it's still in use. So, this has a high likelihood of picking a short interval, but will pick a long one sometimes."""
@@ -112,15 +124,19 @@ def handleLinux(deviceNumber, videoPort):
     #print err
 
 
+
+    #os.system("v4l2-ctl -c gain=60 -c brightness=10 -c contrast=25 -c saturation=30") # Timmy
     #os.system("v4l2-ctl -c brightness=10 -c contrast=25 -c saturation=40") # Timmy
     #os.system("v4l2-ctl -c brightness=10 -c contrast=25 -c saturation=40")
     #os.system("v4l2-ctl -c brightness=240 -c contrast=75 -c saturation=60") # Skippy   
     #os.system("v4l2-ctl -c brightness=150 -c contrast=50 -c saturation=80") # Marvin
     #os.system("v4l2-ctl -c brightness=150 -c contrast=50 -c saturation=80") # Marvin
-    os.system("v4l2-ctl -c brightness=150 -c contrast=50 -c saturation=80") # Canary
+    #os.system("v4l2-ctl -c brightness=10 -c contrast=70 -c saturation=80") # RedBird
+    #os.system("v4l2-ctl -c brightness=40 -c contrast=70 -c saturation=80") # ClawDaddy
     #os.system("v4l2-ctl -c brightness=50 -c contrast=50 -c saturation=80")
     #os.system("v4l2-ctl -c brightness=200 -c contrast=100 -c saturation=100")
     #os.system("v4l2-ctl -c brightness=20 -c contrast=50 -c saturation=60") # Jenny
+    os.system("v4l2-ctl -c brightness=10 -c contrast=50 -c saturation=60") # BlueberrySurprise
 
     if deviceNumber is None:
         deviceAnswer = raw_input("Enter the number of the camera device for your robot: ")
@@ -129,7 +145,8 @@ def handleLinux(deviceNumber, videoPort):
 
         
     #commandLine = '/usr/local/bin/ffmpeg -s 320x240 -f video4linux2 -i /dev/video%s -f mpeg1video -b 1k -r 20 http://runmyrobot.com:%s/hello/320/240/' % (deviceAnswer, videoPort)
-    commandLine = '/usr/local/bin/ffmpeg -s 640x480 -f video4linux2 -i /dev/video%s -f mpeg1video -b 150k -r 20 http://%s:%s/hello/640/480/' % (deviceAnswer, server, videoPort)
+    #commandLine = '/usr/local/bin/ffmpeg -s 640x480 -f video4linux2 -i /dev/video%s -f mpeg1video -b 150k -r 20 http://%s:%s/hello/640/480/' % (deviceAnswer, server, videoPort)
+    commandLine = '/usr/local/bin/ffmpeg -s 640x480 -f video4linux2 -i /dev/video%s -f mpeg1video -b 200k -r 20 http://%s:%s/hello/640/480/' % (deviceAnswer, server, videoPort) # ClawDaddy
     #commandLine = '/usr/local/bin/ffmpeg -s 1280x720 -f video4linux2 -i /dev/video%s -f mpeg1video -b 1k -r 20 http://runmyrobot.com:%s/hello/1280/720/' % (deviceAnswer, videoPort)
 
 
@@ -260,7 +277,8 @@ def startVideoCapture():
     elif platform.system() == 'Linux':
         result = handleLinux(deviceNumber, videoPort)
     elif platform.system() == 'Windows':
-        result = handleWindowsScreenCapture(deviceNumber, videoPort)
+        #result = handleWindowsScreenCapture(deviceNumber, videoPort)
+        result = handleWindows(deviceNumber, videoPort)
     else:
         print "unknown platform", platform.system()
 
