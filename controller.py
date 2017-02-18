@@ -40,8 +40,8 @@ global drivingSpeed
 
 drivingSpeed = 90
 handlingCommand = False
-turningSpeedActuallyUsed = 50
-drivingSpeedActuallyUsed = 50
+turningSpeedActuallyUsed = 200
+drivingSpeedActuallyUsed = 200
 
 
 
@@ -130,6 +130,12 @@ elif robotID == "86583531": # Dilbert
     left = (1, 1, 1, 1)
     right = times(left, -1)
     forward = (-1, 1, -1, 1)
+    backward = times(forward, -1)
+    turnDelay = 0.4
+elif robotID == "48853711": # Marvin
+    left = (-1, -1, -1, -1)
+    right = times(left, -1)
+    forward = (1, -1, 1, -1)
     backward = times(forward, -1)
     turnDelay = 0.4
 else: # default settings
