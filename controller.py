@@ -54,8 +54,8 @@ handlingCommand = False
 #drivingSpeedActuallyUsed = 200
 
 turningSpeedActuallyUsed = 100
-dayTimeDrivingSpeedActuallyUsed = 100
-nightTimeDrivingSpeedActuallyUsed = 100
+dayTimeDrivingSpeedActuallyUsed = 90
+nightTimeDrivingSpeedActuallyUsed = 50
 
 
 
@@ -200,7 +200,7 @@ elif robotID == "48853711": # Marvin
     right = times(left, -1)
     forward = (1, -1, 1, -1)
     backward = times(forward, -1)
-    turnDelay = 0.2
+    turnDelay = 0.1
 elif robotID == "11543083": # RedBird
     left = (-1, -1, -1, -1)
     right = times(left, -1)
