@@ -37,7 +37,7 @@ GPIO.setmode(GPIO.BCM)
 chargeIONumber = 17
 GPIO.setup(chargeIONumber, GPIO.IN)
 
-straightDelay = 1.6
+
 steeringSpeed = 90
 steeringHoldingSpeed = 90
 
@@ -148,70 +148,77 @@ def runMotor(motorIndex, direction):
 
 
 if robotID == "3444925": # if Timmy
-    left = (1, 1, 1, 1)
-    right = times(left, -1)
     forward = (-1, 1, 1, -1)
     backward = times(forward, -1)
+    left = (1, 1, 1, 1)
+    right = times(left, -1)
+    straightDelay = 1.6
     turnDelay = 0.4
 elif robotID == "88359766": # Skippy_old
-    left = (1, -1, 1, 1)
-    right = times(left, -1)
     forward = (1, 1, 1, -1)
     backward = times(forward, -1)
+    left = (1, -1, 1, 1)
+    right = times(left, -1)
+    straightDelay = 1.6
     turnDelay = 0.8
 elif robotID == "22027911": # Zip
-    left = (0, 1, 1, 0) # was 1,1,1,1
-    right = (0, -1, -1, 0)
     forward = (-1, 1, -1, 1)
     backward = times(forward, -1)
+    left = (0, 1, 1, 0) # was 1,1,1,1
+    right = (0, -1, -1, 0)
     turnDelay = 0.8
 elif robotID == "78929358": # ZombieZip
+    forward = (-1, 1, -1, 1)
+    backward = times(forward, -1)
     left = (0, 1, 1, 0) # was 1,1,1,1
     right = (0, -1, -1, 0)
-    forward = (-1, 1, -1, 1)
-    backward = times(forward, -1)
+    straightDelay = 1.6
     turnDelay = 0.8
 elif robotID == "52225122": # Pippy
-    left = (1, 1, 1, 1)
-    right = times(left, -1)
     forward = (-1, 1, 1, -1)
     backward = times(forward, -1)
+    left = (1, 1, 1, 1)
+    right = times(left, -1)
     turnDelay = 0.8
 elif robotID == "72378514": # Skippy
-    left = (1, 1, 1, 1)
-    right = times(left, -1)
     forward = (-1, 1, -1, 1)
     backward = times(forward, -1)
+    left = (1, 1, 1, 1)
+    right = times(left, -1)
+    straightDelay = 1.6
     turnDelay = 0.4
 elif robotID == "19359999": # Mikey
-    left = (1, 1, 1, 1)
-    right = times(left, -1)
     forward = (-1, 1, 1, -1)
     backward = times(forward, -1)
+    left = (1, 1, 1, 1)
+    right = times(left, -1)
     turnDelay = 0.4
 elif robotID == "86583531": # Dilbert
-    left = (1, 1, 1, 1)
-    right = times(left, -1)
     forward = (-1, 1, -1, 1)
     backward = times(forward, -1)
+    left = (1, 1, 1, 1)
+    right = times(left, -1)
+    straightDelay = 1.6
     turnDelay = 0.4
 elif robotID == "48853711": # Marvin
-    left = (-1, -1, -1, -1)
-    right = times(left, -1)
     forward = (1, -1, 1, -1)
     backward = times(forward, -1)
+    left = (-1, -1, -1, -1)
+    right = times(left, -1)
     turnDelay = 0.1
 elif robotID == "11543083": # RedBird
-    left = (-1, -1, -1, -1)
-    right = times(left, -1)
     forward = (1, -1, 1, -1)
     backward = times(forward, -1)
+    left = (-1, -1, -1, -1)
+    right = times(left, -1)
+    straightDelay = 1.6
     turnDelay = 0.4
 else: # default settings
-    left = (1, 1, 1, 1)
-    right = times(left, -1)
     forward = (-1, 1, -1, 1)
     backward = times(forward, -1)
+    left = (1, 1, 1, 1)
+    right = times(left, -1)
+    straightDelay = 0.5
     turnDelay = 0.4
 
     
