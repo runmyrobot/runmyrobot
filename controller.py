@@ -53,9 +53,10 @@ handlingCommand = False
 #turningSpeedActuallyUsed = 200
 #drivingSpeedActuallyUsed = 200
 
-turningSpeedActuallyUsed = 100
-dayTimeDrivingSpeedActuallyUsed = 90
-nightTimeDrivingSpeedActuallyUsed = 50
+# Marvin
+turningSpeedActuallyUsed = 50
+dayTimeDrivingSpeedActuallyUsed = 80
+nightTimeDrivingSpeedActuallyUsed = 15
 
 
 
@@ -166,6 +167,7 @@ elif robotID == "22027911": # Zip
     backward = times(forward, -1)
     left = (0, 1, 1, 0) # was 1,1,1,1
     right = (0, -1, -1, 0)
+    straightDelay = 0.5
     turnDelay = 0.8
 elif robotID == "78929358": # ZombieZip
     forward = (-1, 1, -1, 1)
@@ -179,6 +181,7 @@ elif robotID == "52225122": # Pippy
     backward = times(forward, -1)
     left = (1, 1, 1, 1)
     right = times(left, -1)
+    straightDelay = 0.5
     turnDelay = 0.8
 elif robotID == "72378514": # Skippy
     forward = (-1, 1, -1, 1)
@@ -192,6 +195,7 @@ elif robotID == "19359999": # Mikey
     backward = times(forward, -1)
     left = (1, 1, 1, 1)
     right = times(left, -1)
+    straightDelay = 0.5
     turnDelay = 0.4
 elif robotID == "86583531": # Dilbert
     forward = (-1, 1, -1, 1)
@@ -205,6 +209,7 @@ elif robotID == "48853711": # Marvin
     backward = times(forward, -1)
     left = (-1, -1, -1, -1)
     right = times(left, -1)
+    straightDelay = 0.5
     turnDelay = 0.1
 elif robotID == "11543083": # RedBird
     forward = (1, -1, 1, -1)
