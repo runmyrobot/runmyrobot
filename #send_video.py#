@@ -1,5 +1,4 @@
 import subprocess
-import thread
 import shlex
 import re
 import os
@@ -12,7 +11,7 @@ import base64
 import random
 
 server = "runmyrobot.com"
-#server = "192.168.1.20"
+#server = "52.52.213.92"
 
 
 from socketIO_client import SocketIO, LoggingNamespace
@@ -45,34 +44,6 @@ def onHandleCameraCommand(*args):
 socketIO.on('command_to_camera', onHandleCameraCommand)
 
 
-def handleTakeSnapshotCommand(args):
-    #inputDeviceID = streamProcessDict['device_answer']
-    inputDeviceID = 0
-    snapShot(platform.system(), inputDeviceID)
-    time.sleep(3)
-    if os.path.isfile("snapshot.jpg") is True:
-        with open ("snapshot.jpg", 'rb') as f:
-            data = f.read()
-        print "emit"
-        socketIO.emit('snapshot', {'image':base64.b64encode(data), 'robot_id': args['robot_id'], 'username': args['username']})
-    else:
-        print "no snapshot file"
-
-#with open ("snapshot.jpg", 'rb') as f:
-#    data = f.read()
-#socketIO.emit('snapshot', {'image':base64.b64encode(data)})
-
-def on_handle_take_snapshot_command(*args):
-   print "THEODORE about to start new thread for handleTakeSnapshotCommand"
-   print "THEODORE args are %s" % args
-   thread.start_new_thread(handleTakeSnapshotCommand, args)
-
-#socketIO.on('take_snapshot_command', on_handle_take_snapshot_command)
-
-def listenForTakeSnapshotCommand():
-    socketIO.on('take_snapshot_command', on_handle_take_snapshot_command)
-    socketIO.wait()
-    
 
 def randomSleep():
     """A short wait is good for quick recovery, but sometimes a longer delay is needed or it will just keep trying and failing short intervals, like because the system thinks the port is still in use and every retry makes the system think it's still in use. So, this has a high likelihood of picking a short interval, but will pick a long one sometimes."""
@@ -163,8 +134,7 @@ def handleLinux(deviceNumber, videoPort):
         
     #commandLine = '/usr/local/bin/ffmpeg -s 320x240 -f video4linux2 -i /dev/video%s -f mpeg1video -b 1k -r 20 http://runmyrobot.com:%s/hello/320/240/' % (deviceAnswer, videoPort)
     #commandLine = '/usr/local/bin/ffmpeg -s 640x480 -f video4linux2 -i /dev/video%s -f mpeg1video -b 150k -r 20 http://%s:%s/hello/640/480/' % (deviceAnswer, server, videoPort)
-    commandLine = 'ffmpeg -f v4l2 -framerate 25 -video_size 640x480 -i /dev/video%s -f mpegts -codec:v mpeg1video -s 640x480 -b:v 1000k -bf 0 http://%s:%s/hello/640/480/' % (deviceAnswer, server, videoPort) # ClawDaddy
-    #commandLine = '/usr/local/bin/ffmpeg -s 640x480 -f video4linux2 -i /dev/video%s -f mpeg1video -b 200k -r 20 http://%s:%s/hello/640/480/' % (deviceAnswer, server, videoPort) # ClawDaddy
+    commandLine = '/usr/local/bin/ffmpeg -s 640x480 -f video4linux2 -i /dev/video%s -f mpeg1video -b 200k -r 20 http://%s:%s/hello/640/480/' % (deviceAnswer, server, videoPort) # ClawDaddy
     #commandLine = '/usr/local/bin/ffmpeg -s 1280x720 -f video4linux2 -i /dev/video%s -f mpeg1video -b 1k -r 20 http://runmyrobot.com:%s/hello/1280/720/' % (deviceAnswer, videoPort)
 
 
@@ -269,7 +239,6 @@ def snapShot(operatingSystem, inputDeviceID, filename="snapshot.jpg"):
     except:
         print "did not remove file"
 
-    print "THEODORE after did not remove file"
     commandLineDict = {
         'Darwin': 'ffmpeg -y -f qtkit -i %s -vframes 1 %s' % (inputDeviceID, filename),
         'Linux': '/usr/local/bin/ffmpeg -y -f video4linux2 -i /dev/video%s -vframes 1 -q:v 1000 -vf scale=320:240 %s' % (inputDeviceID, filename),
@@ -320,9 +289,11 @@ def main():
 
     while True:
 
-        thread.start_new_thread(listenForTakeSnapshotCommand, ())
+
+
         socketIO.emit('send_video_status', {'send_video_process_exists': True,
                                             'camera_id':cameraIDAnswer})
+
         
         if streamProcessDict is not None:
             print "stopping previously running ffmpeg (needs to happen if this is not the first iteration)"
