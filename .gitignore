@@ -3,3 +3,5 @@ single_frame_image.jpg
 
 #ignore (open?) files with ~ in name:
 *~
+*.pyc
+
