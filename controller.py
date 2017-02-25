@@ -54,9 +54,9 @@ handlingCommand = False
 #drivingSpeedActuallyUsed = 200
 
 # Marvin
-turningSpeedActuallyUsed = 180
-dayTimeDrivingSpeedActuallyUsed = 180
-nightTimeDrivingSpeedActuallyUsed = 90
+turningSpeedActuallyUsed = 250
+dayTimeDrivingSpeedActuallyUsed = 250
+nightTimeDrivingSpeedActuallyUsed = 170
 
 
 
