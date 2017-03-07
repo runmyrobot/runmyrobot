@@ -24,7 +24,6 @@ import atexit
 import sys
 import thread
 import subprocess
-import time
 import RPi.GPIO as GPIO
 import datetime
 from socketIO_client import SocketIO, LoggingNamespace
