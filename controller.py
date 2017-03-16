@@ -56,7 +56,7 @@ handlingCommand = False
 # Marvin
 turningSpeedActuallyUsed = 250
 dayTimeDrivingSpeedActuallyUsed = 250
-nightTimeDrivingSpeedActuallyUsed = 170
+nightTimeDrivingSpeedActuallyUsed = 230
 
 
 
@@ -68,8 +68,8 @@ nightTimeDrivingSpeedActuallyUsed = 170
 pwm = PWM(0x42)
 # Note if you'd like more debug output you can instead run:
 #pwm = PWM(0x40, debug=True)
-servoMin = [150, 150, 400]  # Min pulse length out of 4096
-servoMax = [600, 600, 565]  # Max pulse length out of 4096
+servoMin = [150, 150, 130]  # Min pulse length out of 4096
+servoMax = [600, 600, 270]  # Max pulse length out of 4096
 armServo = [300, 300, 300]
 
 #def setMotorsToIdle():
