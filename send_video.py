@@ -88,11 +88,15 @@ def getVideoPort():
 def runFfmpeg(commandLine):
 
     print commandLine
-    ffmpegProcess = subprocess.Popen(shlex.split(commandLine))
+    ffmpegProcess = subprocess.Popen(shlex.split(commandLine), stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
     print "command started"
 
+    
     return ffmpegProcess
     
+
+
+
 
 
 def handleDarwin(deviceNumber, videoPort):
@@ -112,7 +116,7 @@ def handleDarwin(deviceNumber, videoPort):
     return {'process': process, 'device_answer': deviceAnswer}
 
 
-def handleLinux(deviceNumber, videoPort):
+def handleLinux(deviceNumber, videoPort, ffmpeg=True):
 
     print "sleeping to give the camera time to start working"
     randomSleep()
@@ -151,12 +155,36 @@ def handleLinux(deviceNumber, videoPort):
     #commandLine = '/usr/local/bin/ffmpeg -s 1280x720 -f video4linux2 -i /dev/video%s -f mpeg1video -b 1k -r 20 http://runmyrobot.com:%s/hello/1280/720/' % (deviceAnswer, videoPort)
 
 
-    # video with audio
-    commandLine = '/usr/local/bin/ffmpeg -f alsa -ar 44100 -ac 1 -i hw:1 -f v4l2 -framerate 25 -video_size 640x480 -i /dev/video%s -f mpegts -codec:v mpeg1video -s 640x480 -b:v 250k -bf 0 http://%s:%s/hello/640/480/' % (deviceAnswer, server, videoPort)
+    
 
-    process = runFfmpeg(commandLine)
 
-    return {'process': process, 'device_answer': deviceAnswer}
+    process = None
+    audioProcess = None
+    
+    if ffmpeg:
+
+
+        # new video
+        #commandLine = '/usr/local/bin/ffmpeg -f v4l2 -framerate 25 -video_size 640x480 -i /dev/video%s -f mpegts -codec:v mpeg1video -s 640x480 -b:v 250k -bf 0 http://%s:%s/hello/640/480/' % (deviceAnswer, server, videoPort) # ClawDaddy
+
+
+        # new video with audio
+        commandLine = '/usr/local/bin/ffmpeg -f alsa -ar 44100 -ac 1 -i hw:1 -f v4l2 -framerate 25 -video_size 640x480 -i /dev/video%s -f mpegts -codec:v mpeg1video -s 640x480 -b:v 250k -bf 0 http://%s:%s/hello/640/480/' % (deviceAnswer, server, videoPort)
+        
+        # new video part without audio
+        #commandLine = '/usr/local/bin/ffmpeg -f v4l2 -framerate 25 -video_size 640x480 -i /dev/video%s -f mpegts -codec:v mpeg1video -s 640x480 -b:v 250k -bf 0 -muxdelay 0.001 http://%s:%s/hello' % (deviceAnswer, server, videoPort) # ClawDaddy
+
+
+        print "command line for video without audio:", commandLine
+        process = runFfmpeg(commandLine)
+
+
+        #commandLineAudio = "/usr/local/bin/ffmpeg -f alsa -ar 44100 -ac 1 -i hw:1 -f mpegts -codec:a mp2 -b:a 32k -muxdelay 0.001 http://%s:%s/hello" % (server, videoPort)
+        #print "command line for audio:", commandLineAudio
+        #audioProcess = subprocess.Popen(shlex.split(commandLineAudio))
+    
+    
+    return {'process': process, 'audio_process': audioProcess, 'device_answer': deviceAnswer}
 
 
 
@@ -265,7 +293,7 @@ def snapShot(operatingSystem, inputDeviceID, filename="snapshot.jpg"):
 
 
 
-def startVideoCapture():
+def startVideoCapture(ffmpeg=True):
 
     videoPort = getVideoPort()
     print "video port:", videoPort
@@ -277,12 +305,12 @@ def startVideoCapture():
 
     result = None
     if platform.system() == 'Darwin':
-        result = handleDarwin(deviceNumber, videoPort)
+        result = handleDarwin(deviceNumber, videoPort, ffmpeg=ffmpeg)
     elif platform.system() == 'Linux':
-        result = handleLinux(deviceNumber, videoPort)
+        result = handleLinux(deviceNumber, videoPort, ffmpeg=ffmpeg)
     elif platform.system() == 'Windows':
         #result = handleWindowsScreenCapture(deviceNumber, videoPort)
-        result = handleWindows(deviceNumber, videoPort)
+        result = handleWindows(deviceNumber, videoPort, ffmpeg=ffmpeg)
     else:
         print "unknown platform", platform.system()
 
@@ -306,7 +334,6 @@ def main():
     while True:
 
 
-
         socketIO.emit('send_video_status', {'send_video_process_exists': True,
                                             'camera_id':cameraIDAnswer})
 
@@ -316,10 +343,14 @@ def main():
             streamProcessDict['process'].kill()
 
         print "starting process just to get device result" # this should be a separate function so you don't have to do this
-        streamProcessDict = startVideoCapture()
+        streamProcessDict = startVideoCapture(ffmpeg=False)
         inputDeviceID = streamProcessDict['device_answer']
-        print "stopping video capture"
-        streamProcessDict['process'].kill()
+
+        # due to the hacky way these processes get started when getting the id, they need to be stopped here:
+        #print "stopping video capture process"
+        #streamProcessDict['process'].kill()
+        #print "stopping audio capture process"
+        #streamProcessDict['audio_process'].kill()
 
         #print "sleeping"
         #time.sleep(3)
@@ -377,11 +408,23 @@ def main():
         for count in range(period):
             time.sleep(1)
 
+            if streamProcessDict['process']:
+                while True:
+                    nextLine = streamProcessDict['process'].stdout.readline()
+                    if nextLine == '':
+                        break
+                    sys.stdout.write("ffmpeg output:" + str(nextLine))
+                    sys.stdout.flush()
+            else:
+                print "process missing"
+
+            
             if count % 20 == 0:
                 socketIO.emit('send_video_status', {'send_video_process_exists': True,
                                                     'camera_id':cameraIDAnswer})
             
-            if count % 40 == 30:
+            #if count % 40 == 30:
+            if False:
                 print "stopping video capture just in case it has reached a state where it's looping forever, not sending video, and not dying as a process, which can happen"
                 streamProcessDict['process'].kill()
                 time.sleep(1)
