@@ -193,9 +193,7 @@ def handleWindows(deviceNumber, videoPort):
         deviceAnswer = str(deviceNumber)
 
     device = devices[int(deviceAnswer)]
-    #commandLine = 'ffmpeg -s 320x240 -f dshow -i video="%s" -f mpeg1video -b 200k -r 20 http://%s:%s/hello/320/240/' % (device, server, videoPort)
-    # New ffmpeg command for new JSMpeg and including audio
-    commandLine = 'ffmpeg -f v4l2 -framerate 25 -video_size 640x480 -i /dev/video%s -f mpegts -codec:v mpeg1video -s 640x480 -b:v 400k -bf 0 http://%s:%s/hello/640/480/' % (deviceAnswer, server, videoPort)
+    commandLine = 'ffmpeg -s 640x480 -f dshow -i video="%s" -f mpegts -codec:v mpeg1video -b 200k -r 20 http://%s:%s/hello/640/480/' % (device, server, videoPort)
     
 
     process = runFfmpeg(commandLine)
