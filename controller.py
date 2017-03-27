@@ -121,6 +121,15 @@ else:
     print "invalid environment"
     sys.exit(0)
 
+
+if serialRobot:
+    # initialize serial connection
+    serialBaud = 9600
+    print "baud:", serialBaud
+    #ser = serial.Serial('/dev/tty.usbmodem12341', 19200, timeout=1)  # open serial
+    ser = serial.Serial(serialDevice, serialBaud, timeout=1)  # open serial
+
+    
     
 print 'using socket io to connect to', server
 socketIO = SocketIO(server, port, LoggingNamespace)
@@ -145,13 +154,9 @@ if not serialRobot:
 
 
 
-
 def sendSerialCommand(command):
 
-    baud1 = 9600
-    print "baud:", baud1
-    #ser = serial.Serial('/dev/tty.usbmodem12341', 19200, timeout=1)  # open serial
-    ser = serial.Serial(serialDevice, baud1, timeout=1)  # open serial
+
     print(ser.name)         # check which port was really used
     ser.nonblocking()
 
@@ -167,7 +172,7 @@ def sendSerialCommand(command):
     #while ser.in_waiting > 0:
     #    print "read:", ser.read()
 
-    ser.close()
+    #ser.close()
 
 
 

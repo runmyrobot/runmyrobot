@@ -57,9 +57,9 @@ def sendCommandsFromUser():
         #ser = serial.Serial('/dev/tty.usbmodem12341', 19200, timeout=1)  # open serial
         ser = serial.Serial(serialDevice, baud, timeout=1)  # open serial
         print(ser.name)         # check which port was really used
-        print "settings:", ser.getSettingsDict()
+        #print "settings:", ser.getSettingsDict()
         ser.nonblocking()
-        print "settings:", ser.getSettingsDict()
+        #print "settings:", ser.getSettingsDict()
 
         
         # loop to collect input
@@ -73,7 +73,7 @@ def sendCommandsFromUser():
             #while ser.in_waiting > 0:
             while ser.inWaiting > 0:                
                 print "read:", ser.read()
-                print "settings:", ser.getSettingsDict()
+                #print "settings:", ser.getSettingsDict()
 
         ser.close()
 
@@ -86,9 +86,9 @@ def sendCommand():
     #ser = serial.Serial('/dev/tty.usbmodem12341', 19200, timeout=1)  # open serial
     ser = serial.Serial(serialDevice, baud1, timeout=1)  # open serial
     print(ser.name)         # check which port was really used
-    print "settings:", ser.getSettingsDict()
+    #print "settings:", ser.getSettingsDict()
     ser.nonblocking()
-    print "settings:", ser.getSettingsDict()
+    #print "settings:", ser.getSettingsDict()
 
     # loop to collect input
     s = "f"
@@ -99,7 +99,7 @@ def sendCommand():
 
     #while ser.in_waiting > 0:
     while ser.inWaiting > 0:
-        print "settings:", ser.getSettingsDict()
+        #print "settings:", ser.getSettingsDict()
         print "read:", ser.read()
 
     ser.close()
