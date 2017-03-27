@@ -130,7 +130,7 @@ def handleLinux(deviceNumber, videoPort):
     #os.system("v4l2-ctl -c brightness=10 -c contrast=25 -c saturation=40")
     #os.system("v4l2-ctl -c brightness=240 -c contrast=75 -c saturation=60") # Skippy   
     #os.system("v4l2-ctl -c brightness=150 -c contrast=50 -c saturation=80") # Marvin
-    os.system("v4l2-ctl -c brightness=150 -c contrast=50 -c saturation=80") # Marvin
+    os.system("v4l2-ctl -c brightness=90 -c contrast=50 -c saturation=80") # Marvin
     #os.system("v4l2-ctl -c brightness=10 -c contrast=70 -c saturation=80") # RedBird
     #os.system("v4l2-ctl -c brightness=40 -c contrast=70 -c saturation=80") # ClawDaddy
     #os.system("v4l2-ctl -c brightness=50 -c contrast=50 -c saturation=80")
@@ -152,7 +152,7 @@ def handleLinux(deviceNumber, videoPort):
 
 
     # video with audio
-    commandLine = '/usr/local/bin/ffmpeg -f alsa -ar 44100 -ac 1 -i hw:1 -f v4l2 -framerate 25 -video_size 640x480 -i /dev/video%s -f mpegts -codec:v mpeg1video -s 640x480 -b:v 250k -bf 0 http://%s:%s/hello/640/480/' % (deviceAnswer, server, videoPort)
+    commandLine = '/usr/local/bin/ffmpeg -f alsa -ar 44100 -ac 1 -i hw:1 -f v4l2 -framerate 25 -video_size 640x480 -i /dev/video%s -f mpegts -codec:v mpeg1video -s 640x480 -b:v %s -bf 0 http://%s:%s/hello/640/480/' % (deviceAnswer, '350k', server, videoPort)
 
     process = runFfmpeg(commandLine)
 
