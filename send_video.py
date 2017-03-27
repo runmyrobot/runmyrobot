@@ -16,8 +16,8 @@ server = "runmyrobot.com"
 
 from socketIO_client import SocketIO, LoggingNamespace
 
-
-print "test1"
+# enable raspicam driver in case a raspicam is being used
+os.system("sudo modprobe bcm2835-v4l2")
 
 
 if len(sys.argv) >= 4:
