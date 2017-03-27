@@ -6,7 +6,7 @@ server = "runmyrobot.com"
 #server = "52.52.213.92"
 
 
-serialRobot = True
+serialRobot = False
 
 
 if not serialRobot:
