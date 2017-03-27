@@ -1,40 +1,45 @@
 import platform
+import serial
 
 
 server = "runmyrobot.com"
 #server = "52.52.213.92"
 
 
+serialRobot = True
 
-try:
-    from Adafruit_MotorHAT import Adafruit_MotorHAT, Adafruit_DCMotor
-    motorsEnabled = True
-except ImportError:
-    print "You need to install Adafruit_MotorHAT"
-    print "Please install Adafruit_MotorHAT for python and restart this script."
-    print "Running in test mode."
-    print "Ctrl-C to quit"
-    motorsEnabled = False
 
-    
-from Adafruit_PWM_Servo_Driver import PWM
-    
+if not serialRobot:
+    try:
+        from Adafruit_MotorHAT import Adafruit_MotorHAT, Adafruit_DCMotor
+        motorsEnabled = True
+    except ImportError:
+        print "You need to install Adafruit_MotorHAT"
+        print "Please install Adafruit_MotorHAT for python and restart this script."
+        print "Running in test mode."
+        print "Ctrl-C to quit"
+        motorsEnabled = False
+
+if not serialRobot:
+    from Adafruit_PWM_Servo_Driver import PWM
+
 import time
 import atexit
 import sys
 import thread
 import subprocess
-import RPi.GPIO as GPIO
+if not serialRobot:
+    import RPi.GPIO as GPIO
 import datetime
 from socketIO_client import SocketIO, LoggingNamespace
 
 
-    
-        
-
-GPIO.setmode(GPIO.BCM)
 chargeIONumber = 17
-GPIO.setup(chargeIONumber, GPIO.IN)
+
+        
+if not serialRobot:
+    GPIO.setmode(GPIO.BCM)
+    GPIO.setup(chargeIONumber, GPIO.IN)
 
 
 steeringSpeed = 90
@@ -64,7 +69,8 @@ nightTimeDrivingSpeedActuallyUsed = 230
 
 
 # Initialise the PWM device
-pwm = PWM(0x42)
+if not serialRobot:
+    pwm = PWM(0x42)
 # Note if you'd like more debug output you can instead run:
 #pwm = PWM(0x40, debug=True)
 servoMin = [150, 150, 130]  # Min pulse length out of 4096
@@ -109,8 +115,40 @@ def setServoPulse(channel, pulse):
   pulse /= pulseLength
   pwm.setPWM(channel, 0, pulse)
 
-  
-pwm.setPWMFreq(60)                        # Set frequency to 60 Hz
+
+if not serialRobot:
+    pwm.setPWMFreq(60)                        # Set frequency to 60 Hz
+
+
+
+
+
+
+def sendSerialCommand(command):
+
+    baud1 = 9600
+    print "baud:", baud1
+    #ser = serial.Serial('/dev/tty.usbmodem12341', 19200, timeout=1)  # open serial
+    ser = serial.Serial('/dev/tty.usbmodem12341', baud1, timeout=1)  # open serial
+    print(ser.name)         # check which port was really used
+    ser.nonblocking()
+
+    # loop to collect input
+    s = "f"
+    print "string:", s
+    ser.write(str(command) + "\r\n")     # write a string
+    #ser.write(s)
+    ser.flush()
+
+    while ser.in_waiting > 0:
+        print "read:", ser.read()
+
+    ser.close()
+
+
+
+
+
 
 
 def incrementArmServo(channel, amount):
@@ -270,7 +308,11 @@ def handle_command(args):
             print('got something', args)
 
             command = args['command']
-            if motorsEnabled:
+
+            if serialRobot:
+                sendSerialCommand(command)
+
+            if not serialRobot and motorsEnabled:
                 motorA.setSpeed(drivingSpeed)
                 motorB.setSpeed(drivingSpeed)
                 if command == 'F':
@@ -314,7 +356,9 @@ def handle_command(args):
                     incrementArmServo(2, 10)
                     time.sleep(0.05)
 
-            turnOffMotors()
+            if not serialRobot:
+                turnOffMotors()
+
             #setMotorsToIdle()
             
         handlingCommand = False
@@ -348,10 +392,11 @@ def myWait():
   thread.start_new_thread(myWait, ())
 
 
-if motorsEnabled:
-    # create a default object, no changes to I2C address or frequency
-    mh = Adafruit_MotorHAT(addr=0x60)
-    #mhArm = Adafruit_MotorHAT(addr=0x61)
+if not serialRobot:
+    if motorsEnabled:
+        # create a default object, no changes to I2C address or frequency
+        mh = Adafruit_MotorHAT(addr=0x60)
+        #mhArm = Adafruit_MotorHAT(addr=0x61)
     
 
 def turnOffMotors():
@@ -365,11 +410,11 @@ def turnOffMotors():
     #mhArm.getMotor(4).run(Adafruit_MotorHAT.RELEASE)
   
 
-    
-if motorsEnabled:
-    atexit.register(turnOffMotors)
-    motorA = mh.getMotor(1)
-    motorB = mh.getMotor(2)
+if not serialRobot:
+    if motorsEnabled:
+        atexit.register(turnOffMotors)
+        motorA = mh.getMotor(1)
+        motorB = mh.getMotor(2)
 
 def ipInfoUpdate():
     socketIO.emit('ip_information',
@@ -384,8 +429,9 @@ def sendChargeState():
 def sendChargeStateCallback(x):
     sendChargeState()
 
-GPIO.add_event_detect(chargeIONumber, GPIO.BOTH)
-GPIO.add_event_callback(chargeIONumber, sendChargeStateCallback)
+if not serialRobot:
+    GPIO.add_event_detect(chargeIONumber, GPIO.BOTH)
+    GPIO.add_event_callback(chargeIONumber, sendChargeStateCallback)
 
 
 def identifyRobotId():
@@ -394,18 +440,31 @@ def identifyRobotId():
 
 
 #setMotorsToIdle()
-    
+
+
+
+
+
 waitCounter = 0
+
+
 identifyRobotId()
+
+
 if platform.system() == 'Darwin':
-    ipInfoUpdate()
+    pass
+    #ipInfoUpdate()
 elif platform.system() == 'Linux':
     ipInfoUpdate()
+
+
 while True:
     socketIO.wait(seconds=10)
     if (waitCounter % 10) == 0:
-        ipInfoUpdate()
-        sendChargeState()
+        if platform.system() == 'Linux':
+            ipInfoUpdate()
+        if not serialRobot:
+            sendChargeState()
 
     waitCounter += 1
 
