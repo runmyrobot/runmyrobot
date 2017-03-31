@@ -295,8 +295,6 @@ else: # default settings
     
         
 def handle_command(args):
-
-
         now = datetime.datetime.now()
         now_time = now.time()
         # if it's late, make the robot slower
@@ -305,19 +303,14 @@ def handle_command(args):
             drivingSpeedActuallyUsed = nightTimeDrivingSpeedActuallyUsed
         else:
             drivingSpeedActuallyUsed = dayTimeDrivingSpeedActuallyUsed
-        
 
-    
         global drivingSpeed
-    
         global handlingCommand
-
 
         #print "received command:", args
         # Note: If you are adding features to your bot,
         # you can get direct access to incomming commands right here.
 
-        
 
         if handlingCommand:
             return
@@ -394,11 +387,9 @@ def handle_command(args):
 
 
 def handleStartReverseSshProcess(args):
-    print "THEODORE calling reverse ssh command"
     subprocess.call(["ssh", "-i", "/home/pi/reverse_ssh_key0.pem", "-N", "-R", "2222:localhost:22", "ubuntu@52.8.25.95"])
 
 def handleEndReverseSshProcess(args):
-    print "THEODORE calling end reverse ssh command"
     subprocess.call(["killall", "ssh"])
         
 def on_handle_command(*args):
