@@ -69,7 +69,7 @@ def randomSleep():
 def getVideoPort():
 
 
-    url = 'http://%s/get_video_port/%s' % (server, cameraIDAnswer)
+    url = 'http://%s:3100/get_video_port/%s' % (server, cameraIDAnswer)
 
 
     for retryNumber in range(2000):
@@ -86,7 +86,7 @@ def getVideoPort():
 def getAudioPort():
 
 
-    url = 'http://%s/get_audio_port/%s' % (server, cameraIDAnswer)
+    url = 'http://%s:3100/get_audio_port/%s' % (server, cameraIDAnswer)
 
 
     for retryNumber in range(2000):
