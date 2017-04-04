@@ -293,6 +293,15 @@ else: # default settings
     turnDelay = 0.4
 
     
+def handle_exclusive_control(args):
+        if 'status' in args and 'robot_id' in args and args['robot_id'] == robotID:
+
+            status = args['status']
+
+	    if status == 'start':
+                print "start exclusive control"
+	    if status == 'end':
+                print "end exclusive control"
         
 def handle_command(args):
         now = datetime.datetime.now()
@@ -395,8 +404,12 @@ def handleEndReverseSshProcess(args):
 def on_handle_command(*args):
    thread.start_new_thread(handle_command, args)
 
+def on_handle_exclusive_control(*args):
+   thread.start_new_thread(handle_exclusive_control, args)
+
 #from communication import socketIO
 socketIO.on('command_to_robot', on_handle_command)
+socketIO.on('exclusive_control', on_handle_exclusive_control)
 
 def startReverseSshProcess(*args):
    thread.start_new_thread(handleStartReverseSshProcess, args)

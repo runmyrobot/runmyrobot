@@ -69,7 +69,7 @@ def randomSleep():
 def getVideoPort():
 
 
-    url = 'http://%s/get_video_port/%s' % (server, cameraIDAnswer)
+    url = 'http://%s:3100/get_video_port/%s' % (server, cameraIDAnswer)
 
 
     for retryNumber in range(2000):
@@ -83,6 +83,23 @@ def getVideoPort():
 
     return json.loads(response)['mpeg_stream_port']
 
+def getAudioPort():
+
+
+    url = 'http://%s:3100/get_audio_port/%s' % (server, cameraIDAnswer)
+
+
+    for retryNumber in range(2000):
+        try:
+            print "GET", url
+            response = urllib2.urlopen(url).read()
+            break
+        except:
+            print "could not open url ", url
+            time.sleep(2)
+
+    return json.loads(response)['audio_stream_port']
+
 
 
 def runFfmpeg(commandLine):
@@ -95,7 +112,7 @@ def runFfmpeg(commandLine):
     
 
 
-def handleDarwin(deviceNumber, videoPort):
+def handleDarwin(deviceNumber, videoPort, audioPort):
 
     
     p = subprocess.Popen(["ffmpeg", "-list_devices", "true", "-f", "qtkit", "-i", "dummy"], stdout=subprocess.PIPE, stderr=subprocess.PIPE)
@@ -112,7 +129,7 @@ def handleDarwin(deviceNumber, videoPort):
     return {'process': process, 'device_answer': deviceAnswer}
 
 
-def handleLinux(deviceNumber, videoPort):
+def handleLinux(deviceNumber, videoPort, audioPort):
 
     print "sleeping to give the camera time to start working"
     randomSleep()
@@ -152,11 +169,13 @@ def handleLinux(deviceNumber, videoPort):
 
 
     # video with audio
-    commandLine = '/usr/local/bin/ffmpeg -f alsa -ar 44100 -ac 1 -i hw:1 -f v4l2 -framerate 25 -video_size 640x480 -i /dev/video%s -f mpegts -codec:v mpeg1video -s 640x480 -b:v %s -bf 0 http://%s:%s/hello/640/480/' % (deviceAnswer, '350k', server, videoPort)
+    videoCommandLine = '/usr/local/bin/ffmpeg -f v4l2 -framerate 25 -video_size 640x480 -i /dev/video%s -f mpegts -codec:v mpeg1video -s 640x480 -b:v %s -bf 0 -muxdelay 0.001 http://%s:%s/hello/640/480/' % (deviceAnswer, '350k', server, videoPort)
+    audioCommandLine = '/usr/local/bin/ffmpeg -f alsa -ar 44100 -c 2 -i hw:1 -f mpegts -codec:a mp2 -b:a 128k -muxdelay 0.001 http://%s:%s/hello/640/480/' % (server, audioPort)
 
-    process = runFfmpeg(commandLine)
+    videoProcess = runFfmpeg(videoCommandLine)
+    audioProcess = runFfmpeg(audioCommandLine)
 
-    return {'process': process, 'device_answer': deviceAnswer}
+    return {'video_process': videoProcess, 'audioProcess': audioProcess, 'device_answer': deviceAnswer}
 
 
 
@@ -165,8 +184,7 @@ def handleWindows(deviceNumber, videoPort):
     p = subprocess.Popen(["ffmpeg", "-list_devices", "true", "-f", "dshow", "-i", "dummy"], stdout=subprocess.PIPE, stderr=subprocess.PIPE)
     
     
-    out, err = p.communicate()
-    
+    out, err = p.communicate() 
     lines = err.split('\n')
     
     count = 0
@@ -268,7 +286,9 @@ def snapShot(operatingSystem, inputDeviceID, filename="snapshot.jpg"):
 def startVideoCapture():
 
     videoPort = getVideoPort()
+    audioPort = getAudioPort()
     print "video port:", videoPort
+    print "audio port:", audioPort
 
     if len(sys.argv) >= 3:
         deviceNumber = sys.argv[2]
@@ -277,12 +297,12 @@ def startVideoCapture():
 
     result = None
     if platform.system() == 'Darwin':
-        result = handleDarwin(deviceNumber, videoPort)
+        result = handleDarwin(deviceNumber, videoPort, audioPort)
     elif platform.system() == 'Linux':
-        result = handleLinux(deviceNumber, videoPort)
+        result = handleLinux(deviceNumber, videoPort, audioPort)
     elif platform.system() == 'Windows':
         #result = handleWindowsScreenCapture(deviceNumber, videoPort)
-        result = handleWindows(deviceNumber, videoPort)
+        result = handleWindows(deviceNumber, videoPort, audioPort)
     else:
         print "unknown platform", platform.system()
 
@@ -383,7 +403,8 @@ def main():
             
             if count % 40 == 30:
                 print "stopping video capture just in case it has reached a state where it's looping forever, not sending video, and not dying as a process, which can happen"
-                streamProcessDict['process'].kill()
+                streamProcessDict['video_process'].kill()
+                streamProcessDict['audio_process'].kill()
                 time.sleep(1)
 
             if count % 80 == 75:
@@ -398,28 +419,13 @@ def main():
             #    os.system("sudo reboot")
                 
             # if the video stream process dies, restart it
-            if streamProcessDict['process'].poll() is not None:
+            if streamProcessDict['video_process'].poll() is not None or streamProcessDict['audio_process'].poll():
                 # wait before trying to start ffmpeg
                 print "ffmpeg process is dead, waiting before trying to restart"
                 randomSleep()
                 streamProcessDict = startVideoCapture()
 
-
-
-
-        #print "taking snapshot"
-        #snapShot(platform.system(), inputDeviceID)
-        #with open ("snapshot.jpg", 'rb') as f:
-        #    data = f.read()
-        #print "emit"
-        #socketIO.emit('snapshot', {'image':base64.b64encode(data)})
-
         twitterSnapCount += 1
-
-
-
-
-print "test2"
 
 if __name__ == "__main__":
 
