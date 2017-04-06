@@ -2,11 +2,31 @@ import platform
 import serial
 
 
+import argparse
+parser = argparse.ArgumentParser(description='start robot control program')
+parser.add_argument('robot_id', help='Robot ID')
+parser.add_argument('--env', help="Environment for example dev or prod, prod is default", default='prod')
+parser.add_argument('--type', help="serial or motor_hat", default='motor_hat')
+
+
+args = parser.parse_args()
+print args
+
+
+
 server = "runmyrobot.com"
 #server = "52.52.213.92"
 
+if args.type == 'serial':
+    serialRobot = True
+elif args.type == 'motor_hat':
+    serialRobot = False
+else:
+    print "invalid --type in command line"
+    exit(0)
 
-serialRobot = False
+#serialDevice = '/dev/tty.usbmodem12341'
+serialDevice = '/dev/ttyUSB0'
 
 
 if not serialRobot:
@@ -85,21 +105,32 @@ armServo = [300, 300, 300]
 
 
 
-if len(sys.argv) >= 2:
-    robotID = sys.argv[1]
-else:
-    robotID = raw_input("Please enter your Robot ID: ")
 
-if len(sys.argv) >= 3:
+robotID = args.robot_id
+
+
+if args.env == 'dev':
     print 'DEV MODE ***************'
     print "using dev port 8122"
     port = 8122
-else:
+elif args.env == 'prod':
     print 'PROD MODE *************'
     print "using prod port 8022"
     port = 8022
+else:
+    print "invalid environment"
+    sys.exit(0)
 
 
+if serialRobot:
+    # initialize serial connection
+    serialBaud = 9600
+    print "baud:", serialBaud
+    #ser = serial.Serial('/dev/tty.usbmodem12341', 19200, timeout=1)  # open serial
+    ser = serial.Serial(serialDevice, serialBaud, timeout=1)  # open serial
+
+    
+    
 print 'using socket io to connect to', server
 socketIO = SocketIO(server, port, LoggingNamespace)
 print 'finished using socket io to connect to', server
@@ -123,27 +154,25 @@ if not serialRobot:
 
 
 
-
 def sendSerialCommand(command):
 
-    baud1 = 9600
-    print "baud:", baud1
-    #ser = serial.Serial('/dev/tty.usbmodem12341', 19200, timeout=1)  # open serial
-    ser = serial.Serial('/dev/tty.usbmodem12341', baud1, timeout=1)  # open serial
+
     print(ser.name)         # check which port was really used
     ser.nonblocking()
 
     # loop to collect input
-    s = "f"
-    print "string:", s
-    ser.write(str(command) + "\r\n")     # write a string
+    #s = "f"
+    #print "string:", s
+    lowercaseCommand = command.lower()
+    print str(lowercaseCommand)
+    ser.write(str(lowercaseCommand) + "\r\n")     # write a string
     #ser.write(s)
     ser.flush()
 
-    while ser.in_waiting > 0:
-        print "read:", ser.read()
+    #while ser.in_waiting > 0:
+    #    print "read:", ser.read()
 
-    ser.close()
+    #ser.close()
 
 
 
@@ -264,31 +293,33 @@ else: # default settings
     turnDelay = 0.4
 
     
+def handle_exclusive_control(args):
+        if 'status' in args and 'robot_id' in args and args['robot_id'] == robotID:
+
+            status = args['status']
+
+	    if status == 'start':
+                print "start exclusive control"
+	    if status == 'end':
+                print "end exclusive control"
         
 def handle_command(args):
-
-
         now = datetime.datetime.now()
         now_time = now.time()
         # if it's late, make the robot slower
         if now_time >= datetime.time(21,30) or now_time <= datetime.time(9,30):
-            print "within the late time interval"
+            #print "within the late time interval"
             drivingSpeedActuallyUsed = nightTimeDrivingSpeedActuallyUsed
         else:
             drivingSpeedActuallyUsed = dayTimeDrivingSpeedActuallyUsed
-        
 
-    
         global drivingSpeed
-    
         global handlingCommand
-
 
         #print "received command:", args
         # Note: If you are adding features to your bot,
         # you can get direct access to incomming commands right here.
 
-        
 
         if handlingCommand:
             return
@@ -365,18 +396,20 @@ def handle_command(args):
 
 
 def handleStartReverseSshProcess(args):
-    print "THEODORE calling reverse ssh command"
     subprocess.call(["ssh", "-i", "/home/pi/reverse_ssh_key0.pem", "-N", "-R", "2222:localhost:22", "ubuntu@52.8.25.95"])
 
 def handleEndReverseSshProcess(args):
-    print "THEODORE calling end reverse ssh command"
     subprocess.call(["killall", "ssh"])
         
 def on_handle_command(*args):
    thread.start_new_thread(handle_command, args)
 
+def on_handle_exclusive_control(*args):
+   thread.start_new_thread(handle_exclusive_control, args)
+
 #from communication import socketIO
 socketIO.on('command_to_robot', on_handle_command)
+socketIO.on('exclusive_control', on_handle_exclusive_control)
 
 def startReverseSshProcess(*args):
    thread.start_new_thread(handleStartReverseSshProcess, args)
