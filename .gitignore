@@ -1,7 +1,9 @@
 snapshot.jpg
 single_frame_image.jpg
+robotoutput.txt
+nohup.out
+npm-debug.log
 
 #ignore (open?) files with ~ in name:
 *~
 *.pyc
-

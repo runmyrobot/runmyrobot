@@ -1,40 +1,65 @@
 import platform
+import serial
+
+
+import argparse
+parser = argparse.ArgumentParser(description='start robot control program')
+parser.add_argument('robot_id', help='Robot ID')
+parser.add_argument('--env', help="Environment for example dev or prod, prod is default", default='prod')
+parser.add_argument('--type', help="serial or motor_hat", default='motor_hat')
+
+
+args = parser.parse_args()
+print args
+
 
 
 server = "runmyrobot.com"
 #server = "52.52.213.92"
 
+if args.type == 'serial':
+    serialRobot = True
+elif args.type == 'motor_hat':
+    serialRobot = False
+else:
+    print "invalid --type in command line"
+    exit(0)
+
+#serialDevice = '/dev/tty.usbmodem12341'
+serialDevice = '/dev/ttyUSB0'
 
 
-try:
-    from Adafruit_MotorHAT import Adafruit_MotorHAT, Adafruit_DCMotor
-    motorsEnabled = True
-except ImportError:
-    print "You need to install Adafruit_MotorHAT"
-    print "Please install Adafruit_MotorHAT for python and restart this script."
-    print "Running in test mode."
-    print "Ctrl-C to quit"
-    motorsEnabled = False
+if not serialRobot:
+    try:
+        from Adafruit_MotorHAT import Adafruit_MotorHAT, Adafruit_DCMotor
+        motorsEnabled = True
+    except ImportError:
+        print "You need to install Adafruit_MotorHAT"
+        print "Please install Adafruit_MotorHAT for python and restart this script."
+        print "Running in test mode."
+        print "Ctrl-C to quit"
+        motorsEnabled = False
 
-    
-from Adafruit_PWM_Servo_Driver import PWM
-    
+if not serialRobot:
+    from Adafruit_PWM_Servo_Driver import PWM
+
 import time
 import atexit
 import sys
 import thread
 import subprocess
-import RPi.GPIO as GPIO
+if not serialRobot:
+    import RPi.GPIO as GPIO
 import datetime
 from socketIO_client import SocketIO, LoggingNamespace
 
 
-    
-        
-
-GPIO.setmode(GPIO.BCM)
 chargeIONumber = 17
-GPIO.setup(chargeIONumber, GPIO.IN)
+
+        
+if not serialRobot:
+    GPIO.setmode(GPIO.BCM)
+    GPIO.setup(chargeIONumber, GPIO.IN)
 
 
 steeringSpeed = 90
@@ -64,7 +89,8 @@ nightTimeDrivingSpeedActuallyUsed = 230
 
 
 # Initialise the PWM device
-pwm = PWM(0x42)
+if not serialRobot:
+    pwm = PWM(0x42)
 # Note if you'd like more debug output you can instead run:
 #pwm = PWM(0x40, debug=True)
 servoMin = [150, 150, 130]  # Min pulse length out of 4096
@@ -79,21 +105,32 @@ armServo = [300, 300, 300]
 
 
 
-if len(sys.argv) >= 2:
-    robotID = sys.argv[1]
-else:
-    robotID = raw_input("Please enter your Robot ID: ")
 
-if len(sys.argv) >= 3:
+robotID = args.robot_id
+
+
+if args.env == 'dev':
     print 'DEV MODE ***************'
     print "using dev port 8122"
     port = 8122
-else:
+elif args.env == 'prod':
     print 'PROD MODE *************'
     print "using prod port 8022"
     port = 8022
+else:
+    print "invalid environment"
+    sys.exit(0)
 
 
+if serialRobot:
+    # initialize serial connection
+    serialBaud = 9600
+    print "baud:", serialBaud
+    #ser = serial.Serial('/dev/tty.usbmodem12341', 19200, timeout=1)  # open serial
+    ser = serial.Serial(serialDevice, serialBaud, timeout=1)  # open serial
+
+    
+    
 print 'using socket io to connect to', server
 socketIO = SocketIO(server, port, LoggingNamespace)
 print 'finished using socket io to connect to', server
@@ -109,8 +146,38 @@ def setServoPulse(channel, pulse):
   pulse /= pulseLength
   pwm.setPWM(channel, 0, pulse)
 
-  
-pwm.setPWMFreq(60)                        # Set frequency to 60 Hz
+
+if not serialRobot:
+    pwm.setPWMFreq(60)                        # Set frequency to 60 Hz
+
+
+
+
+
+def sendSerialCommand(command):
+
+
+    print(ser.name)         # check which port was really used
+    ser.nonblocking()
+
+    # loop to collect input
+    #s = "f"
+    #print "string:", s
+    lowercaseCommand = command.lower()
+    print str(lowercaseCommand)
+    ser.write(str(lowercaseCommand) + "\r\n")     # write a string
+    #ser.write(s)
+    ser.flush()
+
+    #while ser.in_waiting > 0:
+    #    print "read:", ser.read()
+
+    #ser.close()
+
+
+
+
+
 
 
 def incrementArmServo(channel, amount):
@@ -226,31 +293,33 @@ else: # default settings
     turnDelay = 0.4
 
     
+def handle_exclusive_control(args):
+        if 'status' in args and 'robot_id' in args and args['robot_id'] == robotID:
+
+            status = args['status']
+
+	    if status == 'start':
+                print "start exclusive control"
+	    if status == 'end':
+                print "end exclusive control"
         
 def handle_command(args):
-
-
         now = datetime.datetime.now()
         now_time = now.time()
         # if it's late, make the robot slower
         if now_time >= datetime.time(21,30) or now_time <= datetime.time(9,30):
-            print "within the late time interval"
+            #print "within the late time interval"
             drivingSpeedActuallyUsed = nightTimeDrivingSpeedActuallyUsed
         else:
             drivingSpeedActuallyUsed = dayTimeDrivingSpeedActuallyUsed
-        
 
-    
         global drivingSpeed
-    
         global handlingCommand
-
 
         #print "received command:", args
         # Note: If you are adding features to your bot,
         # you can get direct access to incomming commands right here.
 
-        
 
         if handlingCommand:
             return
@@ -270,7 +339,11 @@ def handle_command(args):
             print('got something', args)
 
             command = args['command']
-            if motorsEnabled:
+
+            if serialRobot:
+                sendSerialCommand(command)
+
+            if not serialRobot and motorsEnabled:
                 motorA.setSpeed(drivingSpeed)
                 motorB.setSpeed(drivingSpeed)
                 if command == 'F':
@@ -314,25 +387,29 @@ def handle_command(args):
                     incrementArmServo(2, 10)
                     time.sleep(0.05)
 
-            turnOffMotors()
+            if not serialRobot:
+                turnOffMotors()
+
             #setMotorsToIdle()
             
         handlingCommand = False
 
 
 def handleStartReverseSshProcess(args):
-    print "THEODORE calling reverse ssh command"
     subprocess.call(["ssh", "-i", "/home/pi/reverse_ssh_key0.pem", "-N", "-R", "2222:localhost:22", "ubuntu@52.8.25.95"])
 
 def handleEndReverseSshProcess(args):
-    print "THEODORE calling end reverse ssh command"
     subprocess.call(["killall", "ssh"])
         
 def on_handle_command(*args):
    thread.start_new_thread(handle_command, args)
 
+def on_handle_exclusive_control(*args):
+   thread.start_new_thread(handle_exclusive_control, args)
+
 #from communication import socketIO
 socketIO.on('command_to_robot', on_handle_command)
+socketIO.on('exclusive_control', on_handle_exclusive_control)
 
 def startReverseSshProcess(*args):
    thread.start_new_thread(handleStartReverseSshProcess, args)
@@ -348,10 +425,11 @@ def myWait():
   thread.start_new_thread(myWait, ())
 
 
-if motorsEnabled:
-    # create a default object, no changes to I2C address or frequency
-    mh = Adafruit_MotorHAT(addr=0x60)
-    #mhArm = Adafruit_MotorHAT(addr=0x61)
+if not serialRobot:
+    if motorsEnabled:
+        # create a default object, no changes to I2C address or frequency
+        mh = Adafruit_MotorHAT(addr=0x60)
+        #mhArm = Adafruit_MotorHAT(addr=0x61)
     
 
 def turnOffMotors():
@@ -365,11 +443,11 @@ def turnOffMotors():
     #mhArm.getMotor(4).run(Adafruit_MotorHAT.RELEASE)
   
 
-    
-if motorsEnabled:
-    atexit.register(turnOffMotors)
-    motorA = mh.getMotor(1)
-    motorB = mh.getMotor(2)
+if not serialRobot:
+    if motorsEnabled:
+        atexit.register(turnOffMotors)
+        motorA = mh.getMotor(1)
+        motorB = mh.getMotor(2)
 
 def ipInfoUpdate():
     socketIO.emit('ip_information',
@@ -384,8 +462,9 @@ def sendChargeState():
 def sendChargeStateCallback(x):
     sendChargeState()
 
-GPIO.add_event_detect(chargeIONumber, GPIO.BOTH)
-GPIO.add_event_callback(chargeIONumber, sendChargeStateCallback)
+if not serialRobot:
+    GPIO.add_event_detect(chargeIONumber, GPIO.BOTH)
+    GPIO.add_event_callback(chargeIONumber, sendChargeStateCallback)
 
 
 def identifyRobotId():
@@ -394,18 +473,31 @@ def identifyRobotId():
 
 
 #setMotorsToIdle()
-    
+
+
+
+
+
 waitCounter = 0
+
+
 identifyRobotId()
+
+
 if platform.system() == 'Darwin':
-    ipInfoUpdate()
+    pass
+    #ipInfoUpdate()
 elif platform.system() == 'Linux':
     ipInfoUpdate()
+
+
 while True:
     socketIO.wait(seconds=10)
     if (waitCounter % 10) == 0:
-        ipInfoUpdate()
-        sendChargeState()
+        if platform.system() == 'Linux':
+            ipInfoUpdate()
+        if not serialRobot:
+            sendChargeState()
 
     waitCounter += 1
 
