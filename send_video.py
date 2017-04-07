@@ -170,7 +170,7 @@ def handleLinux(deviceNumber, videoPort, audioPort):
 
     # video with audio
     videoCommandLine = '/usr/local/bin/ffmpeg -f v4l2 -framerate 25 -video_size 640x480 -i /dev/video%s -f mpegts -codec:v mpeg1video -s 640x480 -b:v %s -bf 0 -muxdelay 0.001 http://%s:%s/hello/640/480/' % (deviceAnswer, '350k', server, videoPort)
-    audioCommandLine = '/usr/local/bin/ffmpeg -f alsa -ar 44100 -ac 1 -i hw:1 -f mpegts -codec:a mp2 -b:a 32k -muxdelay 0.001 http://%s:%s/hello/640/480/' % (server, audio
+    audioCommandLine = '/usr/local/bin/ffmpeg -f alsa -ar 44100 -ac 1 -i hw:1 -f mpegts -codec:a mp2 -b:a 32k -muxdelay 0.001 http://%s:%s/hello/640/480/' % (server, audioPort)
 
     videoProcess = runFfmpeg(videoCommandLine)
     audioProcess = runFfmpeg(audioCommandLine)
