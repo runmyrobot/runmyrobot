@@ -10,6 +10,22 @@ import sys
 import base64
 import random
 
+
+import argparse
+
+parser = argparse.ArgumentParser(description='robot control')
+parser.add_argument('camera_id')
+parser.add_argument('video_device_number', default=0, type=int)
+parser.add_argument('--brightness', default=50, type=int, help='camera brightness')
+parser.add_argument('--contrast', default=50, type=int, help='camera contrast')
+parser.add_argument('--saturation', default=50, type=int, help='camera saturation')
+parser.add_argument('--env', default="prod")
+
+
+args = parser.parse_args()
+
+
+
 server = "runmyrobot.com"
 #server = "52.52.213.92"
 
@@ -20,13 +36,17 @@ from socketIO_client import SocketIO, LoggingNamespace
 os.system("sudo modprobe bcm2835-v4l2")
 
 
-if len(sys.argv) >= 4:
+if args.env == "dev":
     print "using dev port 8122"
     port = 8122
-else:
+elif args.env == "prod":
     print "using prod port 8022"
     port = 8022
+else:
+    print "invalid environment"
+    sys.exit(0)
 
+    
 print "initializing socket io"
 print "server:", server
 print "port:", port
@@ -141,19 +161,10 @@ def handleLinux(deviceNumber, videoPort, audioPort):
     #print err
 
 
+    os.system("v4l2-ctl -c brightness={brightness} -c contrast={contrast} -c saturation={saturation}".format(brightness=args.brightness,
+                                                                                                             contrast=args.contrast,
+                                                                                                             saturation=args.saturation))
 
-    #os.system("v4l2-ctl -c gain=60 -c brightness=10 -c contrast=25 -c saturation=30") # Timmy
-    #os.system("v4l2-ctl -c brightness=10 -c contrast=25 -c saturation=40") # Timmy
-    #os.system("v4l2-ctl -c brightness=10 -c contrast=25 -c saturation=40")
-    #os.system("v4l2-ctl -c brightness=240 -c contrast=75 -c saturation=60") # Skippy   
-    #os.system("v4l2-ctl -c brightness=150 -c contrast=50 -c saturation=80") # Marvin
-    os.system("v4l2-ctl -c brightness=90 -c contrast=50 -c saturation=80") # Marvin
-    #os.system("v4l2-ctl -c brightness=10 -c contrast=70 -c saturation=80") # RedBird
-    #os.system("v4l2-ctl -c brightness=40 -c contrast=70 -c saturation=80") # ClawDaddy
-    #os.system("v4l2-ctl -c brightness=50 -c contrast=50 -c saturation=80")
-    #os.system("v4l2-ctl -c brightness=200 -c contrast=100 -c saturation=100")
-    #os.system("v4l2-ctl -c brightness=20 -c contrast=50 -c saturation=60") # Jenny
-    #os.system("v4l2-ctl -c brightness=10 -c contrast=50 -c saturation=60") # BlueberrySurprise
 
     if deviceNumber is None:
         deviceAnswer = raw_input("Enter the number of the camera device for your robot: ")
@@ -290,10 +301,11 @@ def startVideoCapture():
     print "video port:", videoPort
     print "audio port:", audioPort
 
-    if len(sys.argv) >= 3:
-        deviceNumber = sys.argv[2]
-    else:
-        deviceNumber = None
+    #if len(sys.argv) >= 3:
+    #    deviceNumber = sys.argv[2]
+    #else:
+    #    deviceNumber = None
+    deviceNumber = args.video_device_number
 
     result = None
     if platform.system() == 'Darwin':
@@ -430,11 +442,13 @@ def main():
 if __name__ == "__main__":
 
 
-    if len(sys.argv) > 1:
-        cameraIDAnswer = sys.argv[1]
-    else:
-        cameraIDAnswer = raw_input("Enter the Camera ID for your robot, you can get it by pointing a browser to the runmyrobot server %s: " % server)
+    #if len(sys.argv) > 1:
+    #    cameraIDAnswer = sys.argv[1]
+    #else:
+    #    cameraIDAnswer = raw_input("Enter the Camera ID for your robot, you can get it by pointing a browser to the runmyrobot server %s: " % server)
 
+    cameraIDAnswer = args.camera_id
+    
     
     main()
 
