@@ -16,6 +16,7 @@ import argparse
 parser = argparse.ArgumentParser(description='robot control')
 parser.add_argument('camera_id')
 parser.add_argument('video_device_number', default=0, type=int)
+parser.add_argument('--kbps', default=350, type=int)
 parser.add_argument('--brightness', default=50, type=int, help='camera brightness')
 parser.add_argument('--contrast', default=50, type=int, help='camera contrast')
 parser.add_argument('--saturation', default=50, type=int, help='camera saturation')
@@ -180,7 +181,7 @@ def handleLinux(deviceNumber, videoPort, audioPort):
 
 
     # video with audio
-    videoCommandLine = '/usr/local/bin/ffmpeg -f v4l2 -framerate 25 -video_size 640x480 -i /dev/video%s -f mpegts -codec:v mpeg1video -s 640x480 -b:v %s -bf 0 -muxdelay 0.001 http://%s:%s/hello/640/480/' % (deviceAnswer, '350k', server, videoPort)
+    videoCommandLine = '/usr/local/bin/ffmpeg -f v4l2 -framerate 25 -video_size 640x480 -i /dev/video%s -f mpegts -codec:v mpeg1video -s 640x480 -b:v %dk -bf 0 -muxdelay 0.001 http://%s:%s/hello/640/480/' % (deviceAnswer, args.kbps, server, videoPort)
     audioCommandLine = '/usr/local/bin/ffmpeg -f alsa -ar 44100 -ac 1 -i hw:1 -f mpegts -codec:a mp2 -b:a 32k -muxdelay 0.001 http://%s:%s/hello/640/480/' % (server, audioPort)
 
     videoProcess = runFfmpeg(videoCommandLine)
