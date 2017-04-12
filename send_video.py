@@ -20,6 +20,7 @@ parser.add_argument('--kbps', default=350, type=int)
 parser.add_argument('--brightness', default=50, type=int, help='camera brightness')
 parser.add_argument('--contrast', default=50, type=int, help='camera contrast')
 parser.add_argument('--saturation', default=50, type=int, help='camera saturation')
+parser.add_argument('--rotate180', default=False, type=bool, help='rotate image 180 degrees')
 parser.add_argument('--env', default="prod")
 
 
@@ -180,8 +181,13 @@ def handleLinux(deviceNumber, videoPort, audioPort):
     #commandLine = '/usr/local/bin/ffmpeg -s 1280x720 -f video4linux2 -i /dev/video%s -f mpeg1video -b 1k -r 20 http://runmyrobot.com:%s/hello/1280/720/' % (deviceAnswer, videoPort)
 
 
+    if args.rotate180:
+        rotationOption = "-vf transpose=2,transpose=2"
+    else:
+        rotationOption = ""
+
     # video with audio
-    videoCommandLine = '/usr/local/bin/ffmpeg -f v4l2 -framerate 25 -video_size 640x480 -i /dev/video%s -f mpegts -codec:v mpeg1video -s 640x480 -b:v %dk -bf 0 -muxdelay 0.001 http://%s:%s/hello/640/480/' % (deviceAnswer, args.kbps, server, videoPort)
+    videoCommandLine = '/usr/local/bin/ffmpeg -f v4l2 -framerate 25 -video_size 640x480 -i /dev/video%s %s -f mpegts -codec:v mpeg1video -s 640x480 -b:v %dk -bf 0 -muxdelay 0.001 http://%s:%s/hello/640/480/' % (deviceAnswer, rotationOption, args.kbps, server, videoPort)
     audioCommandLine = '/usr/local/bin/ffmpeg -f alsa -ar 44100 -ac 1 -i hw:1 -f mpegts -codec:a mp2 -b:a 32k -muxdelay 0.001 http://%s:%s/hello/640/480/' % (server, audioPort)
 
 
