@@ -10,6 +10,10 @@ parser.add_argument('--env', help="Environment for example dev or prod, prod is 
 parser.add_argument('--type', help="serial or motor_hat", default='motor_hat')
 
 
+# set volume level
+os.system("amixer set PCM -- -100")
+
+
 args = parser.parse_args()
 print args
 
