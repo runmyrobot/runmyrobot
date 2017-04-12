@@ -1,5 +1,6 @@
 import platform
 import serial
+import os
 
 
 import argparse
@@ -302,7 +303,24 @@ def handle_exclusive_control(args):
                 print "start exclusive control"
 	    if status == 'end':
                 print "end exclusive control"
-        
+
+
+def handle_chat_message(args):
+
+    print "chat message received:", args
+    rawMessage = args['message']
+    withoutName = rawMessage.split(']')[1:]
+    message = "".join(withoutName)
+    f = open("/tmp/speech.txt", "w")
+    f.write(message)
+    f.close()
+    os.system('festival --tts < /tmp/speech.txt')
+
+
+    
+
+    
+                
 def handle_command(args):
         now = datetime.datetime.now()
         now_time = now.time()
@@ -336,7 +354,7 @@ def handle_command(args):
             
         if 'command' in args and 'robot_id' in args and args['robot_id'] == robotID:
 
-            print('got something', args)
+            print('got command', args)
 
             command = args['command']
 
@@ -407,9 +425,15 @@ def on_handle_command(*args):
 def on_handle_exclusive_control(*args):
    thread.start_new_thread(handle_exclusive_control, args)
 
+def on_handle_chat_message(*args):
+   thread.start_new_thread(handle_chat_message, args)
+
+   
 #from communication import socketIO
 socketIO.on('command_to_robot', on_handle_command)
 socketIO.on('exclusive_control', on_handle_exclusive_control)
+socketIO.on('chat_message_with_name', on_handle_chat_message)
+
 
 def startReverseSshProcess(*args):
    thread.start_new_thread(handleStartReverseSshProcess, args)
