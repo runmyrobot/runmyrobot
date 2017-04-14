@@ -17,6 +17,10 @@ https://learn.adafruit.com/adafruit-dc-and-stepper-motor-hat-for-raspberry-pi/in
 (2) Install socket.io client for python:
 ```pip install socketIO-client```
 
+(3) Install python serial library:
+```apt-get install python-serial```
+
+
 
 <h2> Bring you Bot to life: Programs to run on the Raspberry Pi </h2>
 
