@@ -8,6 +8,7 @@ parser = argparse.ArgumentParser(description='start robot control program')
 parser.add_argument('robot_id', help='Robot ID')
 parser.add_argument('--env', help="Environment for example dev or prod, prod is default", default='prod')
 parser.add_argument('--type', help="serial or motor_hat", default='motor_hat')
+parser.add_argument('--serial_device', help="serial device", default='/dev/ttyACM0')
 
 
 # set volume level
@@ -37,7 +38,9 @@ else:
 
 #serialDevice = '/dev/tty.usbmodem12341'
 #serialDevice = '/dev/ttyUSB0'
-serialDevice = '/dev/ttyACM0'
+
+serialDevice = args.serial_device
+
 
 
 if not serialRobot:
