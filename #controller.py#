@@ -11,12 +11,7 @@ parser.add_argument('--type', help="serial or motor_hat", default='motor_hat')
 
 
 # set volume level
-
-# tested for 3.5mm audio jack
-#os.system("amixer set PCM -- -100")
-
-# tested for USB audio device
-os.system("amixer cset numid=3 100%")
+os.system("amixer set PCM -- -100")
 
 
 args = parser.parse_args()
@@ -36,8 +31,7 @@ else:
     exit(0)
 
 #serialDevice = '/dev/tty.usbmodem12341'
-#serialDevice = '/dev/ttyUSB0'
-serialDevice = '/dev/ttyACM0'
+serialDevice = '/dev/ttyUSB0'
 
 
 if not serialRobot:
@@ -325,7 +319,7 @@ def handle_chat_message(args):
     f.write(message)
     f.close()
     #os.system('festival --tts < /tmp/speech.txt')
-    os.system('espeak < /tmp/speech.txt')
+    os.system
 
 
     
