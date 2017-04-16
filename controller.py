@@ -328,9 +328,8 @@ def handle_chat_message(args):
     f.write(message)
     f.close()
     #os.system('festival --tts < /tmp/speech.txt')
-    os.system('espeak < /tmp/speech.txt')
-
-
+    #os.system('espeak < /tmp/speech.txt')
+    os.system('cat /tmp/speech.txt | espeak --stdout | aplay -D plughw:2,0')
     
 
     
