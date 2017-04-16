@@ -17,7 +17,8 @@ parser.add_argument('--serial_device', help="serial device", default='/dev/ttyAC
 #os.system("amixer set PCM -- -100")
 
 # tested for USB audio device
-os.system("amixer cset numid=3 100%")
+#os.system("amixer cset numid=3 100%")
+os.system("amixer -c 2 cset numid=3 80%")
 
 
 args = parser.parse_args()
