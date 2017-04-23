@@ -356,13 +356,15 @@ def main():
         
         if streamProcessDict is not None:
             print "stopping previously running ffmpeg (needs to happen if this is not the first iteration)"
-            streamProcessDict['process'].kill()
+            streamProcessDict['video_process'].kill()
+            streamProcessDict['audio_process'].kill()
 
         print "starting process just to get device result" # this should be a separate function so you don't have to do this
         streamProcessDict = startVideoCapture()
         inputDeviceID = streamProcessDict['device_answer']
         print "stopping video capture"
-        streamProcessDict['process'].kill()
+        streamProcessDict['video_process'].kill()
+        streamProcessDict['audio_process'].kill()
 
         #print "sleeping"
         #time.sleep(3)
@@ -420,10 +422,6 @@ def main():
         for count in range(period):
             time.sleep(1)
 
-            if count % 20 == 0:
-                socketIO.emit('send_video_status', {'send_video_process_exists': True,
-                                                    'camera_id':cameraIDAnswer})
-            
             if count % 40 == 30:
                 print "stopping video capture just in case it has reached a state where it's looping forever, not sending video, and not dying as a process, which can happen"
                 streamProcessDict['video_process'].kill()
@@ -432,7 +430,7 @@ def main():
 
             if count % 80 == 75:
                 print "send status about this process and its child process ffmpeg"
-                ffmpegProcessExists = streamProcessDict['process'].poll() is None
+                ffmpegProcessExists = streamProcessDict['video_process'].poll() is not None
                 socketIO.emit('send_video_status', {'send_video_process_exists': True,
                                                     'ffmpeg_process_exists': ffmpegProcessExists,
                                                     'camera_id':cameraIDAnswer})
@@ -442,7 +440,7 @@ def main():
             #    os.system("sudo reboot")
                 
             # if the video stream process dies, restart it
-            if streamProcessDict['video_process'].poll() is not None or streamProcessDict['audio_process'].poll():
+            if streamProcessDict['video_process'].poll() is None or streamProcessDict['audio_process'].poll() is None:
                 # wait before trying to start ffmpeg
                 print "ffmpeg process is dead, waiting before trying to restart"
                 randomSleep()
