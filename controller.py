@@ -2,13 +2,14 @@ import platform
 import serial
 import os
 import uuid
+import gopigo
 
 
 import argparse
 parser = argparse.ArgumentParser(description='start robot control program')
 parser.add_argument('robot_id', help='Robot ID')
 parser.add_argument('--env', help="Environment for example dev or prod, prod is default", default='prod')
-parser.add_argument('--type', help="serial or motor_hat", default='motor_hat')
+parser.add_argument('--type', help="serial or motor_hat or gopigo", default='motor_hat')
 parser.add_argument('--serial_device', help="serial device", default='/dev/ttyACM0')
 
 
@@ -22,18 +23,20 @@ parser.add_argument('--serial_device', help="serial device", default='/dev/ttyAC
 os.system("amixer -c 2 cset numid=3 80%")
 
 
-args = parser.parse_args()
-print args
+commandArgs = parser.parse_args()
+print commandArgs
 
 
 
 server = "runmyrobot.com"
 #server = "52.52.213.92"
 
-if args.type == 'serial':
-    serialRobot = True
-elif args.type == 'motor_hat':
-    serialRobot = False
+if commandArgs.type == 'serial':
+    pass
+elif commandArgs.type == 'motor_hat':
+    pass
+elif commandArgs.type == 'gopigo':
+    import gopigo
 else:
     print "invalid --type in command line"
     exit(0)
@@ -41,11 +44,11 @@ else:
 #serialDevice = '/dev/tty.usbmodem12341'
 #serialDevice = '/dev/ttyUSB0'
 
-serialDevice = args.serial_device
+serialDevice = commandArgs.serial_device
 
 
 
-if not serialRobot:
+if commandArgs.type == 'motor_hat':
     try:
         from Adafruit_MotorHAT import Adafruit_MotorHAT, Adafruit_DCMotor
         motorsEnabled = True
@@ -56,7 +59,7 @@ if not serialRobot:
         print "Ctrl-C to quit"
         motorsEnabled = False
 
-if not serialRobot:
+if commandArgs.type == 'motor_hat':
     from Adafruit_PWM_Servo_Driver import PWM
 
 import time
@@ -64,7 +67,7 @@ import atexit
 import sys
 import thread
 import subprocess
-if not serialRobot:
+if commandArgs.type == 'motor_hat':
     import RPi.GPIO as GPIO
 import datetime
 from socketIO_client import SocketIO, LoggingNamespace
@@ -73,7 +76,7 @@ from socketIO_client import SocketIO, LoggingNamespace
 chargeIONumber = 17
 
         
-if not serialRobot:
+if commandArgs.type == 'motor_hat':
     GPIO.setmode(GPIO.BCM)
     GPIO.setup(chargeIONumber, GPIO.IN)
 
@@ -105,7 +108,7 @@ nightTimeDrivingSpeedActuallyUsed = 170
 
 
 # Initialise the PWM device
-if not serialRobot:
+if commandArgs.type == 'motor_hat':
     pwm = PWM(0x42)
 # Note if you'd like more debug output you can instead run:
 #pwm = PWM(0x40, debug=True)
@@ -122,14 +125,14 @@ armServo = [300, 300, 300]
 
 
 
-robotID = args.robot_id
+robotID = commandArgs.robot_id
 
 
-if args.env == 'dev':
+if commandArgs.env == 'dev':
     print 'DEV MODE ***************'
     print "using dev port 8122"
     port = 8122
-elif args.env == 'prod':
+elif commandArgs.env == 'prod':
     print 'PROD MODE *************'
     print "using prod port 8022"
     port = 8022
@@ -138,7 +141,7 @@ else:
     sys.exit(0)
 
 
-if serialRobot:
+if commandArgs.type == 'serial':
     # initialize serial connection
     serialBaud = 9600
     print "baud:", serialBaud
@@ -163,7 +166,7 @@ def setServoPulse(channel, pulse):
   pwm.setPWM(channel, 0, pulse)
 
 
-if not serialRobot:
+if commandArgs.type == 'motor_hat':
     pwm.setPWMFreq(60)                        # Set frequency to 60 Hz
 
 
@@ -335,6 +338,18 @@ def handle_chat_message(args):
     os.system('cat ' + tempFilePath + ' | espeak --stdout | aplay -D plughw:2,0')
     os.remove(tempFilePath)
 
+
+def moveGoPiGo(command):
+    if command == 'L':
+        gopigo.forward()
+    if command == 'R':
+        gopigo.right()
+    if command == 'F':
+        gopigo.forward()
+    if command == 'B':
+        gopigo.backward()
+    time.sleep(0.5)
+    gopigo.stop()
     
                 
 def handle_command(args):
@@ -374,10 +389,13 @@ def handle_command(args):
 
             command = args['command']
 
-            if serialRobot:
+            if commandArgs.type == 'gopigo':
+                moveGoPiGo(command)
+            
+            if commandArgs.type == 'serial':
                 sendSerialCommand(command)
 
-            if not serialRobot and motorsEnabled:
+            if commandArgs.type == 'motor_hat' and motorsEnabled:
                 motorA.setSpeed(drivingSpeed)
                 motorB.setSpeed(drivingSpeed)
                 if command == 'F':
@@ -421,7 +439,7 @@ def handle_command(args):
                     incrementArmServo(2, 10)
                     time.sleep(0.05)
 
-            if not serialRobot:
+            if commandArgs.type == 'motor_hat':
                 turnOffMotors()
 
             #setMotorsToIdle()
@@ -465,7 +483,7 @@ def myWait():
   thread.start_new_thread(myWait, ())
 
 
-if not serialRobot:
+if commandArgs.type == 'motor_hat':
     if motorsEnabled:
         # create a default object, no changes to I2C address or frequency
         mh = Adafruit_MotorHAT(addr=0x60)
@@ -483,7 +501,7 @@ def turnOffMotors():
     #mhArm.getMotor(4).run(Adafruit_MotorHAT.RELEASE)
   
 
-if not serialRobot:
+if commandArgs.type == 'motor_hat':
     if motorsEnabled:
         atexit.register(turnOffMotors)
         motorA = mh.getMotor(1)
@@ -502,7 +520,7 @@ def sendChargeState():
 def sendChargeStateCallback(x):
     sendChargeState()
 
-if not serialRobot:
+if commandArgs.type == 'motor_hat':
     GPIO.add_event_detect(chargeIONumber, GPIO.BOTH)
     GPIO.add_event_callback(chargeIONumber, sendChargeStateCallback)
 
@@ -536,7 +554,7 @@ while True:
     if (waitCounter % 10) == 0:
         if platform.system() == 'Linux':
             ipInfoUpdate()
-        if not serialRobot:
+        if commandArgs.type == 'motor_hat':
             sendChargeState()
 
     waitCounter += 1
