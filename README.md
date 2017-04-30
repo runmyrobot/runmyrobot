@@ -15,10 +15,42 @@ The RasPi will need the following things install so it can talk to your motor an
 https://learn.adafruit.com/adafruit-dc-and-stepper-motor-hat-for-raspberry-pi/installing-software
 
 (2) Install socket.io client for python:
+
 ```pip install socketIO-client```
 
 (3) Install python serial library:
+
 ```apt-get install python-serial```
+
+(4) Install alsa-lib
+```
+cd /usr/local/src 
+wget ftp://ftp.alsa-project.org/pub/lib/alsa-lib-1.0.25.tar.bz2 \
+cd /usr/local/src/alsa-lib-1.0.25 \
+./configure --host=arm-unknown-linux-gnueabi \
+make -j4 \
+sudo make install
+```
+
+(5) Install x264
+```
+cd /usr/local/src
+git clone git://git.videolan.org/x264
+cd x264
+./configure --host=arm-unknown-linux-gnueabi --enable-static --disable-opencl
+make -j4
+sudo make install
+```
+
+(6) Install FFmpeg
+```
+cd /usr/local/src
+git clone https://github.com/FFmpeg/FFmpeg.git
+cd FFmpeg
+./configure --arch=armel --target-os=linux --enable-gpl --enable-libx264 --enable-nonfree --extra-libs=-ldl
+make -j4
+sudo make install
+```
 
 
 
