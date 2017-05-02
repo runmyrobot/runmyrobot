@@ -13,6 +13,7 @@ parser.add_argument('--type', help="serial or motor_hat or gopigo", default='mot
 parser.add_argument('--serial-device', help="serial device", default='/dev/ttyACM0')
 parser.add_argument('--male', dest='male', action='store_true')
 parser.add_argument('--female', dest='male', action='store_false')
+parser.add_argument('--voice-number', type=int, default=1)
 
 
 # set volume level
@@ -339,7 +340,7 @@ def handle_chat_message(args):
     if commandArgs.male:
         os.system('cat ' + tempFilePath + ' | espeak --stdout | aplay -D plughw:2,0')
     else:
-        os.system('cat ' + tempFilePath + ' | espeak -ven-us+f4 -s170 --stdout | aplay -D plughw:2,0')
+        os.system('cat ' + tempFilePath + ' | espeak -ven-us+f%d -s170 --stdout | aplay -D plughw:2,0' % commandArgs.voice_number)
     os.remove(tempFilePath)
 
 
