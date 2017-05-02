@@ -10,7 +10,7 @@ parser = argparse.ArgumentParser(description='start robot control program')
 parser.add_argument('robot_id', help='Robot ID')
 parser.add_argument('--env', help="Environment for example dev or prod, prod is default", default='prod')
 parser.add_argument('--type', help="serial or motor_hat or gopigo", default='motor_hat')
-parser.add_argument('--serial_device', help="serial device", default='/dev/ttyACM0')
+parser.add_argument('--serial-device', help="serial device", default='/dev/ttyACM0')
 parser.add_argument('--male', dest='male', action='store_true')
 parser.add_argument('--female', dest='male', action='store_false')
 
