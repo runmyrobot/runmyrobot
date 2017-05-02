@@ -185,8 +185,8 @@ def sendSerialCommand(command):
     # loop to collect input
     #s = "f"
     #print "string:", s
-    print str(command)
-    ser.write(command + "\r\n")     # write a string
+    print str(command.lower())
+    ser.write(command.lower() + "\r\n")     # write a string
     #ser.write(s)
     ser.flush()
 
