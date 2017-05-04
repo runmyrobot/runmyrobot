@@ -302,6 +302,13 @@ elif robotID == "11543083": # RedBird
     right = times(left, -1)
     straightDelay = 1.6
     turnDelay = 0.4
+elif robotID == "50316210": # Velma
+    forward = (1, -1, 1, -1)
+    backward = times(forward, -1)
+    left = (-1, -1, -1, -1)
+    right = times(left, -1)
+    straightDelay = 1.6
+    turnDelay = 0.4
 else: # default settings
     forward = (-1, 1, -1, 1)
     backward = times(forward, -1)
