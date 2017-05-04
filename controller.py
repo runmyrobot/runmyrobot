@@ -349,15 +349,22 @@ def handle_chat_message(args):
 
 def moveGoPiGo(command):
     if command == 'L':
-        gopigo.forward()
+        gopigo.left_rot()
+        time.sleep(0.15)
+        gopigo.stop()
     if command == 'R':
-        gopigo.right()
+        gopigo.right_rot()
+        time.sleep(0.15)
+        gopigo.stop()
     if command == 'F':
         gopigo.forward()
+        time.sleep(0.35)
+        gopigo.stop()
     if command == 'B':
         gopigo.backward()
-    time.sleep(0.5)
-    gopigo.stop()
+        time.sleep(0.35)
+        gopigo.stop()
+
     
                 
 def handle_command(args):
