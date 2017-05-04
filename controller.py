@@ -337,10 +337,13 @@ def handle_chat_message(args):
     f.close()
     #os.system('festival --tts < /tmp/speech.txt')
     #os.system('espeak < /tmp/speech.txt')
-    if commandArgs.male:
-        os.system('cat ' + tempFilePath + ' | espeak --stdout | aplay -D plughw:2,0')
-    else:
-        os.system('cat ' + tempFilePath + ' | espeak -ven-us+f%d -s170 --stdout | aplay -D plughw:2,0' % commandArgs.voice_number)
+
+    for hardwareNumber in (0, 1, 2):
+        if commandArgs.male:
+            os.system('cat ' + tempFilePath + ' | espeak --stdout | aplay -D plughw:%d,0' % hardwareNumber)
+        else:
+            os.system('cat ' + tempFilePath + ' | espeak -ven-us+f%d -s170 --stdout | aplay -D plughw:%d,0' % (commandArgs.voice_number, hardwareNumber))
+
     os.remove(tempFilePath)
 
 
