@@ -338,7 +338,7 @@ def handle_chat_message(args):
     #os.system('festival --tts < /tmp/speech.txt')
     #os.system('espeak < /tmp/speech.txt')
 
-    for hardwareNumber in (0, 1, 2):
+    for hardwareNumber in (2, 0, 1):
         if commandArgs.male:
             os.system('cat ' + tempFilePath + ' | espeak --stdout | aplay -D plughw:%d,0' % hardwareNumber)
         else:
