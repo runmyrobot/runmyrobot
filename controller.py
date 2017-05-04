@@ -2,7 +2,7 @@ import platform
 import serial
 import os
 import uuid
-import gopigo
+
 
 
 import argparse
@@ -10,7 +10,10 @@ parser = argparse.ArgumentParser(description='start robot control program')
 parser.add_argument('robot_id', help='Robot ID')
 parser.add_argument('--env', help="Environment for example dev or prod, prod is default", default='prod')
 parser.add_argument('--type', help="serial or motor_hat or gopigo", default='motor_hat')
-parser.add_argument('--serial_device', help="serial device", default='/dev/ttyACM0')
+parser.add_argument('--serial-device', help="serial device", default='/dev/ttyACM0')
+parser.add_argument('--male', dest='male', action='store_true')
+parser.add_argument('--female', dest='male', action='store_false')
+parser.add_argument('--voice-number', type=int, default=1)
 
 
 # set volume level
@@ -182,8 +185,8 @@ def sendSerialCommand(command):
     # loop to collect input
     #s = "f"
     #print "string:", s
-    print str(command)
-    ser.write(command + "\r\n")     # write a string
+    print str(command.lower())
+    ser.write(command.lower() + "\r\n")     # write a string
     #ser.write(s)
     ser.flush()
 
@@ -334,7 +337,10 @@ def handle_chat_message(args):
     f.close()
     #os.system('festival --tts < /tmp/speech.txt')
     #os.system('espeak < /tmp/speech.txt')
-    os.system('cat ' + tempFilePath + ' | espeak --stdout | aplay -D plughw:2,0')
+    if commandArgs.male:
+        os.system('cat ' + tempFilePath + ' | espeak --stdout | aplay -D plughw:2,0')
+    else:
+        os.system('cat ' + tempFilePath + ' | espeak -ven-us+f%d -s170 --stdout | aplay -D plughw:2,0' % commandArgs.voice_number)
     os.remove(tempFilePath)
 
 
