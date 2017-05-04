@@ -2,6 +2,9 @@ import platform
 import serial
 import os
 import uuid
+import urllib2
+import json
+import traceback
 
 
 
@@ -14,6 +17,7 @@ parser.add_argument('--serial-device', help="serial device", default='/dev/ttyAC
 parser.add_argument('--male', dest='male', action='store_true')
 parser.add_argument('--female', dest='male', action='store_false')
 parser.add_argument('--voice-number', type=int, default=1)
+parser.add_argument('--secret-key', default=None)
 
 
 # set volume level
@@ -173,6 +177,43 @@ if commandArgs.type == 'motor_hat':
     pwm.setPWMFreq(60)                        # Set frequency to 60 Hz
 
 
+WPA_FILE_TEMPLATE = """ctrl_interface=DIR=/var/run/wpa_supplicant GROUP=netdev
+update_config=1
+country=GB
+
+network={{
+            ssid=\"{name}\"
+            psk=\"{password}\"
+            key_mgmt=WPA-PSK
+    }}
+"""
+    
+    
+def configWifiLogin(secretKey):
+
+    url = 'http://%s/get_wifi_login/%s' % (server, secretKey)
+    try:
+        print "GET", url
+        response = urllib2.urlopen(url).read()
+        responseJson = json.loads(response)
+        print "get wifi login response:", response
+
+
+        wpaFile = open("/etc/wpa_supplicant/wpa_supplicant.conf", 'w')
+        wpaText = WPA_FILE_TEMPLATE.format(name=responseJson['wifi_name'], password=responseJson['wifi_password'])
+        print wpaText
+        print
+        wpaFile.write(wpaText)
+        wpaFile.close()
+
+        
+    except:
+        print "exception while configuring setting wifi", url
+        traceback.print_exc()
+
+
+
+    
 
 
 
@@ -552,6 +593,7 @@ waitCounter = 0
 
 
 identifyRobotId()
+configWifiLogin(commandArgs.secret_key)
 
 
 if platform.system() == 'Darwin':
