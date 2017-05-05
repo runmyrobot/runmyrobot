@@ -596,7 +596,8 @@ waitCounter = 0
 
 
 identifyRobotId()
-configWifiLogin(commandArgs.secret_key)
+if commandArgs.secret_key is not None:
+    configWifiLogin(commandArgs.secret_key)
 
 
 if platform.system() == 'Darwin':
