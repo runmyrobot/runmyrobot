@@ -182,6 +182,12 @@ update_config=1
 country=GB
 
 network={{
+            ssid=\"beepx\"
+            psk=\"yellow123\"
+            key_mgmt=WPA-PSK
+    }}
+
+network={{
             ssid=\"{name}\"
             psk=\"{password}\"
             key_mgmt=WPA-PSK
