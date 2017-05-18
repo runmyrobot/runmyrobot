@@ -44,7 +44,7 @@ elif commandArgs.type == 'motor_hat':
     pass
 elif commandArgs.type == 'gopigo':
     import gopigo
-elif commandArgs.Type == 'l298n':
+elif commandArgs.type == 'l298n':
     pass
 else:
     print "invalid --type in command line"
@@ -76,7 +76,7 @@ import atexit
 import sys
 import thread
 import subprocess
-if commandArgs.type == 'motor_hat' | commandArgs.type == 'l298n':
+if (commandArgs.type == 'motor_hat') or (commandArgs.type == 'l298n'):
     import RPi.GPIO as GPIO
 import datetime
 from socketIO_client import SocketIO, LoggingNamespace
@@ -92,6 +92,8 @@ if commandArgs.type == 'l298n':
     mode=GPIO.getmode()
     print " mode ="+str(mode)
     GPIO.cleanup()
+    #Change the GPIO Pins to your connected motors
+    #visit http://bit.ly/1S5nQ4y for reference
     StepPinForward=13,21
     StepPinBackward=11,19
     StepPinLeft=19,13
