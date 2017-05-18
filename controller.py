@@ -411,9 +411,9 @@ def handle_exclusive_control(args):
 
             status = args['status']
 
-	    if status == 'start':
+        if status == 'start':
                 print "start exclusive control"
-	    if status == 'end':
+        if status == 'end':
                 print "end exclusive control"
 
 
