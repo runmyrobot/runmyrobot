@@ -67,31 +67,48 @@ Copy the 'start_robot' Script from runmyrobot/Scripts to the pi home folder
 Edit the script so you can adjust some settings for controller.py and send_video.py:
 
 ```nano ~/start_robot```
-Edit the YOURROBOTID to your robot ID.
-Edit the YOURCAMERAID to your camera ID.
-You are getting both IDs when you are creating a new bot on the website.
-The second parameter on send_video.py 0 is assuming you have one camera plugged into your Pi and you are using it, which is usually the case.
-There are more parameter possible:
 
-controller.py
-```
-robot_id 
+Edit the YOURROBOTID to your robot ID.
+
+Edit the YOURCAMERAID to your camera ID.
+
+You are getting both IDs when you are creating a new bot on the website.
+
+The second parameter on send_video.py 0 is assuming you have one camera plugged into your Pi and you are using it, which is usually the case.
+
+There are more parameter possible for controller.py:
+
+```robot_id```
+
 Your Robot ID. Required
---env prod | dev
+
+```--env prod | dev```
+
 Environment for example dev or prod | default='prod'
---type motor_hat | serial | l298n
+
+```--type motor_hat | serial | l298n```
+
 What type of motor controller should be used | default='motor_hat'
---serial-device /dev/ttyACM0
+
+```--serial-device /dev/ttyACM0```
+
 Serial device | default='/dev/ttyACM0'
---male
+
+```--male```
+
 Use TTS with a male voice
---female
+
+```--female```
+
 Use TTS with a female voice
---voice-number 1
+
+```--voice-number 1```
+
 What voice should be used | default=1
 
-```
-Examples:
+
+Example start_robot:
+
 ```
 cd /home/pi/runmyrobot
 nohup scripts/repeat_start python controller.py YOURROBOTID --type motor_hat --male --voice_number 1 &> /dev/null &
