@@ -220,7 +220,7 @@ network={{
     
 def configWifiLogin(secretKey):
 
-    url = 'http://%s/get_wifi_login/%s' % (server, secretKey)
+    url = 'https://%s/get_wifi_login/%s' % (server, secretKey)
     try:
         print "GET", url
         response = urllib2.urlopen(url).read()
