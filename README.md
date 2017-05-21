@@ -47,7 +47,7 @@ sudo make install
 cd /usr/local/src
 git clone https://github.com/FFmpeg/FFmpeg.git
 cd FFmpeg
-./configure --arch=armel --target-os=linux --enable-gpl --enable-libx264 --enable-nonfree --extra-libs=-ldl
+./configure --arch=armel --target-os=linux --enable-gpl --enable-libx264 --enable-nonfree --enable-gnutls --extra-libs=-ldl
 make -j4
 sudo make install
 ```
