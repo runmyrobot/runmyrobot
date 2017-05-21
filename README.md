@@ -18,9 +18,9 @@ https://learn.adafruit.com/adafruit-dc-and-stepper-motor-hat-for-raspberry-pi/in
 
 ```pip install socketIO-client```
 
-(3) Install python serial library:
+(3) Install python serial library and python dev package:
 
-```apt-get install python-serial```
+```apt-get install python-serial python-dev```
 
 (4) Install alsa-lib
 ```
