@@ -18,9 +18,9 @@ https://learn.adafruit.com/adafruit-dc-and-stepper-motor-hat-for-raspberry-pi/in
 
 ```pip install socketIO-client```
 
-(3) Install python serial library:
+(3) Install python serial, gnutls, and python-dev:
 
-```apt-get install python-serial```
+```apt-get install python-serial python-dev libgnutls28-dev```
 
 (4) Install alsa-lib
 ```
@@ -47,7 +47,7 @@ sudo make install
 cd /usr/local/src
 git clone https://github.com/FFmpeg/FFmpeg.git
 cd FFmpeg
-./configure --arch=armel --target-os=linux --enable-gpl --enable-libx264 --enable-nonfree --extra-libs=-ldl
+./configure --arch=armel --target-os=linux --enable-gpl --enable-libx264 --enable-nonfree --enable-gnutls --extra-libs=-ldl
 make -j4
 sudo make install
 ```
