@@ -25,10 +25,10 @@ https://learn.adafruit.com/adafruit-dc-and-stepper-motor-hat-for-raspberry-pi/in
 (4) Install alsa-lib
 ```
 cd /usr/local/src 
-wget ftp://ftp.alsa-project.org/pub/lib/alsa-lib-1.0.25.tar.bz2 \
-cd /usr/local/src/alsa-lib-1.0.25 \
-./configure --host=arm-unknown-linux-gnueabi \
-make -j4 \
+wget ftp://ftp.alsa-project.org/pub/lib/alsa-lib-1.0.25.tar.bz2 
+cd /usr/local/src/alsa-lib-1.0.25 
+./configure --host=arm-unknown-linux-gnueabi 
+make -j4 
 sudo make install
 ```
 
