@@ -517,7 +517,7 @@ def handle_command(args):
 
 
 def handleStartReverseSshProcess(args):
-    subprocess.call(["ssh", "-i", "/home/pi/reverse_ssh_key0.pem", "-N", "-R", "2222:localhost:22", "ubuntu@52.8.25.95"])
+    subprocess.call(["ssh", "-i", "/home/pi/reverse_ssh_key1.pem", "-N", "-R", "2222:localhost:22", "ubuntu@52.52.204.174"])
 
 def handleEndReverseSshProcess(args):
     subprocess.call(["killall", "ssh"])
