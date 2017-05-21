@@ -12,7 +12,7 @@ import argparse
 parser = argparse.ArgumentParser(description='start robot control program')
 parser.add_argument('robot_id', help='Robot ID')
 parser.add_argument('--env', help="Environment for example dev or prod, prod is default", default='prod')
-parser.add_argument('--type', help="serial or motor_hat or gopigo", default='motor_hat')
+parser.add_argument('--type', help="serial or motor_hat or gopigo or l298n", default='motor_hat')
 parser.add_argument('--serial-device', help="serial device", default='/dev/ttyACM0')
 parser.add_argument('--male', dest='male', action='store_true')
 parser.add_argument('--female', dest='male', action='store_false')
@@ -44,6 +44,8 @@ elif commandArgs.type == 'motor_hat':
     pass
 elif commandArgs.type == 'gopigo':
     import gopigo
+elif commandArgs.type == 'l298n':
+    pass
 else:
     print "invalid --type in command line"
     exit(0)
@@ -74,7 +76,7 @@ import atexit
 import sys
 import thread
 import subprocess
-if commandArgs.type == 'motor_hat':
+if (commandArgs.type == 'motor_hat') or (commandArgs.type == 'l298n'):
     import RPi.GPIO as GPIO
 import datetime
 from socketIO_client import SocketIO, LoggingNamespace
@@ -86,7 +88,28 @@ chargeIONumber = 17
 if commandArgs.type == 'motor_hat':
     GPIO.setmode(GPIO.BCM)
     GPIO.setup(chargeIONumber, GPIO.IN)
-
+if commandArgs.type == 'l298n':
+    mode=GPIO.getmode()
+    print " mode ="+str(mode)
+    GPIO.cleanup()
+    #Change the GPIO Pins to your connected motors
+    #visit http://bit.ly/1S5nQ4y for reference
+    StepPinForward=13,21
+    StepPinBackward=11,19
+    StepPinLeft=19,13
+    StepPinRight=11,21
+    GPIO.setmode(GPIO.BOARD)
+    GPIO.setup(StepPinForward, GPIO.OUT)
+    GPIO.setup(StepPinBackward, GPIO.OUT)
+    GPIO.setup(StepPinLeft, GPIO.OUT)
+    GPIO.setup(StepPinRight, GPIO.OUT)
+    #Change sleeptime to adjust driving speed
+    #Change rotatetimes to adjust the rotation. Will be multiplicated with sleeptime.
+    sleeptime=0.2
+    rotatetimes=5
+    #StanleyBot
+    #sleeptime=0.2
+    #rotatetimes=5
 
 steeringSpeed = 90
 steeringHoldingSpeed = 90
@@ -197,7 +220,7 @@ network={{
     
 def configWifiLogin(secretKey):
 
-    url = 'http://%s/get_wifi_login/%s' % (server, secretKey)
+    url = 'https://%s/get_wifi_login/%s' % (server, secretKey)
     try:
         print "GET", url
         response = urllib2.urlopen(url).read()
@@ -265,6 +288,23 @@ def incrementArmServo(channel, amount):
 def times(lst, number):
     return [x*number for x in lst]
 
+def runl298n(direction):
+    if direction == 'F':
+        GPIO.output(StepPinForward, GPIO.HIGH)
+        time.sleep(sleeptime * rotatetimes)
+        GPIO.output(StepPinForward, GPIO.LOW)
+    if direction == 'B':
+        GPIO.output(StepPinBackward, GPIO.HIGH)
+        time.sleep(sleeptime * rotatetimes)
+        GPIO.output(StepPinBackward, GPIO.LOW)
+    if direction == 'L':
+        GPIO.output(StepPinLeft, GPIO.HIGH)
+        time.sleep(sleeptime)
+        GPIO.output(StepPinLeft, GPIO.LOW)
+    if direction == 'R':
+        GPIO.output(StepPinRight, GPIO.HIGH)
+        time.sleep(sleeptime)
+        GPIO.output(StepPinRight, GPIO.LOW)
 
 def runMotor(motorIndex, direction):
     motor = mh.getMotor(motorIndex+1)
@@ -373,9 +413,9 @@ def handle_exclusive_control(args):
 
             status = args['status']
 
-	    if status == 'start':
+        if status == 'start':
                 print "start exclusive control"
-	    if status == 'end':
+        if status == 'end':
                 print "end exclusive control"
 
 
@@ -510,7 +550,8 @@ def handle_command(args):
 
             if commandArgs.type == 'motor_hat':
                 turnOffMotors()
-
+            if commandArgs.type == 'l298n':
+                runl298n(command)                                 
             #setMotorsToIdle()
             
         handlingCommand = False

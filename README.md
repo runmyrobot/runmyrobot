@@ -25,10 +25,10 @@ https://learn.adafruit.com/adafruit-dc-and-stepper-motor-hat-for-raspberry-pi/in
 (4) Install alsa-lib
 ```
 cd /usr/local/src 
-wget ftp://ftp.alsa-project.org/pub/lib/alsa-lib-1.0.25.tar.bz2 \
-cd /usr/local/src/alsa-lib-1.0.25 \
-./configure --host=arm-unknown-linux-gnueabi \
-make -j4 \
+wget ftp://ftp.alsa-project.org/pub/lib/alsa-lib-1.0.25.tar.bz2 
+cd /usr/local/src/alsa-lib-1.0.25 
+./configure --host=arm-unknown-linux-gnueabi 
+make -j4 
 sudo make install
 ```
 
@@ -60,28 +60,72 @@ Go to new robot page to create a robot. If you already have one, got to manage r
 
 These two scripts need to be running in the background to bring your robot to life: controller.py, send_video.py. Here are instructions about how to start them.
 
-Starting the Robot Controller for the Robot
+Copy the 'start_robot' Script from runmyrobot/Scripts to the pi home folder
 
-python controller.py YOUR_ROBOT_ID
+```cp ~/runmyrobot/scripts/start_robot ~/```
 
-For example:
+Edit the script so you can adjust some settings for controller.py and send_video.py:
 
-```python controller.py 789123```
+```nano ~/start_robot```
+
+Edit the YOURROBOTID to your robot ID.
+
+Edit the YOURCAMERAID to your camera ID.
+
+You are getting both IDs when you are creating a new bot on the website.
+
+The second parameter on send_video.py 0 is assuming you have one camera plugged into your Pi and you are using it, which is usually the case.
+
+There are more parameter possible for controller.py:
+
+```robot_id```
+
+Your Robot ID. Required
+
+```--env prod | dev```
+
+Environment for example dev or prod | default='prod'
+
+```--type motor_hat | serial | l298n```
+
+What type of motor controller should be used | default='motor_hat'
+
+```--serial-device /dev/ttyACM0```
+
+Serial device | default='/dev/ttyACM0'
+
+```--male```
+
+Use TTS with a male voice
+
+```--female```
+
+Use TTS with a female voice
+
+```--voice-number 1```
+
+What voice should be used | default=1
 
 
+Example start_robot:
 
-Starting the Video Streamer for the Robot
+```
+cd /home/pi/runmyrobot
+nohup scripts/repeat_start python controller.py YOURROBOTID --type motor_hat --male --voice_number 1 &> /dev/null &
+nohup scripts/repeat_start python send_video.py YOURCAMERAID 0 &> /dev/null &
+```
 
+<h3> Start script on boot </h3>
+Use crontab to start the start_robot script on booting:
+```
+crontab -e
+```
+insert following line and save:
+```
+@reboot /bin/bash /home/pi/start_robot
+```
 
-```python send_video.py YOUR_CAMERA_ID YOUR_VIDEO_DEVICE_NUMBER```
-
-For example:
-
-```python send_video.py 12345 0```
-
-The second parameter 0 is assuming you have one camera plugged into your Pi and you are using it, which is usually the case.
-
-
+That's it!
 
 <h2> How does this work </h2>
 
