@@ -220,7 +220,7 @@ network={{
     
 def configWifiLogin(secretKey):
 
-    url = 'http://%s/get_wifi_login/%s' % (server, secretKey)
+    url = 'https://%s/get_wifi_login/%s' % (server, secretKey)
     try:
         print "GET", url
         response = urllib2.urlopen(url).read()
@@ -558,8 +558,13 @@ def handle_command(args):
 
 
 def handleStartReverseSshProcess(args):
-    subprocess.call(["ssh", "-i", "/home/pi/reverse_ssh_key0.pem", "-N", "-R", "2222:localhost:22", "ubuntu@52.8.25.95"])
+    print "starting reverse ssh"
+    socketIO.emit("reverse_ssh_info", "starting")
+    returnCode = subprocess.call(["/usr/bin/ssh", "-i", "/home/pi/reverse_ssh_key1.pem", "-N", "-R", "2222:localhost:22", "ubuntu@52.52.204.174"])
+    socketIO.emit("reverse_ssh_info", "return code: " + str(returnCode))
+    print "reverse ssh process has exited with code", str(returnCode)
 
+    
 def handleEndReverseSshProcess(args):
     subprocess.call(["killall", "ssh"])
         
@@ -664,8 +669,13 @@ elif platform.system() == 'Linux':
 while True:
     socketIO.wait(seconds=10)
     if (waitCounter % 10) == 0:
+
+        # tell the server what robot id is using this connection
+        identifyRobotId()
+        
         if platform.system() == 'Linux':
             ipInfoUpdate()
+
         if commandArgs.type == 'motor_hat':
             sendChargeState()
 
