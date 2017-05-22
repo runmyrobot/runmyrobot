@@ -155,6 +155,11 @@ def SetLED_Low():
     # brightness MIN
     spi.writebytes([0x0a])
     spi.writebytes([0x00])
+def SetLED_Med():
+  if commandArgs.led == 'max7219':
+    #brightness MED
+    spi.writebytes([0x0a])
+    spi.writebytes([0x06])
 def SetLED_Full():
   if commandArgs.led == 'max7219':
     # brightness MAX
@@ -597,7 +602,6 @@ def handle_command(args):
                 runl298n(command)                                 
             #setMotorsToIdle()
             
-#
             if commandArgs.led == 'max7219':
                 if command == 'LED_ON':
                     SetLED_On()
@@ -605,6 +609,8 @@ def handle_command(args):
                     SetLED_Off()
                 if command == 'LED_FULL':
                     SetLED_Full()
+                if command == 'LED_MED':
+                    SetLED_Med()
                 if command == 'LED_LOW':
                     SetLED_Low()
         handlingCommand = False
