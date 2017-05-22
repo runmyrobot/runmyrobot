@@ -106,21 +106,27 @@ Use TTS with a female voice
 
 What voice should be used | default=1
 
+```--led max7219```
+
+What LEDs should be used (if any) | default=none
 
 Example start_robot:
 
 ```
 cd /home/pi/runmyrobot
-nohup scripts/repeat_start python controller.py YOURROBOTID --type motor_hat --male --voice_number 1 &> /dev/null &
+nohup scripts/repeat_start python controller.py YOURROBOTID --type motor_hat --male --voice_number 1 --led max7219 &> /dev/null &
 nohup scripts/repeat_start python send_video.py YOURCAMERAID 0 &> /dev/null &
 ```
 
 <h3> Start script on boot </h3>
 Use crontab to start the start_robot script on booting:
+
 ```
 crontab -e
 ```
+
 insert following line and save:
+
 ```
 @reboot /bin/bash /home/pi/start_robot
 ```

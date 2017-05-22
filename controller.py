@@ -111,6 +111,12 @@ if commandArgs.type == 'l298n':
 if commandArgs.led == 'max7219':
     spi = spidev.SpiDev()
     spi.open(0,0)
+    #VCC -> RPi Pin 2
+    #GND -> RPi Pin 6
+    #DIN -> RPi Pin 19
+    #CLK -> RPi Pin 23
+    #CS -> RPi Pin 24
+    
     # decoding:BCD
     spi.writebytes([0x09])
     spi.writebytes([0x00])
