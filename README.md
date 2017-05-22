@@ -18,9 +18,9 @@ https://learn.adafruit.com/adafruit-dc-and-stepper-motor-hat-for-raspberry-pi/in
 
 ```pip install socketIO-client```
 
-(3) Install python serial, gnutls, and python-dev:
+(3) Install python serial, gnutls, python-dev, and espeak:
 
-```apt-get install python-serial python-dev libgnutls28-dev```
+```apt-get install python-serial python-dev libgnutls28-dev espeak```
 
 (4) Install alsa-lib
 ```
