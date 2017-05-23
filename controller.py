@@ -17,6 +17,7 @@ parser.add_argument('--serial-device', help="serial device", default='/dev/ttyAC
 parser.add_argument('--male', dest='male', action='store_true')
 parser.add_argument('--female', dest='male', action='store_false')
 parser.add_argument('--voice-number', type=int, default=1)
+parser.add_argument('--led', help="Type of LED for example max7219", default=None)
 parser.add_argument('--tts-volume', type=int, default=80)
 parser.add_argument('--secret-key', default=None)
 
@@ -51,6 +52,9 @@ else:
     print "invalid --type in command line"
     exit(0)
 
+if commandArgs.led == 'max7219':
+    import spidev
+    
 #serialDevice = '/dev/tty.usbmodem12341'
 #serialDevice = '/dev/ttyUSB0'
 
@@ -84,8 +88,7 @@ from socketIO_client import SocketIO, LoggingNamespace
 
 
 chargeIONumber = 17
-
-        
+      
 if commandArgs.type == 'motor_hat':
     GPIO.setmode(GPIO.BCM)
     GPIO.setup(chargeIONumber, GPIO.IN)
@@ -95,22 +98,82 @@ if commandArgs.type == 'l298n':
     GPIO.cleanup()
     #Change the GPIO Pins to your connected motors
     #visit http://bit.ly/1S5nQ4y for reference
-    StepPinForward=13,21
-    StepPinBackward=11,19
-    StepPinLeft=19,13
-    StepPinRight=11,21
+    StepPinForward=12,16
+    StepPinBackward=11,15
+    StepPinLeft=15,12
+    StepPinRight=11,16
     GPIO.setmode(GPIO.BOARD)
     GPIO.setup(StepPinForward, GPIO.OUT)
     GPIO.setup(StepPinBackward, GPIO.OUT)
     GPIO.setup(StepPinLeft, GPIO.OUT)
     GPIO.setup(StepPinRight, GPIO.OUT)
-    #Change sleeptime to adjust driving speed
-    #Change rotatetimes to adjust the rotation. Will be multiplicated with sleeptime.
-    sleeptime=0.2
-    rotatetimes=5
-    #StanleyBot
-    #sleeptime=0.2
-    #rotatetimes=5
+
+#LED controlling
+if commandArgs.led == 'max7219':
+    spi = spidev.SpiDev()
+    spi.open(0,0)
+    #VCC -> RPi Pin 2
+    #GND -> RPi Pin 6
+    #DIN -> RPi Pin 19
+    #CLK -> RPi Pin 23
+    #CS -> RPi Pin 24
+    
+    # decoding:BCD
+    spi.writebytes([0x09])
+    spi.writebytes([0x00])
+    # Start with low brightness
+    spi.writebytes([0x0a])
+    spi.writebytes([0x03])
+    # scanlimit; 8 LEDs
+    spi.writebytes([0x0b])
+    spi.writebytes([0x07])
+    # Enter normal power-mode
+    spi.writebytes([0x0c])
+    spi.writebytes([0x01])
+    # Activate display
+    spi.writebytes([0x0f])
+    spi.writebytes([0x00])
+    columns = [0x1,0x2,0x3,0x4,0x5,0x6,0x7,0x8]
+    LEDOn = [0xFF,0xFF,0xFF,0xFF,0xFF,0xFF,0xFF,0xFF] 
+    LEDOff = [0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0] 
+    
+def SetLED_On():
+  if commandArgs.led == 'max7219':
+    spi.xfer([columns[0],LEDOn[0]]) 
+    spi.xfer([columns[1],LEDOn[1]])
+    spi.xfer([columns[2],LEDOn[2]])
+    spi.xfer([columns[3],LEDOn[3]])
+    spi.xfer([columns[4],LEDOn[4]])
+    spi.xfer([columns[5],LEDOn[5]])
+    spi.xfer([columns[6],LEDOn[6]])
+    spi.xfer([columns[7],LEDOn[7]])
+def SetLED_Off():
+  if commandArgs.led == 'max7219':
+    spi.xfer([columns[0],LEDOff[0]]) 
+    spi.xfer([columns[1],LEDOff[1]])
+    spi.xfer([columns[2],LEDOff[2]])
+    spi.xfer([columns[3],LEDOff[3]])
+    spi.xfer([columns[4],LEDOff[4]])
+    spi.xfer([columns[5],LEDOff[5]])
+    spi.xfer([columns[6],LEDOff[6]])
+    spi.xfer([columns[7],LEDOff[7]])
+def SetLED_Low():
+  if commandArgs.led == 'max7219':
+    # brightness MIN
+    spi.writebytes([0x0a])
+    spi.writebytes([0x00])
+def SetLED_Med():
+  if commandArgs.led == 'max7219':
+    #brightness MED
+    spi.writebytes([0x0a])
+    spi.writebytes([0x06])
+def SetLED_Full():
+  if commandArgs.led == 'max7219':
+    # brightness MAX
+    spi.writebytes([0x0a])
+    spi.writebytes([0x0F])
+        
+SetLED_Off()
 
 steeringSpeed = 90
 steeringHoldingSpeed = 90
@@ -289,23 +352,7 @@ def incrementArmServo(channel, amount):
 def times(lst, number):
     return [x*number for x in lst]
 
-def runl298n(direction):
-    if direction == 'F':
-        GPIO.output(StepPinForward, GPIO.HIGH)
-        time.sleep(sleeptime * rotatetimes)
-        GPIO.output(StepPinForward, GPIO.LOW)
-    if direction == 'B':
-        GPIO.output(StepPinBackward, GPIO.HIGH)
-        time.sleep(sleeptime * rotatetimes)
-        GPIO.output(StepPinBackward, GPIO.LOW)
-    if direction == 'L':
-        GPIO.output(StepPinLeft, GPIO.HIGH)
-        time.sleep(sleeptime)
-        GPIO.output(StepPinLeft, GPIO.LOW)
-    if direction == 'R':
-        GPIO.output(StepPinRight, GPIO.HIGH)
-        time.sleep(sleeptime)
-        GPIO.output(StepPinRight, GPIO.LOW)
+
 
 def runMotor(motorIndex, direction):
     motor = mh.getMotor(motorIndex+1)
@@ -400,6 +447,16 @@ elif robotID == "12692512": # Pita
     right = times(left, -1)
     straightDelay = 0.5
     turnDelay = 0.4
+elif robotID == "88241899": #MadrivaBot
+    forward = (1, -1, 1, -1)
+    backward = times(forward, -1)
+    left = (-1, -1, -1, -1)
+    right = times(left, -1)
+    straightDelay = 0.5
+    turnDelay = 0.4
+elif robotID == "20134182": #StanleyBot
+    l298n_sleeptime=0.2
+    l298n_rotatetimes=5
 else: # default settings
     forward = (-1, 1, -1, 1)
     backward = times(forward, -1)
@@ -407,6 +464,10 @@ else: # default settings
     right = times(left, -1)
     straightDelay = 0.5
     turnDelay = 0.4
+    #Change sleeptime to adjust driving speed
+    #Change rotatetimes to adjust the rotation. Will be multiplicated with sleeptime.
+    l298n_sleeptime=0.2
+    l298n_rotatetimes=5
 
     
 def handle_exclusive_control(args):
@@ -555,8 +616,37 @@ def handle_command(args):
                 runl298n(command)                                 
             #setMotorsToIdle()
             
+            if commandArgs.led == 'max7219':
+                if command == 'LED_OFF':
+                    SetLED_Off()
+                if command == 'LED_FULL':
+                    SetLED_On()
+                    SetLED_Full()
+                if command == 'LED_MED':
+                    SetLED_On()
+                    SetLED_Med()
+                if command == 'LED_LOW':
+                    SetLED_On()
+                    SetLED_Low()
         handlingCommand = False
 
+def runl298n(direction):
+    if direction == 'F':
+        GPIO.output(StepPinForward, GPIO.HIGH)
+        time.sleep(l298n_sleeptime * l298n_rotatetimes)
+        GPIO.output(StepPinForward, GPIO.LOW)
+    if direction == 'B':
+        GPIO.output(StepPinBackward, GPIO.HIGH)
+        time.sleep(l298n_sleeptime * l298n_rotatetimes)
+        GPIO.output(StepPinBackward, GPIO.LOW)
+    if direction == 'L':
+        GPIO.output(StepPinLeft, GPIO.HIGH)
+        time.sleep(l298n_sleeptime)
+        GPIO.output(StepPinLeft, GPIO.LOW)
+    if direction == 'R':
+        GPIO.output(StepPinRight, GPIO.HIGH)
+        time.sleep(l298n_sleeptime)
+        GPIO.output(StepPinRight, GPIO.LOW)
 
 def handleStartReverseSshProcess(args):
     print "starting reverse ssh"
