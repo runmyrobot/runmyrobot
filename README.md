@@ -20,7 +20,7 @@ https://learn.adafruit.com/adafruit-dc-and-stepper-motor-hat-for-raspberry-pi/in
 
 (3) Install python serial, gnutls, python-dev, espeak, and python-smbus:
 
-```apt-get install python-serial python-dev libgnutls28-dev espeak python-smbus```
+```apt-get install python-serial python-dev libgnutls28-dev espeak python-smbus python-pip```
 
 (4) Install alsa-lib
 ```
