@@ -609,15 +609,16 @@ def handle_command(args):
             #setMotorsToIdle()
             
             if commandArgs.led == 'max7219':
-                if command == 'LED_ON':
-                    SetLED_On()
                 if command == 'LED_OFF':
                     SetLED_Off()
                 if command == 'LED_FULL':
+                    SetLED_On()
                     SetLED_Full()
                 if command == 'LED_MED':
+                    SetLED_On()
                     SetLED_Med()
                 if command == 'LED_LOW':
+                    SetLED_On()
                     SetLED_Low()
         handlingCommand = False
 
