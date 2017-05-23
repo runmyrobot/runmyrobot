@@ -18,7 +18,13 @@ parser.add_argument('--male', dest='male', action='store_true')
 parser.add_argument('--female', dest='male', action='store_false')
 parser.add_argument('--voice-number', type=int, default=1)
 parser.add_argument('--led', help="Type of LED for example max7219", default=None)
+parser.add_argument('--tts-volume', type=int, default=80)
 parser.add_argument('--secret-key', default=None)
+
+
+commandArgs = parser.parse_args()
+print commandArgs
+
 
 
 # set volume level
@@ -27,12 +33,7 @@ parser.add_argument('--secret-key', default=None)
 #os.system("amixer set PCM -- -100")
 
 # tested for USB audio device
-#os.system("amixer cset numid=3 100%")
-os.system("amixer -c 2 cset numid=3 80%")
-
-
-commandArgs = parser.parse_args()
-print commandArgs
+os.system("amixer -c 2 cset numid=3 %d%%" % commandArgs.tts_volume)
 
 
 
@@ -656,8 +657,10 @@ def handleStartReverseSshProcess(args):
 
     
 def handleEndReverseSshProcess(args):
-    subprocess.call(["killall", "ssh"])
-        
+    print "handling end reverse ssh process"
+    resultCode = subprocess.call(["killall", "ssh"])
+    print "result code of killall ssh:", resultCode
+
 def on_handle_command(*args):
    thread.start_new_thread(handle_command, args)
 
