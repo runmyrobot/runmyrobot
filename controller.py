@@ -446,6 +446,13 @@ elif robotID == "12692512": # Pita
     right = times(left, -1)
     straightDelay = 0.5
     turnDelay = 0.4
+elif robotID == "88241899": #MadrivaBot
+    forward = (1, -1, 1, -1)
+    backward = times(forward, -1)
+    left = (-1, -1, -1, -1)
+    right = times(left, -1)
+    straightDelay = 0.5
+    turnDelay = 0.4
 elif robotID == "20134182": #StanleyBot
     l298n_sleeptime=0.2
     l298n_rotatetimes=5
