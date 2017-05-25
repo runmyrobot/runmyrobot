@@ -12,6 +12,11 @@ parser.add_argument('--type', help="serial or motor_hat", default='motor_hat')
 parser.add_argument('--serial_device', help="serial device", default='/dev/ttyACM0')
 
 
+# watch dog timer
+os.system("sudo modprobe bcm2835_wdt")
+os.system("sudo /usr/sbin/service watchdog start")
+
+
 # set volume level
 
 # tested for 3.5mm audio jack
