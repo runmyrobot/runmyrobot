@@ -69,6 +69,8 @@ if commandArgs.type == 'motor_hat':
     except ImportError:
         print "You need to install Adafruit_MotorHAT"
         print "Please install Adafruit_MotorHAT for python and restart this script."
+        print "To install: cd /usr/local/src && sudo git clone https://github.com/adafruit/Adafruit-Motor-HAT-Python-Library.git"
+        print "cd /usr/local/src/Adafruit-Motor-HAT-Python-Library && sudo python setup.py install"
         print "Running in test mode."
         print "Ctrl-C to quit"
         motorsEnabled = False
