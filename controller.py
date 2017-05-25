@@ -12,7 +12,7 @@ import argparse
 parser = argparse.ArgumentParser(description='start robot control program')
 parser.add_argument('robot_id', help='Robot ID')
 parser.add_argument('--env', help="Environment for example dev or prod, prod is default", default='prod')
-parser.add_argument('--type', help="serial or motor_hat or gopigo or l298n", default='motor_hat')
+parser.add_argument('--type', help="serial or motor_hat or gopigo or l298n or motozero", default='motor_hat')
 parser.add_argument('--serial-device', help="serial device", default='/dev/ttyACM0')
 parser.add_argument('--male', dest='male', action='store_true')
 parser.add_argument('--female', dest='male', action='store_false')
@@ -47,6 +47,8 @@ elif commandArgs.type == 'motor_hat':
 elif commandArgs.type == 'gopigo':
     import gopigo
 elif commandArgs.type == 'l298n':
+    pass
+elif commandArgs.type == 'motozero':
     pass
 else:
     print "invalid --type in command line"
@@ -83,7 +85,7 @@ import atexit
 import sys
 import thread
 import subprocess
-if (commandArgs.type == 'motor_hat') or (commandArgs.type == 'l298n'):
+if (commandArgs.type == 'motor_hat') or (commandArgs.type == 'l298n') or (commandArgs.type == 'motozero'):
     import RPi.GPIO as GPIO
 import datetime
 from socketIO_client import SocketIO, LoggingNamespace
@@ -109,6 +111,53 @@ if commandArgs.type == 'l298n':
     GPIO.setup(StepPinBackward, GPIO.OUT)
     GPIO.setup(StepPinLeft, GPIO.OUT)
     GPIO.setup(StepPinRight, GPIO.OUT)
+if commandArgs.type == 'motozero':
+    GPIO.cleanup()
+    GPIO.setmode(GPIO.BCM)
+
+    # Motor1 is back left
+    # Motor1A is reverse
+    # Motor1B is forward
+    Motor1A = 24
+    Motor1B = 27
+    Motor1Enable = 5
+
+    # Motor2 is back right
+    # Motor2A is reverse
+    # Motor2B is forward
+    Motor2A = 6
+    Motor2B = 22
+    Motor2Enable = 17
+
+    # Motor3 is ?
+    # Motor3A is reverse
+    # Motor3B is forward
+    Motor3A = 23
+    Motor3B = 16
+    Motor3Enable = 12
+
+    # Motor4 is ?
+    # Motor4A is reverse
+    # Motor4B is forward
+    Motor4A = 13
+    Motor4B = 18
+    Motor4Enable = 25
+
+    GPIO.setup(Motor1A,GPIO.OUT)
+    GPIO.setup(Motor1B,GPIO.OUT)
+    GPIO.setup(Motor1Enable,GPIO.OUT)
+
+    GPIO.setup(Motor2A,GPIO.OUT)
+    GPIO.setup(Motor2B,GPIO.OUT)
+    GPIO.setup(Motor2Enable,GPIO.OUT) 
+
+    GPIO.setup(Motor3A,GPIO.OUT)
+    GPIO.setup(Motor3B,GPIO.OUT)
+    GPIO.setup(Motor3Enable,GPIO.OUT)
+
+    GPIO.setup(Motor4A,GPIO.OUT)
+    GPIO.setup(Motor4B,GPIO.OUT)
+    GPIO.setup(Motor4Enable,GPIO.OUT)
 
 #LED controlling
 if commandArgs.led == 'max7219':
@@ -617,6 +666,8 @@ def handle_command(args):
             if commandArgs.type == 'l298n':
                 runl298n(command)                                 
             #setMotorsToIdle()
+	    if commandArgs.type == 'motozero':
+		runmotozero(command)
             
             if commandArgs.led == 'max7219':
                 if command == 'LED_OFF':
@@ -649,6 +700,54 @@ def runl298n(direction):
         GPIO.output(StepPinRight, GPIO.HIGH)
         time.sleep(l298n_sleeptime)
         GPIO.output(StepPinRight, GPIO.LOW)
+
+def runmotozero(direction):
+    if direction == 'F':
+        GPIO.output(Motor1A, GPIO.LOW)
+        GPIO.output(Motor1B, GPIO.HIGH) 
+        GPIO.output(Motor1Enable,GPIO.HIGH)
+        
+        GPIO.output(Motor2A, GPIO.LOW)
+        GPIO.output(Motor2B, GPIO.HIGH)
+        GPIO.output(Motor2Enable, GPIO.HIGH)
+        
+        GPIO.output(Motor3A, GPIO.HIGH)
+        GPIO.output(Motor3B, GPIO.LOW)
+        GPIO.output(Motor3Enable, GPIO.HIGH)
+   
+        GPIO.output(Motor4A, GPIO.HIGH)
+        GPIO.output(Motor4B, GPIO.LOW)
+        GPIO.output(Motor4Enable, GPIO.HIGH)
+
+        time.sleep(3)
+        
+        GPIO.output(Motor1B, GPIO.LOW)
+        GPIO.output(Motor2B, GPIO.LOW)
+        GPIO.output(Motor3A, GPIO.LOW)
+        GPIO.output(Motor4A, GPIO.LOW)
+    if direction == 'B':
+        GPIO.output(Motor1A, GPIO.HIGH)
+        GPIO.output(Motor1B, GPIO.LOW)
+        GPIO.output(Motor1Enable, GPIO.HIGH)
+        
+        GPIO.output(Motor2A, GPIO.HIGH)
+        GPIO.output(Motor2B, GPIO.LOW)
+        GPIO.output(Motor2Enable, GPIO.HIGH)
+        
+        GPIO.output(Motor3A, GPIO.LOW)
+        GPIO.output(Motor3B, GPIO.HIGH)
+        GPIO.output(Motor3Enable, GPIO.HIGH)
+
+        GPIO.output(Motor4A, GPIO.LOW)
+        GPIO.output(Motor4B, GPIO.HIGH)
+        GPIO.output(Motor4Enable, GPIO.HIGH)
+
+        time.sleep(3)
+        
+        GPIO.output(Motor1A, GPIO.LOW)
+        GPIO.output(Motor2A, GPIO.LOW)
+        GPIO.output(Motor3B, GPIO.LOW)
+        GPIO.output(Motor4B, GPIO.LOW)
 
 def handleStartReverseSshProcess(args):
     print "starting reverse ssh"
@@ -775,5 +874,3 @@ while True:
             sendChargeState()
 
     waitCounter += 1
-
-
