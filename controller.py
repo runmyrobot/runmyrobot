@@ -2,14 +2,29 @@ import platform
 import serial
 import os
 import uuid
+import urllib2
+import json
+import traceback
+
 
 
 import argparse
 parser = argparse.ArgumentParser(description='start robot control program')
 parser.add_argument('robot_id', help='Robot ID')
 parser.add_argument('--env', help="Environment for example dev or prod, prod is default", default='prod')
-parser.add_argument('--type', help="serial or motor_hat", default='motor_hat')
-parser.add_argument('--serial_device', help="serial device", default='/dev/ttyACM0')
+parser.add_argument('--type', help="serial or motor_hat or gopigo or l298n or motozero", default='motor_hat')
+parser.add_argument('--serial-device', help="serial device", default='/dev/ttyACM0')
+parser.add_argument('--male', dest='male', action='store_true')
+parser.add_argument('--female', dest='male', action='store_false')
+parser.add_argument('--voice-number', type=int, default=1)
+parser.add_argument('--led', help="Type of LED for example max7219", default=None)
+parser.add_argument('--tts-volume', type=int, default=80)
+parser.add_argument('--secret-key', default=None)
+
+
+commandArgs = parser.parse_args()
+print commandArgs
+
 
 
 # watch dog timer
@@ -23,45 +38,51 @@ os.system("sudo /usr/sbin/service watchdog start")
 #os.system("amixer set PCM -- -100")
 
 # tested for USB audio device
-#os.system("amixer cset numid=3 100%")
-os.system("amixer -c 2 cset numid=3 80%")
-
-
-args = parser.parse_args()
-print args
+os.system("amixer -c 2 cset numid=3 %d%%" % commandArgs.tts_volume)
 
 
 
 server = "runmyrobot.com"
 #server = "52.52.213.92"
 
-if args.type == 'serial':
-    serialRobot = True
-elif args.type == 'motor_hat':
-    serialRobot = False
+if commandArgs.type == 'serial':
+    pass
+elif commandArgs.type == 'motor_hat':
+    pass
+elif commandArgs.type == 'gopigo':
+    import gopigo
+elif commandArgs.type == 'l298n':
+    pass
+elif commandArgs.type == 'motozero':
+    pass
 else:
     print "invalid --type in command line"
     exit(0)
 
+if commandArgs.led == 'max7219':
+    import spidev
+    
 #serialDevice = '/dev/tty.usbmodem12341'
 #serialDevice = '/dev/ttyUSB0'
 
-serialDevice = args.serial_device
+serialDevice = commandArgs.serial_device
 
 
 
-if not serialRobot:
+if commandArgs.type == 'motor_hat':
     try:
         from Adafruit_MotorHAT import Adafruit_MotorHAT, Adafruit_DCMotor
         motorsEnabled = True
     except ImportError:
         print "You need to install Adafruit_MotorHAT"
         print "Please install Adafruit_MotorHAT for python and restart this script."
+        print "To install: cd /usr/local/src && sudo git clone https://github.com/adafruit/Adafruit-Motor-HAT-Python-Library.git"
+        print "cd /usr/local/src/Adafruit-Motor-HAT-Python-Library && sudo python setup.py install"
         print "Running in test mode."
         print "Ctrl-C to quit"
         motorsEnabled = False
 
-if not serialRobot:
+if commandArgs.type == 'motor_hat':
     from Adafruit_PWM_Servo_Driver import PWM
 
 import time
@@ -69,19 +90,146 @@ import atexit
 import sys
 import thread
 import subprocess
-if not serialRobot:
+if (commandArgs.type == 'motor_hat') or (commandArgs.type == 'l298n') or (commandArgs.type == 'motozero'):
     import RPi.GPIO as GPIO
 import datetime
 from socketIO_client import SocketIO, LoggingNamespace
 
 
 chargeIONumber = 17
-
-        
-if not serialRobot:
+      
+if commandArgs.type == 'motor_hat':
     GPIO.setmode(GPIO.BCM)
     GPIO.setup(chargeIONumber, GPIO.IN)
+if commandArgs.type == 'l298n':
+    mode=GPIO.getmode()
+    print " mode ="+str(mode)
+    GPIO.cleanup()
+    #Change the GPIO Pins to your connected motors
+    #visit http://bit.ly/1S5nQ4y for reference
+    StepPinForward=12,16
+    StepPinBackward=11,15
+    StepPinLeft=15,12
+    StepPinRight=11,16
+    GPIO.setmode(GPIO.BOARD)
+    GPIO.setup(StepPinForward, GPIO.OUT)
+    GPIO.setup(StepPinBackward, GPIO.OUT)
+    GPIO.setup(StepPinLeft, GPIO.OUT)
+    GPIO.setup(StepPinRight, GPIO.OUT)
+if commandArgs.type == 'motozero':
+    GPIO.cleanup()
+    GPIO.setmode(GPIO.BCM)
 
+    # Motor1 is back left
+    # Motor1A is reverse
+    # Motor1B is forward
+    Motor1A = 24
+    Motor1B = 27
+    Motor1Enable = 5
+
+    # Motor2 is back right
+    # Motor2A is reverse
+    # Motor2B is forward
+    Motor2A = 6
+    Motor2B = 22
+    Motor2Enable = 17
+
+    # Motor3 is ?
+    # Motor3A is reverse
+    # Motor3B is forward
+    Motor3A = 23
+    Motor3B = 16
+    Motor3Enable = 12
+
+    # Motor4 is ?
+    # Motor4A is reverse
+    # Motor4B is forward
+    Motor4A = 13
+    Motor4B = 18
+    Motor4Enable = 25
+
+    GPIO.setup(Motor1A,GPIO.OUT)
+    GPIO.setup(Motor1B,GPIO.OUT)
+    GPIO.setup(Motor1Enable,GPIO.OUT)
+
+    GPIO.setup(Motor2A,GPIO.OUT)
+    GPIO.setup(Motor2B,GPIO.OUT)
+    GPIO.setup(Motor2Enable,GPIO.OUT) 
+
+    GPIO.setup(Motor3A,GPIO.OUT)
+    GPIO.setup(Motor3B,GPIO.OUT)
+    GPIO.setup(Motor3Enable,GPIO.OUT)
+
+    GPIO.setup(Motor4A,GPIO.OUT)
+    GPIO.setup(Motor4B,GPIO.OUT)
+    GPIO.setup(Motor4Enable,GPIO.OUT)
+
+#LED controlling
+if commandArgs.led == 'max7219':
+    spi = spidev.SpiDev()
+    spi.open(0,0)
+    #VCC -> RPi Pin 2
+    #GND -> RPi Pin 6
+    #DIN -> RPi Pin 19
+    #CLK -> RPi Pin 23
+    #CS -> RPi Pin 24
+    
+    # decoding:BCD
+    spi.writebytes([0x09])
+    spi.writebytes([0x00])
+    # Start with low brightness
+    spi.writebytes([0x0a])
+    spi.writebytes([0x03])
+    # scanlimit; 8 LEDs
+    spi.writebytes([0x0b])
+    spi.writebytes([0x07])
+    # Enter normal power-mode
+    spi.writebytes([0x0c])
+    spi.writebytes([0x01])
+    # Activate display
+    spi.writebytes([0x0f])
+    spi.writebytes([0x00])
+    columns = [0x1,0x2,0x3,0x4,0x5,0x6,0x7,0x8]
+    LEDOn = [0xFF,0xFF,0xFF,0xFF,0xFF,0xFF,0xFF,0xFF] 
+    LEDOff = [0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0] 
+    
+def SetLED_On():
+  if commandArgs.led == 'max7219':
+    spi.xfer([columns[0],LEDOn[0]]) 
+    spi.xfer([columns[1],LEDOn[1]])
+    spi.xfer([columns[2],LEDOn[2]])
+    spi.xfer([columns[3],LEDOn[3]])
+    spi.xfer([columns[4],LEDOn[4]])
+    spi.xfer([columns[5],LEDOn[5]])
+    spi.xfer([columns[6],LEDOn[6]])
+    spi.xfer([columns[7],LEDOn[7]])
+def SetLED_Off():
+  if commandArgs.led == 'max7219':
+    spi.xfer([columns[0],LEDOff[0]]) 
+    spi.xfer([columns[1],LEDOff[1]])
+    spi.xfer([columns[2],LEDOff[2]])
+    spi.xfer([columns[3],LEDOff[3]])
+    spi.xfer([columns[4],LEDOff[4]])
+    spi.xfer([columns[5],LEDOff[5]])
+    spi.xfer([columns[6],LEDOff[6]])
+    spi.xfer([columns[7],LEDOff[7]])
+def SetLED_Low():
+  if commandArgs.led == 'max7219':
+    # brightness MIN
+    spi.writebytes([0x0a])
+    spi.writebytes([0x00])
+def SetLED_Med():
+  if commandArgs.led == 'max7219':
+    #brightness MED
+    spi.writebytes([0x0a])
+    spi.writebytes([0x06])
+def SetLED_Full():
+  if commandArgs.led == 'max7219':
+    # brightness MAX
+    spi.writebytes([0x0a])
+    spi.writebytes([0x0F])
+        
+SetLED_Off()
 
 steeringSpeed = 90
 steeringHoldingSpeed = 90
@@ -110,7 +258,7 @@ nightTimeDrivingSpeedActuallyUsed = 170
 
 
 # Initialise the PWM device
-if not serialRobot:
+if commandArgs.type == 'motor_hat':
     pwm = PWM(0x42)
 # Note if you'd like more debug output you can instead run:
 #pwm = PWM(0x40, debug=True)
@@ -127,14 +275,14 @@ armServo = [300, 300, 300]
 
 
 
-robotID = args.robot_id
+robotID = commandArgs.robot_id
 
 
-if args.env == 'dev':
+if commandArgs.env == 'dev':
     print 'DEV MODE ***************'
     print "using dev port 8122"
     port = 8122
-elif args.env == 'prod':
+elif commandArgs.env == 'prod':
     print 'PROD MODE *************'
     print "using prod port 8022"
     port = 8022
@@ -143,7 +291,7 @@ else:
     sys.exit(0)
 
 
-if serialRobot:
+if commandArgs.type == 'serial':
     # initialize serial connection
     serialBaud = 9600
     print "baud:", serialBaud
@@ -168,10 +316,53 @@ def setServoPulse(channel, pulse):
   pwm.setPWM(channel, 0, pulse)
 
 
-if not serialRobot:
+if commandArgs.type == 'motor_hat':
     pwm.setPWMFreq(60)                        # Set frequency to 60 Hz
 
 
+WPA_FILE_TEMPLATE = """ctrl_interface=DIR=/var/run/wpa_supplicant GROUP=netdev
+update_config=1
+country=GB
+
+network={{
+            ssid=\"beepx\"
+            psk=\"yellow123\"
+            key_mgmt=WPA-PSK
+    }}
+
+network={{
+            ssid=\"{name}\"
+            psk=\"{password}\"
+            key_mgmt=WPA-PSK
+    }}
+"""
+    
+    
+def configWifiLogin(secretKey):
+
+    url = 'https://%s/get_wifi_login/%s' % (server, secretKey)
+    try:
+        print "GET", url
+        response = urllib2.urlopen(url).read()
+        responseJson = json.loads(response)
+        print "get wifi login response:", response
+
+
+        wpaFile = open("/etc/wpa_supplicant/wpa_supplicant.conf", 'w')
+        wpaText = WPA_FILE_TEMPLATE.format(name=responseJson['wifi_name'], password=responseJson['wifi_password'])
+        print wpaText
+        print
+        wpaFile.write(wpaText)
+        wpaFile.close()
+
+        
+    except:
+        print "exception while configuring setting wifi", url
+        traceback.print_exc()
+
+
+
+    
 
 
 
@@ -184,9 +375,8 @@ def sendSerialCommand(command):
     # loop to collect input
     #s = "f"
     #print "string:", s
-    lowercaseCommand = command.lower()
-    print str(lowercaseCommand)
-    ser.write(str(lowercaseCommand) + "\r\n")     # write a string
+    print str(command.lower())
+    ser.write(command.lower() + "\r\n")     # write a string
     #ser.write(s)
     ser.flush()
 
@@ -217,6 +407,7 @@ def incrementArmServo(channel, amount):
 
 def times(lst, number):
     return [x*number for x in lst]
+
 
 
 def runMotor(motorIndex, direction):
@@ -305,6 +496,23 @@ elif robotID == "11543083": # RedBird
     right = times(left, -1)
     straightDelay = 1.6
     turnDelay = 0.4
+elif robotID == "12692512": # Pita 
+    forward = (1, 1, 1, 1)
+    backward = (-1,-1,-1,-1)
+    left = (-1, 0, 0, 0)
+    right = times(left, -1)
+    straightDelay = 0.5
+    turnDelay = 0.4
+elif robotID == "88241899": #MadrivaBot
+    forward = (1, -1, 1, -1)
+    backward = times(forward, -1)
+    left = (-1, -1, -1, -1)
+    right = times(left, -1)
+    straightDelay = 0.5
+    turnDelay = 0.4
+elif robotID == "20134182": #StanleyBot
+    l298n_sleeptime=0.2
+    l298n_rotatetimes=5
 else: # default settings
     forward = (-1, 1, -1, 1)
     backward = times(forward, -1)
@@ -312,6 +520,10 @@ else: # default settings
     right = times(left, -1)
     straightDelay = 0.5
     turnDelay = 0.4
+    #Change sleeptime to adjust driving speed
+    #Change rotatetimes to adjust the rotation. Will be multiplicated with sleeptime.
+    l298n_sleeptime=0.2
+    l298n_rotatetimes=5
 
     
 def handle_exclusive_control(args):
@@ -319,9 +531,9 @@ def handle_exclusive_control(args):
 
             status = args['status']
 
-	    if status == 'start':
+        if status == 'start':
                 print "start exclusive control"
-	    if status == 'end':
+        if status == 'end':
                 print "end exclusive control"
 
 
@@ -337,8 +549,33 @@ def handle_chat_message(args):
     f.close()
     #os.system('festival --tts < /tmp/speech.txt')
     #os.system('espeak < /tmp/speech.txt')
-    os.system('cat ' + tempFilePath + ' | espeak --stdout | aplay -D plughw:2,0')
+
+    for hardwareNumber in (2, 0, 1):
+        if commandArgs.male:
+            os.system('cat ' + tempFilePath + ' | espeak --stdout | aplay -D plughw:%d,0' % hardwareNumber)
+        else:
+            os.system('cat ' + tempFilePath + ' | espeak -ven-us+f%d -s170 --stdout | aplay -D plughw:%d,0' % (commandArgs.voice_number, hardwareNumber))
+
     os.remove(tempFilePath)
+
+
+def moveGoPiGo(command):
+    if command == 'L':
+        gopigo.left_rot()
+        time.sleep(0.15)
+        gopigo.stop()
+    if command == 'R':
+        gopigo.right_rot()
+        time.sleep(0.15)
+        gopigo.stop()
+    if command == 'F':
+        gopigo.forward()
+        time.sleep(0.35)
+        gopigo.stop()
+    if command == 'B':
+        gopigo.backward()
+        time.sleep(0.35)
+        gopigo.stop()
 
     
                 
@@ -379,10 +616,13 @@ def handle_command(args):
 
             command = args['command']
 
-            if serialRobot:
+            if commandArgs.type == 'gopigo':
+                moveGoPiGo(command)
+            
+            if commandArgs.type == 'serial':
                 sendSerialCommand(command)
 
-            if not serialRobot and motorsEnabled:
+            if commandArgs.type == 'motor_hat' and motorsEnabled:
                 motorA.setSpeed(drivingSpeed)
                 motorB.setSpeed(drivingSpeed)
                 if command == 'F':
@@ -426,20 +666,107 @@ def handle_command(args):
                     incrementArmServo(2, 10)
                     time.sleep(0.05)
 
-            if not serialRobot:
+            if commandArgs.type == 'motor_hat':
                 turnOffMotors()
-
+            if commandArgs.type == 'l298n':
+                runl298n(command)                                 
             #setMotorsToIdle()
+	    if commandArgs.type == 'motozero':
+		runmotozero(command)
             
+            if commandArgs.led == 'max7219':
+                if command == 'LED_OFF':
+                    SetLED_Off()
+                if command == 'LED_FULL':
+                    SetLED_On()
+                    SetLED_Full()
+                if command == 'LED_MED':
+                    SetLED_On()
+                    SetLED_Med()
+                if command == 'LED_LOW':
+                    SetLED_On()
+                    SetLED_Low()
         handlingCommand = False
 
+def runl298n(direction):
+    if direction == 'F':
+        GPIO.output(StepPinForward, GPIO.HIGH)
+        time.sleep(l298n_sleeptime * l298n_rotatetimes)
+        GPIO.output(StepPinForward, GPIO.LOW)
+    if direction == 'B':
+        GPIO.output(StepPinBackward, GPIO.HIGH)
+        time.sleep(l298n_sleeptime * l298n_rotatetimes)
+        GPIO.output(StepPinBackward, GPIO.LOW)
+    if direction == 'L':
+        GPIO.output(StepPinLeft, GPIO.HIGH)
+        time.sleep(l298n_sleeptime)
+        GPIO.output(StepPinLeft, GPIO.LOW)
+    if direction == 'R':
+        GPIO.output(StepPinRight, GPIO.HIGH)
+        time.sleep(l298n_sleeptime)
+        GPIO.output(StepPinRight, GPIO.LOW)
+
+def runmotozero(direction):
+    if direction == 'F':
+        GPIO.output(Motor1A, GPIO.LOW)
+        GPIO.output(Motor1B, GPIO.HIGH) 
+        GPIO.output(Motor1Enable,GPIO.HIGH)
+        
+        GPIO.output(Motor2A, GPIO.LOW)
+        GPIO.output(Motor2B, GPIO.HIGH)
+        GPIO.output(Motor2Enable, GPIO.HIGH)
+        
+        GPIO.output(Motor3A, GPIO.HIGH)
+        GPIO.output(Motor3B, GPIO.LOW)
+        GPIO.output(Motor3Enable, GPIO.HIGH)
+   
+        GPIO.output(Motor4A, GPIO.HIGH)
+        GPIO.output(Motor4B, GPIO.LOW)
+        GPIO.output(Motor4Enable, GPIO.HIGH)
+
+        time.sleep(3)
+        
+        GPIO.output(Motor1B, GPIO.LOW)
+        GPIO.output(Motor2B, GPIO.LOW)
+        GPIO.output(Motor3A, GPIO.LOW)
+        GPIO.output(Motor4A, GPIO.LOW)
+    if direction == 'B':
+        GPIO.output(Motor1A, GPIO.HIGH)
+        GPIO.output(Motor1B, GPIO.LOW)
+        GPIO.output(Motor1Enable, GPIO.HIGH)
+        
+        GPIO.output(Motor2A, GPIO.HIGH)
+        GPIO.output(Motor2B, GPIO.LOW)
+        GPIO.output(Motor2Enable, GPIO.HIGH)
+        
+        GPIO.output(Motor3A, GPIO.LOW)
+        GPIO.output(Motor3B, GPIO.HIGH)
+        GPIO.output(Motor3Enable, GPIO.HIGH)
+
+        GPIO.output(Motor4A, GPIO.LOW)
+        GPIO.output(Motor4B, GPIO.HIGH)
+        GPIO.output(Motor4Enable, GPIO.HIGH)
+
+        time.sleep(3)
+        
+        GPIO.output(Motor1A, GPIO.LOW)
+        GPIO.output(Motor2A, GPIO.LOW)
+        GPIO.output(Motor3B, GPIO.LOW)
+        GPIO.output(Motor4B, GPIO.LOW)
 
 def handleStartReverseSshProcess(args):
-    subprocess.call(["ssh", "-i", "/home/pi/reverse_ssh_key0.pem", "-N", "-R", "2222:localhost:22", "ubuntu@52.8.25.95"])
+    print "starting reverse ssh"
+    socketIO.emit("reverse_ssh_info", "starting")
+    returnCode = subprocess.call(["/usr/bin/ssh", "-i", "/home/pi/reverse_ssh_key1.pem", "-N", "-R", "2222:localhost:22", "ubuntu@52.52.204.174"])
+    socketIO.emit("reverse_ssh_info", "return code: " + str(returnCode))
+    print "reverse ssh process has exited with code", str(returnCode)
 
+    
 def handleEndReverseSshProcess(args):
-    subprocess.call(["killall", "ssh"])
-        
+    print "handling end reverse ssh process"
+    resultCode = subprocess.call(["killall", "ssh"])
+    print "result code of killall ssh:", resultCode
+
 def on_handle_command(*args):
    thread.start_new_thread(handle_command, args)
 
@@ -470,7 +797,7 @@ def myWait():
   thread.start_new_thread(myWait, ())
 
 
-if not serialRobot:
+if commandArgs.type == 'motor_hat':
     if motorsEnabled:
         # create a default object, no changes to I2C address or frequency
         mh = Adafruit_MotorHAT(addr=0x60)
@@ -488,7 +815,7 @@ def turnOffMotors():
     #mhArm.getMotor(4).run(Adafruit_MotorHAT.RELEASE)
   
 
-if not serialRobot:
+if commandArgs.type == 'motor_hat':
     if motorsEnabled:
         atexit.register(turnOffMotors)
         motorA = mh.getMotor(1)
@@ -507,7 +834,7 @@ def sendChargeState():
 def sendChargeStateCallback(x):
     sendChargeState()
 
-if not serialRobot:
+if commandArgs.type == 'motor_hat':
     GPIO.add_event_detect(chargeIONumber, GPIO.BOTH)
     GPIO.add_event_callback(chargeIONumber, sendChargeStateCallback)
 
@@ -527,6 +854,8 @@ waitCounter = 0
 
 
 identifyRobotId()
+if commandArgs.secret_key is not None:
+    configWifiLogin(commandArgs.secret_key)
 
 
 if platform.system() == 'Darwin':
@@ -539,11 +868,14 @@ elif platform.system() == 'Linux':
 while True:
     socketIO.wait(seconds=10)
     if (waitCounter % 10) == 0:
+
+        # tell the server what robot id is using this connection
+        identifyRobotId()
+        
         if platform.system() == 'Linux':
             ipInfoUpdate()
-        if not serialRobot:
+
+        if commandArgs.type == 'motor_hat':
             sendChargeState()
 
     waitCounter += 1
-
-

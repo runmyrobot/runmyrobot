@@ -1,0 +1,2 @@
+echo This will create an entry in known hosts for root when it tries to connect so that ssh can be run from cron. Note: It doesn't matter that it won't actually connect without the pem specified. It will still created the neccesary entry.
+sudo -u root ssh ubuntu@52.52.204.174

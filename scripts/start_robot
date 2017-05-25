@@ -1,3 +1,4 @@
+#!/bin/bash
 # suggested use for this:
 # (1) Put in the id's for your robot, YOURROBOTID and YOURCAMERAID
 # (2) use sudo to create a crontab entry: @reboot /bin/bash /home/pi/start_robot
