@@ -708,52 +708,84 @@ def runl298n(direction):
 
 def runmotozero(direction):
     if direction == 'F':
-        GPIO.output(Motor1A, GPIO.LOW)
-        GPIO.output(Motor1B, GPIO.HIGH) 
+        GPIO.output(Motor1B, GPIO.HIGH)
         GPIO.output(Motor1Enable,GPIO.HIGH)
-        
-        GPIO.output(Motor2A, GPIO.LOW)
+
         GPIO.output(Motor2B, GPIO.HIGH)
         GPIO.output(Motor2Enable, GPIO.HIGH)
-        
+
         GPIO.output(Motor3A, GPIO.HIGH)
-        GPIO.output(Motor3B, GPIO.LOW)
-        GPIO.output(Motor3Enable, GPIO.HIGH)
-   
-        GPIO.output(Motor4A, GPIO.HIGH)
-        GPIO.output(Motor4B, GPIO.LOW)
-        GPIO.output(Motor4Enable, GPIO.HIGH)
-
-        time.sleep(3)
-        
-        GPIO.output(Motor1B, GPIO.LOW)
-        GPIO.output(Motor2B, GPIO.LOW)
-        GPIO.output(Motor3A, GPIO.LOW)
-        GPIO.output(Motor4A, GPIO.LOW)
-    if direction == 'B':
-        GPIO.output(Motor1A, GPIO.HIGH)
-        GPIO.output(Motor1B, GPIO.LOW)
-        GPIO.output(Motor1Enable, GPIO.HIGH)
-        
-        GPIO.output(Motor2A, GPIO.HIGH)
-        GPIO.output(Motor2B, GPIO.LOW)
-        GPIO.output(Motor2Enable, GPIO.HIGH)
-        
-        GPIO.output(Motor3A, GPIO.LOW)
-        GPIO.output(Motor3B, GPIO.HIGH)
         GPIO.output(Motor3Enable, GPIO.HIGH)
 
-        GPIO.output(Motor4A, GPIO.LOW)
         GPIO.output(Motor4B, GPIO.HIGH)
         GPIO.output(Motor4Enable, GPIO.HIGH)
 
-        time.sleep(3)
-        
+        time.sleep(0.3)
+
+        GPIO.output(Motor1B, GPIO.LOW)
+        GPIO.output(Motor2B, GPIO.LOW)
+        GPIO.output(Motor3A, GPIO.LOW)
+        GPIO.output(Motor4B, GPIO.LOW)
+    if direction == 'B':
+        GPIO.output(Motor1A, GPIO.HIGH)
+        GPIO.output(Motor1Enable, GPIO.HIGH)
+
+        GPIO.output(Motor2A, GPIO.HIGH)
+        GPIO.output(Motor2Enable, GPIO.HIGH)
+
+        GPIO.output(Motor3B, GPIO.HIGH)
+        GPIO.output(Motor3Enable, GPIO.HIGH)
+
+        GPIO.output(Motor4A, GPIO.HIGH)
+        GPIO.output(Motor4Enable, GPIO.HIGH)
+
+        time.sleep(0.3)
+
         GPIO.output(Motor1A, GPIO.LOW)
         GPIO.output(Motor2A, GPIO.LOW)
         GPIO.output(Motor3B, GPIO.LOW)
+        GPIO.output(Motor4A, GPIO.LOW)
+
+    if direction =='L':
+        GPIO.output(Motor3B, GPIO.HIGH)
+        GPIO.output(Motor3Enable, GPIO.HIGH)
+
+        GPIO.output(Motor1A, GPIO.HIGH)
+        GPIO.output(Motor1Enable, GPIO.HIGH)
+
+        GPIO.output(Motor2B, GPIO.HIGH)
+        GPIO.output(Motor2Enable, GPIO.HIGH)
+
+        GPIO.output(Motor4B, GPIO.HIGH)
+        GPIO.output(Motor4Enable, GPIO.HIGH)
+
+        time.sleep(0.3)
+
+        GPIO.output(Motor3B, GPIO.LOW)
+        GPIO.output(Motor1A, GPIO.LOW)
+        GPIO.output(Motor2B, GPIO.LOW)
         GPIO.output(Motor4B, GPIO.LOW)
 
+    if direction == 'R':
+        GPIO.output(Motor3A, GPIO.HIGH)
+        GPIO.output(Motor3Enable, GPIO.HIGH)
+
+        GPIO.output(Motor1B, GPIO.HIGH)
+        GPIO.output(Motor1Enable, GPIO.HIGH)
+
+        GPIO.output(Motor2A, GPIO.HIGH)
+        GPIO.output(Motor2Enable, GPIO.HIGH)
+
+        GPIO.output(Motor4A, GPIO.HIGH)
+        GPIO.output(Motor4Enable, GPIO.HIGH)
+
+        time.sleep(0.3)
+
+        GPIO.output(Motor3A, GPIO.LOW)
+        GPIO.output(Motor1B, GPIO.LOW)
+        GPIO.output(Motor2A, GPIO.LOW)
+        GPIO.output(Motor4A, GPIO.LOW)
+	
 def handleStartReverseSshProcess(args):
     print "starting reverse ssh"
     socketIO.emit("reverse_ssh_info", "starting")
