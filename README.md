@@ -142,3 +142,13 @@ We use ffmpeg to stream audio and socket.io to send control messages.
 The is a community project. Making your own bot? Adding your own control stuff? Cool! We'd like to hear from you.
 
 
+<h1> Quicker install </h1>
+
+Grab the source
+run the install.sh script in the runmyrobot/scripts folder
+
+(This hasn't been tested yet.)
+
+
+
+
