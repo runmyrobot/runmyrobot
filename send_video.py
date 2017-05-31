@@ -190,14 +190,13 @@ def handleLinux(deviceNumber, videoPort, audioPort):
     videoCommandLine = '/usr/local/bin/ffmpeg -f v4l2 -framerate 25 -video_size 640x480 -i /dev/video%s %s -f mpegts -codec:v mpeg1video -s 640x480 -b:v %dk -bf 0 -muxdelay 0.001 http://%s:%s/hello/640/480/' % (deviceAnswer, rotationOption, args.kbps, server, videoPort)
     audioCommandLine = '/usr/local/bin/ffmpeg -f alsa -ar 44100 -ac 1 -i hw:1 -f mpegts -codec:a mp2 -b:a 32k -muxdelay 0.001 http://%s:%s/hello/640/480/' % (server, audioPort)
 
-
     print videoCommandLine
     print audioCommandLine
     
     videoProcess = runFfmpeg(videoCommandLine)
     audioProcess = runFfmpeg(audioCommandLine)
 
-    return {'video_process': videoProcess, 'audioProcess': audioProcess, 'device_answer': deviceAnswer}
+    return {'video_process': videoProcess, 'audio_process': audioProcess, 'device_answer': deviceAnswer}
 
 
 
@@ -356,13 +355,15 @@ def main():
         
         if streamProcessDict is not None:
             print "stopping previously running ffmpeg (needs to happen if this is not the first iteration)"
-            streamProcessDict['process'].kill()
+            streamProcessDict['video_process'].kill()
+            streamProcessDict['audio_process'].kill()
 
         print "starting process just to get device result" # this should be a separate function so you don't have to do this
         streamProcessDict = startVideoCapture()
         inputDeviceID = streamProcessDict['device_answer']
         print "stopping video capture"
-        streamProcessDict['process'].kill()
+        streamProcessDict['video_process'].kill()
+        streamProcessDict['audio_process'].kill()
 
         #print "sleeping"
         #time.sleep(3)
@@ -417,22 +418,25 @@ def main():
         # Every 50 seconds, it kills and restarts ffmpeg.
         # Every 40 seconds, it sends a signal to the server indicating status of processes.
         period = 2*60*60 # period in seconds between snaps
-        for count in range(period):
+        #for count in range(period):
+        count = 0
+        while True:
+            count += 1
             time.sleep(1)
 
             if count % 20 == 0:
                 socketIO.emit('send_video_status', {'send_video_process_exists': True,
                                                     'camera_id':cameraIDAnswer})
             
-            if count % 40 == 30:
+            if False: #count % 40 == 30:
                 print "stopping video capture just in case it has reached a state where it's looping forever, not sending video, and not dying as a process, which can happen"
                 streamProcessDict['video_process'].kill()
                 streamProcessDict['audio_process'].kill()
                 time.sleep(1)
 
-            if count % 80 == 75:
+            if count % 30 == 0:
                 print "send status about this process and its child process ffmpeg"
-                ffmpegProcessExists = streamProcessDict['process'].poll() is None
+                ffmpegProcessExists = True# streamProcessDict['video_process'].poll() is None
                 socketIO.emit('send_video_status', {'send_video_process_exists': True,
                                                     'ffmpeg_process_exists': ffmpegProcessExists,
                                                     'camera_id':cameraIDAnswer})
