@@ -20,7 +20,7 @@ https://learn.adafruit.com/adafruit-dc-and-stepper-motor-hat-for-raspberry-pi/in
 
 (3) Install python serial, gnutls, python-dev, espeak, and python-smbus:
 
-```apt-get install python-serial python-dev libgnutls28-dev espeak python-smbus```
+```apt-get install python-serial python-dev libgnutls28-dev espeak python-smbus python-pip```
 
 (4) Install alsa-lib
 ```
@@ -106,21 +106,27 @@ Use TTS with a female voice
 
 What voice should be used | default=1
 
+```--led max7219```
+
+What LEDs should be used (if any) | default=none
 
 Example start_robot:
 
 ```
 cd /home/pi/runmyrobot
-nohup scripts/repeat_start python controller.py YOURROBOTID --type motor_hat --male --voice_number 1 &> /dev/null &
+nohup scripts/repeat_start python controller.py YOURROBOTID --type motor_hat --male --voice_number 1 --led max7219 &> /dev/null &
 nohup scripts/repeat_start python send_video.py YOURCAMERAID 0 &> /dev/null &
 ```
 
 <h3> Start script on boot </h3>
 Use crontab to start the start_robot script on booting:
+
 ```
 crontab -e
 ```
+
 insert following line and save:
+
 ```
 @reboot /bin/bash /home/pi/start_robot
 ```
@@ -134,5 +140,15 @@ We use ffmpeg to stream audio and socket.io to send control messages.
 <h2> How to contribute </h2>
 
 The is a community project. Making your own bot? Adding your own control stuff? Cool! We'd like to hear from you.
+
+
+<h1> Quicker install </h1>
+
+Grab the source
+run the install.sh script in the runmyrobot/scripts folder
+
+(This hasn't been tested yet.)
+
+
 
 
