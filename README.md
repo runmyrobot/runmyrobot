@@ -9,19 +9,6 @@ https://runmyrobot.com
 <h2> Installing robot control and video scripts </h2>
 
 
-<h2> Hardware Compatibility </h2>
-
-Adafruit Motor Hat
-
-Serial Port based commands
-
-GoPiGo
-
-L298N
-
-Missing something?, you can add it, open source!
-
-
 The RasPi will need the following things install so it can talk to your motor and talk to the internet.
 
 (1) Install motor HAT software:
@@ -154,6 +141,18 @@ We use ffmpeg to stream audio and socket.io to send control messages.
 
 The is a community project. Making your own bot? Adding your own control stuff? Cool! We'd like to hear from you.
 
+
+<h1> Hardware Compatibility </h1>
+
+Adafruit Motor Hat
+
+Serial Port based commands
+
+GoPiGo
+
+L298N
+
+Missing something?, you can add it, open source!
 
 <h1> Quicker install </h1>
 
