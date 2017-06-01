@@ -10,10 +10,15 @@ https://runmyrobot.com
 
 
 <h2> Hardware Compatibility </h2>
-* Adafruit Motor Hat
-* Serial Port based commands
-* GoPiGo
-* L298N
+
+Adafruit Motor Hat
+
+Serial Port based commands
+
+GoPiGo
+
+L298N
+
 Missing something?, you can add it, open source!
 
 
