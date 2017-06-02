@@ -20,7 +20,8 @@ parser.add_argument('--voice-number', type=int, default=1)
 parser.add_argument('--led', help="Type of LED for example max7219", default=None)
 parser.add_argument('--tts-volume', type=int, default=80)
 parser.add_argument('--secret-key', default=None)
-
+parser.add_argument('--turn-delay', type=float, default=0.4)
+parser.add_argument('--straight-delay', type=float, default=0.5)
 
 commandArgs = parser.parse_args()
 print commandArgs
@@ -39,8 +40,6 @@ os.system("sudo /usr/sbin/service watchdog start")
 
 # tested for USB audio device
 os.system("amixer -c 2 cset numid=3 %d%%" % commandArgs.tts_volume)
-
-
 
 server = "runmyrobot.com"
 #server = "52.52.213.92"
@@ -518,8 +517,8 @@ else: # default settings
     backward = times(forward, -1)
     left = (1, 1, 1, 1)
     right = times(left, -1)
-    straightDelay = 0.5
-    turnDelay = 0.4
+    straightDelay = commandArgs.straight_delay 
+    turnDelay = commandArgs.turn_delay
     #Change sleeptime to adjust driving speed
     #Change rotatetimes to adjust the rotation. Will be multiplicated with sleeptime.
     l298n_sleeptime=0.2
