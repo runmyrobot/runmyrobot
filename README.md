@@ -86,7 +86,7 @@ Your Robot ID. Required
 
 Environment for example dev or prod | default='prod'
 
-```--type motor_hat | serial | l298n```
+```--type motor_hat | serial | l298n | motozero```
 
 What type of motor controller should be used | default='motor_hat'
 
