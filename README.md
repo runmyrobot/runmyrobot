@@ -11,8 +11,8 @@ https://runmyrobot.com
 
 The RasPi will need the following things install so it can talk to your motor and talk to the internet.
 
-(1) Install motor HAT software:
-https://learn.adafruit.com/adafruit-dc-and-stepper-motor-hat-for-raspberry-pi/installing-software
+(1) Install [motor HAT software](https://learn.adafruit.com/adafruit-dc-and-stepper-motor-hat-for-raspberry-pi/installing-software):
+
 
 (2) Install socket.io client for python:
 
