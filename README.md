@@ -26,6 +26,7 @@ The RasPi will need the following things install so it can talk to your motor an
 ```
 cd /usr/local/src 
 wget ftp://ftp.alsa-project.org/pub/lib/alsa-lib-1.0.25.tar.bz2 
+tar xjf alsa-lib-1.0.25.tar.bz2
 cd /usr/local/src/alsa-lib-1.0.25 
 ./configure --host=arm-unknown-linux-gnueabi 
 make -j4 
