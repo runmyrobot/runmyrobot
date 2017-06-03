@@ -247,8 +247,6 @@ handlingCommand = False
 turningSpeedActuallyUsed = 250
 dayTimeDrivingSpeedActuallyUsed = 250
 nightTimeDrivingSpeedActuallyUsed = commandArgs.night_speed
-#nightTimeDrivingSpeedActuallyUsed = 170
-
 
 # Initialise the PWM device
 if commandArgs.type == 'motor_hat':
@@ -352,10 +350,6 @@ def configWifiLogin(secretKey):
     except:
         print "exception while configuring setting wifi", url
         traceback.print_exc()
-
-
-
-    
 
 
 
