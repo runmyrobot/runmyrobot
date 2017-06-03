@@ -153,6 +153,8 @@ GoPiGo
 
 L298N
 
+MotoZero
+
 Missing something?, you can add it, open source!
 
 <h1> Quicker install </h1>
