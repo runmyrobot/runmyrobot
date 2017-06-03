@@ -6,33 +6,29 @@ import urllib2
 import json
 import traceback
 
-
-
 import argparse
-parser = argparse.ArgumentParser(description='start robot control program')
-parser.add_argument('robot_id', help='Robot ID')
-parser.add_argument('--env', help="Environment for example dev or prod, prod is default", default='prod')
-parser.add_argument('--type', help="serial or motor_hat or gopigo or l298n or motozero", default='motor_hat')
-parser.add_argument('--serial-device', help="serial device", default='/dev/ttyACM0')
-parser.add_argument('--male', dest='male', action='store_true')
-parser.add_argument('--female', dest='male', action='store_false')
-parser.add_argument('--voice-number', type=int, default=1)
-parser.add_argument('--led', help="Type of LED for example max7219", default=None)
-parser.add_argument('--tts-volume', type=int, default=80)
-parser.add_argument('--secret-key', default=None)
-parser.add_argument('--turn-delay', type=float, default=0.4)
-parser.add_argument('--straight-delay', type=float, default=0.5)
-parser.add_argument('--driving-speed', type=int, default=90)
 
-commandArgs = parser.parse_args()
-print commandArgs
+with open('config.json') as json_data_file:
+  data = json.load(json_data_file)
 
-
+# read data from config.json file
+robotID = data['robot_id']
+env = data['env']
+type = data['type']
+serialDevice = data['serial_device']
+male = data['male']
+female = data['female']
+voiceNumber = data['voice_number']
+led = data['led']
+tts_volume = data['tts_volume']
+secret_key = data['secret_key']
+turn_delay = data['turn_delay']
+straight_delay = data['straight_delay']
+driving_speed = data['driving_speed']
 
 # watch dog timer
 os.system("sudo modprobe bcm2835_wdt")
 os.system("sudo /usr/sbin/service watchdog start")
-
 
 # set volume level
 
@@ -40,36 +36,29 @@ os.system("sudo /usr/sbin/service watchdog start")
 #os.system("amixer set PCM -- -100")
 
 # tested for USB audio device
-os.system("amixer -c 2 cset numid=3 %d%%" % commandArgs.tts_volume)
+os.system("amixer -c 2 cset numid=3 %d%%" % tts_volume)
 
 server = "runmyrobot.com"
 #server = "52.52.213.92"
 
-if commandArgs.type == 'serial':
+if type == 'serial':
     pass
-elif commandArgs.type == 'motor_hat':
+elif type == 'motor_hat':
     pass
-elif commandArgs.type == 'gopigo':
+elif type == 'gopigo':
     import gopigo
-elif commandArgs.type == 'l298n':
+elif type == 'l298n':
     pass
-elif commandArgs.type == 'motozero':
+elif type == 'motozero':
     pass
 else:
     print "invalid --type in command line"
     exit(0)
 
-if commandArgs.led == 'max7219':
+if led == 'max7219':
     import spidev
-    
-#serialDevice = '/dev/tty.usbmodem12341'
-#serialDevice = '/dev/ttyUSB0'
 
-serialDevice = commandArgs.serial_device
-
-
-
-if commandArgs.type == 'motor_hat':
+if type == 'motor_hat':
     try:
         from Adafruit_MotorHAT import Adafruit_MotorHAT, Adafruit_DCMotor
         motorsEnabled = True
@@ -82,7 +71,7 @@ if commandArgs.type == 'motor_hat':
         print "Ctrl-C to quit"
         motorsEnabled = False
 
-if commandArgs.type == 'motor_hat':
+if type == 'motor_hat':
     from Adafruit_PWM_Servo_Driver import PWM
 
 import time
@@ -90,7 +79,7 @@ import atexit
 import sys
 import thread
 import subprocess
-if (commandArgs.type == 'motor_hat') or (commandArgs.type == 'l298n') or (commandArgs.type == 'motozero'):
+if (type == 'motor_hat') or (type == 'l298n') or (type == 'motozero'):
     import RPi.GPIO as GPIO
 import datetime
 from socketIO_client import SocketIO, LoggingNamespace
@@ -98,10 +87,10 @@ from socketIO_client import SocketIO, LoggingNamespace
 
 chargeIONumber = 17
       
-if commandArgs.type == 'motor_hat':
+if type == 'motor_hat':
     GPIO.setmode(GPIO.BCM)
     GPIO.setup(chargeIONumber, GPIO.IN)
-if commandArgs.type == 'l298n':
+if type == 'l298n':
     mode=GPIO.getmode()
     print " mode ="+str(mode)
     GPIO.cleanup()
@@ -116,7 +105,7 @@ if commandArgs.type == 'l298n':
     GPIO.setup(StepPinBackward, GPIO.OUT)
     GPIO.setup(StepPinLeft, GPIO.OUT)
     GPIO.setup(StepPinRight, GPIO.OUT)
-if commandArgs.type == 'motozero':
+if type == 'motozero':
     GPIO.cleanup()
     GPIO.setmode(GPIO.BCM)
 
@@ -165,7 +154,7 @@ if commandArgs.type == 'motozero':
     GPIO.setup(Motor4Enable,GPIO.OUT)
 
 #LED controlling
-if commandArgs.led == 'max7219':
+if led == 'max7219':
     spi = spidev.SpiDev()
     spi.open(0,0)
     #VCC -> RPi Pin 2
@@ -194,7 +183,7 @@ if commandArgs.led == 'max7219':
     LEDOff = [0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0] 
     
 def SetLED_On():
-  if commandArgs.led == 'max7219':
+  if led == 'max7219':
     spi.xfer([columns[0],LEDOn[0]]) 
     spi.xfer([columns[1],LEDOn[1]])
     spi.xfer([columns[2],LEDOn[2]])
@@ -204,7 +193,7 @@ def SetLED_On():
     spi.xfer([columns[6],LEDOn[6]])
     spi.xfer([columns[7],LEDOn[7]])
 def SetLED_Off():
-  if commandArgs.led == 'max7219':
+  if led == 'max7219':
     spi.xfer([columns[0],LEDOff[0]]) 
     spi.xfer([columns[1],LEDOff[1]])
     spi.xfer([columns[2],LEDOff[2]])
@@ -214,17 +203,17 @@ def SetLED_Off():
     spi.xfer([columns[6],LEDOff[6]])
     spi.xfer([columns[7],LEDOff[7]])
 def SetLED_Low():
-  if commandArgs.led == 'max7219':
+  if led == 'max7219':
     # brightness MIN
     spi.writebytes([0x0a])
     spi.writebytes([0x00])
 def SetLED_Med():
-  if commandArgs.led == 'max7219':
+  if led == 'max7219':
     #brightness MED
     spi.writebytes([0x0a])
     spi.writebytes([0x06])
 def SetLED_Full():
-  if commandArgs.led == 'max7219':
+  if led == 'max7219':
     # brightness MAX
     spi.writebytes([0x0a])
     spi.writebytes([0x0F])
@@ -234,11 +223,6 @@ SetLED_Off()
 steeringSpeed = 90
 steeringHoldingSpeed = 90
 
-global drivingSpeed
-
-
-#drivingSpeed = 90
-drivingSpeed = commandArgs.driving_speed
 handlingCommand = False
 
 
@@ -257,23 +241,11 @@ servoMin = [150, 150, 130]  # Min pulse length out of 4096
 servoMax = [600, 600, 270]  # Max pulse length out of 4096
 armServo = [300, 300, 300]
 
-#def setMotorsToIdle():
-#    s = 65
-#    for i in range(1, 2):
-#        mh.getMotor(i).setSpeed(s)
-#        mh.getMotor(i).run(Adafruit_MotorHAT.FORWARD)
-
-
-
-
-robotID = commandArgs.robot_id
-
-
-if commandArgs.env == 'dev':
+if env == 'dev':
     print 'DEV MODE ***************'
     print "using dev port 8122"
     port = 8122
-elif commandArgs.env == 'prod':
+elif env == 'prod':
     print 'PROD MODE *************'
     print "using prod port 8022"
     port = 8022
@@ -337,7 +309,6 @@ def configWifiLogin(secretKey):
         response = urllib2.urlopen(url).read()
         responseJson = json.loads(response)
         print "get wifi login response:", response
-
 
         wpaFile = open("/etc/wpa_supplicant/wpa_supplicant.conf", 'w')
         wpaText = WPA_FILE_TEMPLATE.format(name=responseJson['wifi_name'], password=responseJson['wifi_password'])
@@ -404,10 +375,10 @@ def times(lst, number):
 def runMotor(motorIndex, direction):
     motor = mh.getMotor(motorIndex+1)
     if direction == 1:
-        motor.setSpeed(drivingSpeed)
+        motor.setSpeed(driving_speed)
         motor.run(Adafruit_MotorHAT.FORWARD)
     if direction == -1:
-        motor.setSpeed(drivingSpeed)
+        motor.setSpeed(driving_speed)
         motor.run(Adafruit_MotorHAT.BACKWARD)
     if direction == 0.5:
         motor.setSpeed(128)
@@ -542,10 +513,10 @@ def handle_chat_message(args):
     #os.system('espeak < /tmp/speech.txt')
 
     for hardwareNumber in (2, 0, 1):
-        if commandArgs.male:
+        if male:
             os.system('cat ' + tempFilePath + ' | espeak --stdout | aplay -D plughw:%d,0' % hardwareNumber)
         else:
-            os.system('cat ' + tempFilePath + ' | espeak -ven-us+f%d -s170 --stdout | aplay -D plughw:%d,0' % (commandArgs.voice_number, hardwareNumber))
+            os.system('cat ' + tempFilePath + ' | espeak -ven-us+f%d -s170 --stdout | aplay -D plughw:%d,0' % (voiceNumber, hardwareNumber))
 
     os.remove(tempFilePath)
 
@@ -665,7 +636,7 @@ def handle_command(args):
 	    if commandArgs.type == 'motozero':
 		runmotozero(command)
             
-            if commandArgs.led == 'max7219':
+            if led == 'max7219':
                 if command == 'LED_OFF':
                     SetLED_Off()
                 if command == 'LED_FULL':

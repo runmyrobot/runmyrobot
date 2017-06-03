@@ -1,0 +1,15 @@
+{
+  "robot_id": "my_robot_id",
+  "env": "prod",
+  "type": "motor_hat",
+  "serial_device": "/dev/ttyACM0",
+  "male": "store_true",
+  "female": "store_false",
+  "voice_number": "1",
+  "led": null,
+  "tts_volume": 80,
+  "secret_key": null,
+  "turn_delay": 0.4,
+  "straight_delay": 0.5,
+  "driving_speed": 90
+}
