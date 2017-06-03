@@ -232,7 +232,7 @@ def handleWindows(deviceNumber, videoPort):
         deviceAnswer = str(deviceNumber)
 
     device = devices[int(deviceAnswer)]
-    commandLine = 'ffmpeg -s 640x480 -f dshow -i video="%s" -f mpegts -codec:v mpeg1video -b 200k -r 20 https://%s:%s/hello/640/480/' % (device, server, videoPort)
+    commandLine = 'ffmpeg -s 640x480 -f dshow -i video="%s" -f mpegts -codec:v mpeg1video -b 200k -r 20 http://%s:%s/hello/640/480/' % (device, server, videoPort)
     
 
     process = runFfmpeg(commandLine)
