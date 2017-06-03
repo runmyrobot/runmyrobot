@@ -233,7 +233,7 @@ nightTimeDrivingSpeedActuallyUsed = 170
 
 
 # Initialise the PWM device
-if commandArgs.type == 'motor_hat':
+if type == 'motor_hat':
     pwm = PWM(0x42)
 # Note if you'd like more debug output you can instead run:
 #pwm = PWM(0x40, debug=True)
@@ -254,7 +254,7 @@ else:
     sys.exit(0)
 
 
-if commandArgs.type == 'serial':
+if type == 'serial':
     # initialize serial connection
     serialBaud = 9600
     print "baud:", serialBaud
@@ -279,7 +279,7 @@ def setServoPulse(channel, pulse):
   pwm.setPWM(channel, 0, pulse)
 
 
-if commandArgs.type == 'motor_hat':
+if type == 'motor_hat':
     pwm.setPWMFreq(60)                        # Set frequency to 60 Hz
 
 
@@ -480,8 +480,8 @@ else: # default settings
     backward = times(forward, -1)
     left = (1, 1, 1, 1)
     right = times(left, -1)
-    straightDelay = commandArgs.straight_delay 
-    turnDelay = commandArgs.turn_delay
+    straightDelay = straight_delay 
+    turnDelay = turn_delay
     #Change sleeptime to adjust driving speed
     #Change rotatetimes to adjust the rotation. Will be multiplicated with sleeptime.
     l298n_sleeptime=0.2
@@ -578,13 +578,13 @@ def handle_command(args):
 
             command = args['command']
 
-            if commandArgs.type == 'gopigo':
+            if type == 'gopigo':
                 moveGoPiGo(command)
             
-            if commandArgs.type == 'serial':
+            if type == 'serial':
                 sendSerialCommand(command)
 
-            if commandArgs.type == 'motor_hat' and motorsEnabled:
+            if type == 'motor_hat' and motorsEnabled:
                 motorA.setSpeed(drivingSpeed)
                 motorB.setSpeed(drivingSpeed)
                 if command == 'F':
@@ -628,12 +628,12 @@ def handle_command(args):
                     incrementArmServo(2, 10)
                     time.sleep(0.05)
 
-            if commandArgs.type == 'motor_hat':
+            if type == 'motor_hat':
                 turnOffMotors()
-            if commandArgs.type == 'l298n':
+            if type == 'l298n':
                 runl298n(command)                                 
             #setMotorsToIdle()
-	    if commandArgs.type == 'motozero':
+	    if type == 'motozero':
 		runmotozero(command)
             
             if led == 'max7219':
@@ -791,7 +791,7 @@ def myWait():
   thread.start_new_thread(myWait, ())
 
 
-if commandArgs.type == 'motor_hat':
+if type == 'motor_hat':
     if motorsEnabled:
         # create a default object, no changes to I2C address or frequency
         mh = Adafruit_MotorHAT(addr=0x60)
@@ -809,7 +809,7 @@ def turnOffMotors():
     #mhArm.getMotor(4).run(Adafruit_MotorHAT.RELEASE)
   
 
-if commandArgs.type == 'motor_hat':
+if type == 'motor_hat':
     if motorsEnabled:
         atexit.register(turnOffMotors)
         motorA = mh.getMotor(1)
@@ -828,7 +828,7 @@ def sendChargeState():
 def sendChargeStateCallback(x):
     sendChargeState()
 
-if commandArgs.type == 'motor_hat':
+if type == 'motor_hat':
     GPIO.add_event_detect(chargeIONumber, GPIO.BOTH)
     GPIO.add_event_callback(chargeIONumber, sendChargeStateCallback)
 
@@ -848,8 +848,8 @@ waitCounter = 0
 
 
 identifyRobotId()
-if commandArgs.secret_key is not None:
-    configWifiLogin(commandArgs.secret_key)
+if secret_key is not None:
+    configWifiLogin(secret_key)
 
 
 if platform.system() == 'Darwin':
@@ -869,7 +869,7 @@ while True:
         if platform.system() == 'Linux':
             ipInfoUpdate()
 
-        if commandArgs.type == 'motor_hat':
+        if type == 'motor_hat':
             sendChargeState()
 
     waitCounter += 1
