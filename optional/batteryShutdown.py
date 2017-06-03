@@ -2,6 +2,8 @@
 # Geekworm UPS
 # shutdown safely
 # 2017-04-30
+# add this to crontab to run every 3 minutes
+# */3 * * * * /path/to/batteryShutdown.py
 
 import struct
 import smbus 
