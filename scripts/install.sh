@@ -1,5 +1,9 @@
 #!/bin/bash
 
+sudo apt-get update
+sudo apt-get upgrade
+sudo apt-get dist-upgrade
+
 sudo apt-get install -y python-serial python-dev libgnutls28-dev espeak python-smbus python-pip git
 
 sudo pip install -U socketIO-client &&\
