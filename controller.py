@@ -220,11 +220,14 @@ def SetLED_Full():
         
 SetLED_Off()
 
+global drivingSpeed
+
 steeringSpeed = 90
 steeringHoldingSpeed = 90
 
 handlingCommand = False
 
+drivingSpeed = driving_speed
 
 # Marvin
 turningSpeedActuallyUsed = 250
