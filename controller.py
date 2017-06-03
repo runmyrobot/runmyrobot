@@ -22,6 +22,7 @@ parser.add_argument('--tts-volume', type=int, default=80)
 parser.add_argument('--secret-key', default=None)
 parser.add_argument('--turn-delay', type=float, default=0.4)
 parser.add_argument('--straight-delay', type=float, default=0.5)
+parser.add_argument('--driving-speed', type=int, default=90)
 
 commandArgs = parser.parse_args()
 print commandArgs
@@ -236,24 +237,15 @@ steeringHoldingSpeed = 90
 global drivingSpeed
 
 
-drivingSpeed = 90
+#drivingSpeed = 90
+drivingSpeed = commandArgs.driving_speed
 handlingCommand = False
 
-
-
-
-#turningSpeedActuallyUsed = 200
-#drivingSpeedActuallyUsed = 200
 
 # Marvin
 turningSpeedActuallyUsed = 250
 dayTimeDrivingSpeedActuallyUsed = 250
 nightTimeDrivingSpeedActuallyUsed = 170
-
-
-
-
-
 
 
 # Initialise the PWM device
