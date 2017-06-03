@@ -8,6 +8,9 @@ import traceback
 
 import argparse
 
+if secret_key is not None:
+    retrieveRobotConfiguration(secret_key)
+
 with open('config.json') as json_data_file:
   data = json.load(json_data_file)
 
@@ -256,20 +259,16 @@ else:
     print "invalid environment"
     sys.exit(0)
 
-
 if type == 'serial':
     # initialize serial connection
     serialBaud = 9600
     print "baud:", serialBaud
     #ser = serial.Serial('/dev/tty.usbmodem12341', 19200, timeout=1)  # open serial
     ser = serial.Serial(serialDevice, serialBaud, timeout=1)  # open serial
-
-    
     
 print 'using socket io to connect to', server
 socketIO = SocketIO(server, port, LoggingNamespace)
 print 'finished using socket io to connect to', server
-
 
 def setServoPulse(channel, pulse):
   pulseLength = 1000000                   # 1,000,000 us per second
@@ -281,10 +280,8 @@ def setServoPulse(channel, pulse):
   pulse /= pulseLength
   pwm.setPWM(channel, 0, pulse)
 
-
 if type == 'motor_hat':
     pwm.setPWMFreq(60)                        # Set frequency to 60 Hz
-
 
 WPA_FILE_TEMPLATE = """ctrl_interface=DIR=/var/run/wpa_supplicant GROUP=netdev
 update_config=1
@@ -303,9 +300,25 @@ network={{
     }}
 """
     
-    
 def configWifiLogin(secretKey):
+    url = 'https://%s/get_wifi_login/%s' % (server, secretKey)
+    try:
+        print "GET", url
+        response = urllib2.urlopen(url).read()
+        responseJson = json.loads(response)
+        print "get wifi login response:", response
+        wpaFile = open("/etc/wpa_supplicant/wpa_supplicant.conf", 'w')
+        wpaText = WPA_FILE_TEMPLATE.format(name=responseJson['wifi_name'], password=responseJson['wifi_password'])
+        print wpaText
+        print
+        wpaFile.write(wpaText)
+        wpaFile.close()
+        
+    except:
+        print "exception while configuring setting wifi", url
+        traceback.print_exc()
 
+def retrieveRobotConfiguration(secretKey):
     url = 'https://%s/get_wifi_login/%s' % (server, secretKey)
     try:
         print "GET", url
@@ -319,17 +332,9 @@ def configWifiLogin(secretKey):
         print
         wpaFile.write(wpaText)
         wpaFile.close()
-
-        
     except:
         print "exception while configuring setting wifi", url
         traceback.print_exc()
-
-
-
-    
-
-
 
 def sendSerialCommand(command):
 
@@ -350,12 +355,6 @@ def sendSerialCommand(command):
 
     #ser.close()
 
-
-
-
-
-
-
 def incrementArmServo(channel, amount):
 
     armServo[channel] += amount
@@ -368,12 +367,8 @@ def incrementArmServo(channel, amount):
         armServo[channel] = servoMin[channel]
     pwm.setPWM(channel, 0, armServo[channel])
 
-        
-
 def times(lst, number):
     return [x*number for x in lst]
-
-
 
 def runMotor(motorIndex, direction):
     motor = mh.getMotor(motorIndex+1)
@@ -839,21 +834,12 @@ if type == 'motor_hat':
 def identifyRobotId():
     socketIO.emit('identify_robot_id', robotID);
 
-
-
 #setMotorsToIdle()
-
-
-
-
-
 waitCounter = 0
-
 
 identifyRobotId()
 if secret_key is not None:
     configWifiLogin(secret_key)
-
 
 if platform.system() == 'Darwin':
     pass
