@@ -14,13 +14,15 @@ The RasPi will need the following things install so it can talk to your motor an
 (1) Install [motor HAT software](https://learn.adafruit.com/adafruit-dc-and-stepper-motor-hat-for-raspberry-pi/installing-software):
 
 
-(2) Install socket.io client for python:
+(2) Install python serial, gnutls, python-dev, espeak, and python-smbus:
+
+```apt-get install python-serial python-dev libgnutls28-dev espeak python-smbus python-pip git```
+
+
+(3) Install socket.io client for python:
 
 ```pip install socketIO-client```
 
-(3) Install python serial, gnutls, python-dev, espeak, and python-smbus:
-
-```apt-get install python-serial python-dev libgnutls28-dev espeak python-smbus python-pip```
 
 (4) Install alsa-lib
 ```
@@ -56,6 +58,13 @@ sudo make install
 
 
 <h2> Bring you Bot to life: Programs to run on the Raspberry Pi </h2>
+
+Start by cloning the runmyrobot repository
+```
+cd ~
+git clone https://github.com/runmyrobot/runmyrobot
+cd runmyrobot
+```
 
 Go to new robot page to create a robot. If you already have one, got to manage robots. There you'll find your Robot ID and Camera ID.
 
