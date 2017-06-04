@@ -19,6 +19,11 @@ echo
 echo -e "\e[33mPlease enter your Robot ID:\e[39m "
 read input_robot
 
+re='^[0-9]+$'
+if ! [[ $input_robot =~ $re ]] ; then
+   echo "Error: Robot ID is not a number" >&2; exit 1
+fi
+
 echo
 
 echo -e "\e[33mPlease enter your Camera ID:\e[39m "
@@ -27,7 +32,11 @@ read input_camera
 echo
 echo
 
-echo "Thank you, sit back and relax, we'll see you on runmyrobot.com"
+if ! [[ $input_camera =~ $re ]] ; then
+   echo "Error: Camera ID is not a number" >&2; exit 1
+fi
+
+echo -e "\e[33mThank you, sit back and relax, we'll see you on runmyrobot.com\e[39m"
 echo
 sleep 3s
 
@@ -85,3 +94,8 @@ sudo git clone https://github.com/runmyrobot/runmyrobot &&\
 
 # Add start_robot script to crontab, it might throw an error, but it works anyways
 crontab -l | { cat; echo "@reboot /bin/bash /home/pi/start_robot"; } | crontab -
+
+echo
+echo
+
+echo -e "\e[33mInstall has completed, please run start_robot, or reboot your robot to bring it online.\e[39m"
