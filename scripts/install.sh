@@ -44,9 +44,9 @@ cd runmyrobot
 
 sudo cp ~/runmyrobot/scripts/start_robot ~/
 
-crontab -l >cron.tmp
-echo '@reboot /bin/bash /home/pi/start_robot' >>cron.tmp
-crontab cron.tmp
-rm cron.tmp
+crontab -l > /tmp/cron.tmp
+sudo echo '@reboot /bin/bash /home/pi/start_robot' >> /tmp/cron.tmp
+crontab /tmp/cron.tmp
+rm /tmp/cron.tmp
 
 sudo nano ~/start_robot
