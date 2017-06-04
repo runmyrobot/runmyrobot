@@ -48,5 +48,4 @@ sudo crontab -l > /tmp/cron.tmp
 sudo echo '@reboot /bin/bash /home/pi/start_robot' >> /tmp/cron.tmp
 sudo crontab /tmp/cron.tmp
 
-
 sudo nano ~/start_robot
