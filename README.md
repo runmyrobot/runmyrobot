@@ -124,7 +124,7 @@ Example start_robot:
 
 ```
 cd /home/pi/runmyrobot
-nohup scripts/repeat_start python controller.py YOURROBOTID --type motor_hat --male --voice_number 1 --led max7219 &> /dev/null &
+nohup scripts/repeat_start python controller.py YOURROBOTID --type motor_hat --male --voice-number 1 --led max7219 &> /dev/null &
 nohup scripts/repeat_start python send_video.py YOURCAMERAID 0 &> /dev/null &
 ```
 
