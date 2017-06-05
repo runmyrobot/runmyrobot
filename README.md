@@ -11,21 +11,24 @@ https://runmyrobot.com
 
 The RasPi will need the following things install so it can talk to your motor and talk to the internet.
 
-(1) Install motor HAT software:
-https://learn.adafruit.com/adafruit-dc-and-stepper-motor-hat-for-raspberry-pi/installing-software
+(1) Install [motor HAT software](https://learn.adafruit.com/adafruit-dc-and-stepper-motor-hat-for-raspberry-pi/installing-software):
 
-(2) Install socket.io client for python:
+
+(2) Install python serial, gnutls, python-dev, espeak, and python-smbus:
+
+```apt-get install python-serial python-dev libgnutls28-dev espeak python-smbus python-pip git```
+
+
+(3) Install socket.io client for python:
 
 ```pip install socketIO-client```
 
-(3) Install python serial, gnutls, python-dev, espeak, and python-smbus:
-
-```apt-get install python-serial python-dev libgnutls28-dev espeak python-smbus python-pip```
 
 (4) Install alsa-lib
 ```
 cd /usr/local/src 
 wget ftp://ftp.alsa-project.org/pub/lib/alsa-lib-1.0.25.tar.bz2 
+tar xjf alsa-lib-1.0.25.tar.bz2
 cd /usr/local/src/alsa-lib-1.0.25 
 ./configure --host=arm-unknown-linux-gnueabi 
 make -j4 
@@ -55,6 +58,13 @@ sudo make install
 
 
 <h2> Bring you Bot to life: Programs to run on the Raspberry Pi </h2>
+
+Start by cloning the runmyrobot repository
+```
+cd ~
+git clone https://github.com/runmyrobot/runmyrobot
+cd runmyrobot
+```
 
 Go to new robot page to create a robot. If you already have one, got to manage robots. There you'll find your Robot ID and Camera ID.
 
@@ -86,7 +96,7 @@ Your Robot ID. Required
 
 Environment for example dev or prod | default='prod'
 
-```--type motor_hat | serial | l298n```
+```--type motor_hat | serial | l298n | motozero```
 
 What type of motor controller should be used | default='motor_hat'
 
@@ -114,7 +124,7 @@ Example start_robot:
 
 ```
 cd /home/pi/runmyrobot
-nohup scripts/repeat_start python controller.py YOURROBOTID --type motor_hat --male --voice_number 1 --led max7219 &> /dev/null &
+nohup scripts/repeat_start python controller.py YOURROBOTID --type motor_hat --male --voice-number 1 --led max7219 &> /dev/null &
 nohup scripts/repeat_start python send_video.py YOURCAMERAID 0 &> /dev/null &
 ```
 
@@ -140,5 +150,29 @@ We use ffmpeg to stream audio and socket.io to send control messages.
 <h2> How to contribute </h2>
 
 The is a community project. Making your own bot? Adding your own control stuff? Cool! We'd like to hear from you.
+
+
+<h1> Hardware Compatibility </h1>
+
+Adafruit Motor Hat
+
+Serial Port based commands
+
+GoPiGo
+
+L298N
+
+MotoZero
+
+Missing something?, you can add it, open source!
+
+<h1> Quicker install </h1>
+
+Grab the source
+run the install.sh script in the runmyrobot/scripts folder
+
+(This hasn't been tested yet.)
+
+
 
 

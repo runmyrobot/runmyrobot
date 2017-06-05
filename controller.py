@@ -12,7 +12,7 @@ import argparse
 parser = argparse.ArgumentParser(description='start robot control program')
 parser.add_argument('robot_id', help='Robot ID')
 parser.add_argument('--env', help="Environment for example dev or prod, prod is default", default='prod')
-parser.add_argument('--type', help="serial or motor_hat or gopigo or l298n", default='motor_hat')
+parser.add_argument('--type', help="serial or motor_hat or gopigo or l298n or motozero", default='motor_hat')
 parser.add_argument('--serial-device', help="serial device", default='/dev/ttyACM0')
 parser.add_argument('--male', dest='male', action='store_true')
 parser.add_argument('--female', dest='male', action='store_false')
@@ -20,11 +20,19 @@ parser.add_argument('--voice-number', type=int, default=1)
 parser.add_argument('--led', help="Type of LED for example max7219", default=None)
 parser.add_argument('--tts-volume', type=int, default=80)
 parser.add_argument('--secret-key', default=None)
-
+parser.add_argument('--turn-delay', type=float, default=0.4)
+parser.add_argument('--straight-delay', type=float, default=0.5)
+parser.add_argument('--driving-speed', type=int, default=90)
+parser.add_argument('--night-speed', type=int, default=170)
 
 commandArgs = parser.parse_args()
 print commandArgs
 
+
+
+# watch dog timer
+os.system("sudo modprobe bcm2835_wdt")
+os.system("sudo /usr/sbin/service watchdog start")
 
 
 # set volume level
@@ -34,8 +42,6 @@ print commandArgs
 
 # tested for USB audio device
 os.system("amixer -c 2 cset numid=3 %d%%" % commandArgs.tts_volume)
-
-
 
 server = "runmyrobot.com"
 #server = "52.52.213.92"
@@ -47,6 +53,8 @@ elif commandArgs.type == 'motor_hat':
 elif commandArgs.type == 'gopigo':
     import gopigo
 elif commandArgs.type == 'l298n':
+    pass
+elif commandArgs.type == 'motozero':
     pass
 else:
     print "invalid --type in command line"
@@ -69,6 +77,8 @@ if commandArgs.type == 'motor_hat':
     except ImportError:
         print "You need to install Adafruit_MotorHAT"
         print "Please install Adafruit_MotorHAT for python and restart this script."
+        print "To install: cd /usr/local/src && sudo git clone https://github.com/adafruit/Adafruit-Motor-HAT-Python-Library.git"
+        print "cd /usr/local/src/Adafruit-Motor-HAT-Python-Library && sudo python setup.py install"
         print "Running in test mode."
         print "Ctrl-C to quit"
         motorsEnabled = False
@@ -81,7 +91,7 @@ import atexit
 import sys
 import thread
 import subprocess
-if (commandArgs.type == 'motor_hat') or (commandArgs.type == 'l298n'):
+if (commandArgs.type == 'motor_hat') or (commandArgs.type == 'l298n') or (commandArgs.type == 'motozero'):
     import RPi.GPIO as GPIO
 import datetime
 from socketIO_client import SocketIO, LoggingNamespace
@@ -107,6 +117,53 @@ if commandArgs.type == 'l298n':
     GPIO.setup(StepPinBackward, GPIO.OUT)
     GPIO.setup(StepPinLeft, GPIO.OUT)
     GPIO.setup(StepPinRight, GPIO.OUT)
+if commandArgs.type == 'motozero':
+    GPIO.cleanup()
+    GPIO.setmode(GPIO.BCM)
+
+    # Motor1 is back left
+    # Motor1A is reverse
+    # Motor1B is forward
+    Motor1A = 24
+    Motor1B = 27
+    Motor1Enable = 5
+
+    # Motor2 is back right
+    # Motor2A is reverse
+    # Motor2B is forward
+    Motor2A = 6
+    Motor2B = 22
+    Motor2Enable = 17
+
+    # Motor3 is ?
+    # Motor3A is reverse
+    # Motor3B is forward
+    Motor3A = 23
+    Motor3B = 16
+    Motor3Enable = 12
+
+    # Motor4 is ?
+    # Motor4A is reverse
+    # Motor4B is forward
+    Motor4A = 13
+    Motor4B = 18
+    Motor4Enable = 25
+
+    GPIO.setup(Motor1A,GPIO.OUT)
+    GPIO.setup(Motor1B,GPIO.OUT)
+    GPIO.setup(Motor1Enable,GPIO.OUT)
+
+    GPIO.setup(Motor2A,GPIO.OUT)
+    GPIO.setup(Motor2B,GPIO.OUT)
+    GPIO.setup(Motor2Enable,GPIO.OUT) 
+
+    GPIO.setup(Motor3A,GPIO.OUT)
+    GPIO.setup(Motor3B,GPIO.OUT)
+    GPIO.setup(Motor3Enable,GPIO.OUT)
+
+    GPIO.setup(Motor4A,GPIO.OUT)
+    GPIO.setup(Motor4B,GPIO.OUT)
+    GPIO.setup(Motor4Enable,GPIO.OUT)
 
 #LED controlling
 if commandArgs.led == 'max7219':
@@ -181,25 +238,15 @@ steeringHoldingSpeed = 90
 global drivingSpeed
 
 
-drivingSpeed = 90
+#drivingSpeed = 90
+drivingSpeed = commandArgs.driving_speed
 handlingCommand = False
 
-
-
-
-#turningSpeedActuallyUsed = 200
-#drivingSpeedActuallyUsed = 200
 
 # Marvin
 turningSpeedActuallyUsed = 250
 dayTimeDrivingSpeedActuallyUsed = 250
-nightTimeDrivingSpeedActuallyUsed = 170
-
-
-
-
-
-
+nightTimeDrivingSpeedActuallyUsed = commandArgs.night_speed
 
 # Initialise the PWM device
 if commandArgs.type == 'motor_hat':
@@ -303,10 +350,6 @@ def configWifiLogin(secretKey):
     except:
         print "exception while configuring setting wifi", url
         traceback.print_exc()
-
-
-
-    
 
 
 
@@ -462,8 +505,8 @@ else: # default settings
     backward = times(forward, -1)
     left = (1, 1, 1, 1)
     right = times(left, -1)
-    straightDelay = 0.5
-    turnDelay = 0.4
+    straightDelay = commandArgs.straight_delay 
+    turnDelay = commandArgs.turn_delay
     #Change sleeptime to adjust driving speed
     #Change rotatetimes to adjust the rotation. Will be multiplicated with sleeptime.
     l298n_sleeptime=0.2
@@ -615,6 +658,8 @@ def handle_command(args):
             if commandArgs.type == 'l298n':
                 runl298n(command)                                 
             #setMotorsToIdle()
+	    if commandArgs.type == 'motozero':
+		runmotozero(command)
             
             if commandArgs.led == 'max7219':
                 if command == 'LED_OFF':
@@ -648,6 +693,86 @@ def runl298n(direction):
         time.sleep(l298n_sleeptime)
         GPIO.output(StepPinRight, GPIO.LOW)
 
+def runmotozero(direction):
+    if direction == 'F':
+        GPIO.output(Motor1B, GPIO.HIGH)
+        GPIO.output(Motor1Enable,GPIO.HIGH)
+
+        GPIO.output(Motor2B, GPIO.HIGH)
+        GPIO.output(Motor2Enable, GPIO.HIGH)
+
+        GPIO.output(Motor3A, GPIO.HIGH)
+        GPIO.output(Motor3Enable, GPIO.HIGH)
+
+        GPIO.output(Motor4B, GPIO.HIGH)
+        GPIO.output(Motor4Enable, GPIO.HIGH)
+
+        time.sleep(0.3)
+
+        GPIO.output(Motor1B, GPIO.LOW)
+        GPIO.output(Motor2B, GPIO.LOW)
+        GPIO.output(Motor3A, GPIO.LOW)
+        GPIO.output(Motor4B, GPIO.LOW)
+    if direction == 'B':
+        GPIO.output(Motor1A, GPIO.HIGH)
+        GPIO.output(Motor1Enable, GPIO.HIGH)
+
+        GPIO.output(Motor2A, GPIO.HIGH)
+        GPIO.output(Motor2Enable, GPIO.HIGH)
+
+        GPIO.output(Motor3B, GPIO.HIGH)
+        GPIO.output(Motor3Enable, GPIO.HIGH)
+
+        GPIO.output(Motor4A, GPIO.HIGH)
+        GPIO.output(Motor4Enable, GPIO.HIGH)
+
+        time.sleep(0.3)
+
+        GPIO.output(Motor1A, GPIO.LOW)
+        GPIO.output(Motor2A, GPIO.LOW)
+        GPIO.output(Motor3B, GPIO.LOW)
+        GPIO.output(Motor4A, GPIO.LOW)
+
+    if direction =='L':
+        GPIO.output(Motor3B, GPIO.HIGH)
+        GPIO.output(Motor3Enable, GPIO.HIGH)
+
+        GPIO.output(Motor1A, GPIO.HIGH)
+        GPIO.output(Motor1Enable, GPIO.HIGH)
+
+        GPIO.output(Motor2B, GPIO.HIGH)
+        GPIO.output(Motor2Enable, GPIO.HIGH)
+
+        GPIO.output(Motor4B, GPIO.HIGH)
+        GPIO.output(Motor4Enable, GPIO.HIGH)
+
+        time.sleep(0.3)
+
+        GPIO.output(Motor3B, GPIO.LOW)
+        GPIO.output(Motor1A, GPIO.LOW)
+        GPIO.output(Motor2B, GPIO.LOW)
+        GPIO.output(Motor4B, GPIO.LOW)
+
+    if direction == 'R':
+        GPIO.output(Motor3A, GPIO.HIGH)
+        GPIO.output(Motor3Enable, GPIO.HIGH)
+
+        GPIO.output(Motor1B, GPIO.HIGH)
+        GPIO.output(Motor1Enable, GPIO.HIGH)
+
+        GPIO.output(Motor2A, GPIO.HIGH)
+        GPIO.output(Motor2Enable, GPIO.HIGH)
+
+        GPIO.output(Motor4A, GPIO.HIGH)
+        GPIO.output(Motor4Enable, GPIO.HIGH)
+
+        time.sleep(0.3)
+
+        GPIO.output(Motor3A, GPIO.LOW)
+        GPIO.output(Motor1B, GPIO.LOW)
+        GPIO.output(Motor2A, GPIO.LOW)
+        GPIO.output(Motor4A, GPIO.LOW)
+	
 def handleStartReverseSshProcess(args):
     print "starting reverse ssh"
     socketIO.emit("reverse_ssh_info", "starting")
@@ -773,5 +898,3 @@ while True:
             sendChargeState()
 
     waitCounter += 1
-
-
