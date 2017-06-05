@@ -18,6 +18,7 @@ parser.add_argument('--male', dest='male', action='store_true')
 parser.add_argument('--female', dest='male', action='store_false')
 parser.add_argument('--voice-number', type=int, default=1)
 parser.add_argument('--led', help="Type of LED for example max7219", default=None)
+parser.add_argument('--ledrotate', help="Rotates the LED matrix. Example: 180", default=None)
 parser.add_argument('--tts-volume', type=int, default=80)
 parser.add_argument('--secret-key', default=None)
 parser.add_argument('--turn-delay', type=float, default=0.4)
@@ -192,7 +193,16 @@ if commandArgs.led == 'max7219':
     spi.writebytes([0x00])
     columns = [0x1,0x2,0x3,0x4,0x5,0x6,0x7,0x8]
     LEDOn = [0xFF,0xFF,0xFF,0xFF,0xFF,0xFF,0xFF,0xFF] 
-    LEDOff = [0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0] 
+    LEDOff = [0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0]
+    LEDEmoteSmile = [0x0,0x0,0x24,0x0,0x42,0x3C,0x0,0x0]
+    LEDEmoteSad = [0x0,0x0,0x24,0x0,0x0,0x3C,0x42,0x0]
+    LEDEmoteTongue = [0x0,0x0,0x24,0x0,0x42,0x3C,0xC,0x0]
+    LEDEmoteSuprise = [0x0,0x0,0x24,0x0,0x18,0x24,0x24,0x18]
+    if commandArgs.ledrotate == 180:
+        LEDEmoteSmile = LEDEmoteSmile[::-1]
+        LEDEmoteSad = LEDEmoteSad[::-1]
+        LEDEmoteTongue = LEDEmoteTongue[::-1]
+        LEDEmoteSuprise = LEDEmoteSuprise[::-1]
     
 def SetLED_On():
   if commandArgs.led == 'max7219':
@@ -214,6 +224,48 @@ def SetLED_Off():
     spi.xfer([columns[5],LEDOff[5]])
     spi.xfer([columns[6],LEDOff[6]])
     spi.xfer([columns[7],LEDOff[7]])
+def SetLED_E_Smiley():
+  if commandArgs.led == 'max7219':
+    for i in range(0, len(columns)-1)
+        spi.xfer([columns[i],LEDEmoteSmile[i]]) 
+    #spi.xfer([columns[0],LEDEmoteSmile[0]]) 
+    #spi.xfer([columns[1],LEDEmoteSmile[1]])
+    #spi.xfer([columns[2],LEDEmoteSmile[2]])
+    #spi.xfer([columns[3],LEDEmoteSmile[3]])
+    #spi.xfer([columns[4],LEDEmoteSmile[4]])
+    #spi.xfer([columns[5],LEDEmoteSmile[5]])
+    #spi.xfer([columns[6],LEDEmoteSmile[6]])
+    #spi.xfer([columns[7],LEDEmoteSmile[7]])
+def SetLED_E_Sad():
+  if commandArgs.led == 'max7219':
+    spi.xfer([columns[0],LEDEmoteSad[0]]) 
+    spi.xfer([columns[1],LEDEmoteSad[1]])
+    spi.xfer([columns[2],LEDEmoteSad[2]])
+    spi.xfer([columns[3],LEDEmoteSad[3]])
+    spi.xfer([columns[4],LEDEmoteSad[4]])
+    spi.xfer([columns[5],LEDEmoteSad[5]])
+    spi.xfer([columns[6],LEDEmoteSad[6]])
+    spi.xfer([columns[7],LEDEmoteSad[7]])
+def SetLED_E_Tongue():
+  if commandArgs.led == 'max7219':
+    spi.xfer([columns[0],LEDEmoteTongue[0]]) 
+    spi.xfer([columns[1],LEDEmoteTongue[1]])
+    spi.xfer([columns[2],LEDEmoteTongue[2]])
+    spi.xfer([columns[3],LEDEmoteTongue[3]])
+    spi.xfer([columns[4],LEDEmoteTongue[4]])
+    spi.xfer([columns[5],LEDEmoteTongue[5]])
+    spi.xfer([columns[6],LEDEmoteTongue[6]])
+    spi.xfer([columns[7],LEDEmoteTongue[7]])
+def SetLED_E_Suprised():
+  if commandArgs.led == 'max7219':
+    spi.xfer([columns[0],LEDEmoteSuprise[0]]) 
+    spi.xfer([columns[1],LEDEmoteSuprise[1]])
+    spi.xfer([columns[2],LEDEmoteSuprise[2]])
+    spi.xfer([columns[3],LEDEmoteSuprise[3]])
+    spi.xfer([columns[4],LEDEmoteSuprise[4]])
+    spi.xfer([columns[5],LEDEmoteSuprise[5]])
+    spi.xfer([columns[6],LEDEmoteSuprise[6]])
+    spi.xfer([columns[7],LEDEmoteSuprise[7]])
 def SetLED_Low():
   if commandArgs.led == 'max7219':
     # brightness MIN
@@ -673,6 +725,18 @@ def handle_command(args):
                 if command == 'LED_LOW':
                     SetLED_On()
                     SetLED_Low()
+                if command == 'LED_E_SMILEY':
+                    SetLED_On()
+                    SetLED_E_Smiley()
+                if command == 'LED_E_SAD':
+                    SetLED_On()
+                    SetLED_E_Sad()
+                if command == 'LED_E_TONGUE':
+                    SetLED_On()
+                    SetLED_E_Tongue()
+                if command == 'LED_E_SUPRISED':
+                    SetLED_On()
+                    SetLED_E_Suprised()
         handlingCommand = False
 
 def runl298n(direction):
