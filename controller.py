@@ -198,7 +198,7 @@ if commandArgs.led == 'max7219':
     LEDEmoteSad = [0x0,0x0,0x24,0x0,0x0,0x3C,0x42,0x0]
     LEDEmoteTongue = [0x0,0x0,0x24,0x0,0x42,0x3C,0xC,0x0]
     LEDEmoteSuprise = [0x0,0x0,0x24,0x0,0x18,0x24,0x24,0x18]
-    if commandArgs.ledrotate == 180:
+    if commandArgs.ledrotate == '180':
         LEDEmoteSmile = LEDEmoteSmile[::-1]
         LEDEmoteSad = LEDEmoteSad[::-1]
         LEDEmoteTongue = LEDEmoteTongue[::-1]
@@ -206,66 +206,28 @@ if commandArgs.led == 'max7219':
     
 def SetLED_On():
   if commandArgs.led == 'max7219':
-    spi.xfer([columns[0],LEDOn[0]]) 
-    spi.xfer([columns[1],LEDOn[1]])
-    spi.xfer([columns[2],LEDOn[2]])
-    spi.xfer([columns[3],LEDOn[3]])
-    spi.xfer([columns[4],LEDOn[4]])
-    spi.xfer([columns[5],LEDOn[5]])
-    spi.xfer([columns[6],LEDOn[6]])
-    spi.xfer([columns[7],LEDOn[7]])
+    for i in range(len(columns)):
+        spi.xfer([columns[i],LEDOn[i]])
 def SetLED_Off():
-  if commandArgs.led == 'max7219':
-    spi.xfer([columns[0],LEDOff[0]]) 
-    spi.xfer([columns[1],LEDOff[1]])
-    spi.xfer([columns[2],LEDOff[2]])
-    spi.xfer([columns[3],LEDOff[3]])
-    spi.xfer([columns[4],LEDOff[4]])
-    spi.xfer([columns[5],LEDOff[5]])
-    spi.xfer([columns[6],LEDOff[6]])
-    spi.xfer([columns[7],LEDOff[7]])
+  if commandArgs.led == 'max7219': 
+    for i in range(len(columns)):
+        spi.xfer([columns[i],LEDOff[i]])
 def SetLED_E_Smiley():
   if commandArgs.led == 'max7219':
-    for i in range(0, len(columns)-1)
+    for i in range(len(columns)):
         spi.xfer([columns[i],LEDEmoteSmile[i]]) 
-    #spi.xfer([columns[0],LEDEmoteSmile[0]]) 
-    #spi.xfer([columns[1],LEDEmoteSmile[1]])
-    #spi.xfer([columns[2],LEDEmoteSmile[2]])
-    #spi.xfer([columns[3],LEDEmoteSmile[3]])
-    #spi.xfer([columns[4],LEDEmoteSmile[4]])
-    #spi.xfer([columns[5],LEDEmoteSmile[5]])
-    #spi.xfer([columns[6],LEDEmoteSmile[6]])
-    #spi.xfer([columns[7],LEDEmoteSmile[7]])
 def SetLED_E_Sad():
   if commandArgs.led == 'max7219':
-    spi.xfer([columns[0],LEDEmoteSad[0]]) 
-    spi.xfer([columns[1],LEDEmoteSad[1]])
-    spi.xfer([columns[2],LEDEmoteSad[2]])
-    spi.xfer([columns[3],LEDEmoteSad[3]])
-    spi.xfer([columns[4],LEDEmoteSad[4]])
-    spi.xfer([columns[5],LEDEmoteSad[5]])
-    spi.xfer([columns[6],LEDEmoteSad[6]])
-    spi.xfer([columns[7],LEDEmoteSad[7]])
+    for i in range(len(columns)):
+        spi.xfer([columns[i],LEDEmoteSad[i]])
 def SetLED_E_Tongue():
   if commandArgs.led == 'max7219':
-    spi.xfer([columns[0],LEDEmoteTongue[0]]) 
-    spi.xfer([columns[1],LEDEmoteTongue[1]])
-    spi.xfer([columns[2],LEDEmoteTongue[2]])
-    spi.xfer([columns[3],LEDEmoteTongue[3]])
-    spi.xfer([columns[4],LEDEmoteTongue[4]])
-    spi.xfer([columns[5],LEDEmoteTongue[5]])
-    spi.xfer([columns[6],LEDEmoteTongue[6]])
-    spi.xfer([columns[7],LEDEmoteTongue[7]])
+    for i in range(len(columns)):
+        spi.xfer([columns[i],LEDEmoteTongue[i]])
 def SetLED_E_Suprised():
   if commandArgs.led == 'max7219':
-    spi.xfer([columns[0],LEDEmoteSuprise[0]]) 
-    spi.xfer([columns[1],LEDEmoteSuprise[1]])
-    spi.xfer([columns[2],LEDEmoteSuprise[2]])
-    spi.xfer([columns[3],LEDEmoteSuprise[3]])
-    spi.xfer([columns[4],LEDEmoteSuprise[4]])
-    spi.xfer([columns[5],LEDEmoteSuprise[5]])
-    spi.xfer([columns[6],LEDEmoteSuprise[6]])
-    spi.xfer([columns[7],LEDEmoteSuprise[7]])
+    for i in range(len(columns)):
+        spi.xfer([columns[i],LEDEmoteSuprise[i]])
 def SetLED_Low():
   if commandArgs.led == 'max7219':
     # brightness MIN
