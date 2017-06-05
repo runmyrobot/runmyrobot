@@ -99,6 +99,7 @@ from socketIO_client import SocketIO, LoggingNamespace
 
 
 chargeIONumber = 17
+robotID = commandArgs.robot_id
       
 if commandArgs.type == 'motor_hat':
     GPIO.setmode(GPIO.BCM)
@@ -109,10 +110,21 @@ if commandArgs.type == 'l298n':
     GPIO.cleanup()
     #Change the GPIO Pins to your connected motors
     #visit http://bit.ly/1S5nQ4y for reference
-    StepPinForward=12,16
-    StepPinBackward=11,15
-    StepPinLeft=15,12
-    StepPinRight=11,16
+    if robotID == "20134182": # StanleyBot
+        StepPinForward=12,16
+        StepPinBackward=11,15
+        StepPinLeft=15,12
+        StepPinRight=11,16
+    elif robotID == "53326365": # StaceyBot
+        StepPinForward=11,15
+        StepPinBackward=12,16
+        StepPinLeft=11,16
+        StepPinRight=15,12
+    else: # default settings
+        StepPinForward=12,16
+        StepPinBackward=11,15
+        StepPinLeft=15,12
+        StepPinRight=11,16
     GPIO.setmode(GPIO.BOARD)
     GPIO.setup(StepPinForward, GPIO.OUT)
     GPIO.setup(StepPinBackward, GPIO.OUT)
@@ -280,7 +292,7 @@ armServo = [300, 300, 300]
 
 
 
-robotID = commandArgs.robot_id
+
 
 
 if commandArgs.env == 'dev':
@@ -512,7 +524,10 @@ elif robotID == "88241899": #MadrivaBot
     straightDelay = 0.5
     turnDelay = 0.4
 elif robotID == "20134182": #StanleyBot
-    l298n_sleeptime=0.2
+    l298n_sleeptime=0.1
+    l298n_rotatetimes=5
+elif robotID == "53326365": #StaceyBot
+    l298n_sleeptime=0.1
     l298n_rotatetimes=5
 else: # default settings
     forward = (-1, 1, -1, 1)
