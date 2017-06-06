@@ -344,12 +344,12 @@ elif robotID == "22027911": # Zip
     straightDelay = 0.5
     turnDelay = 0.8
 elif robotID == "78929358": # ZombieZip
-    forward = (-1, 1, -1, 1)
+    forward = (-1, 1, 0, 0)
     backward = times(forward, -1)
-    left = (0, 1, 1, 0) # was 1,1,1,1
-    right = (0, -1, -1, 0)
-    straightDelay = 1.6
-    turnDelay = 0.8
+    left = (1, 1, 0, 0) # was 1,1,1,1
+    right = (-1, -1, 0, 0)
+    straightDelay = 0.8
+    turnDelay = 0.2
 elif robotID == "52225122": # Pippy
     forward = (-1, 1, 1, -1)
     backward = times(forward, -1)
