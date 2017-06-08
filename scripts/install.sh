@@ -1,4 +1,4 @@
-
+sudo apt-get install espeak &&\
 sudo pip install -U socketIO-client &&\
 cd ~ &&\
 git clone https://github.com/adafruit/Adafruit-Motor-HAT-Python-Library.git &&\
