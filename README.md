@@ -120,11 +120,15 @@ What voice should be used | default=1
 
 What LEDs should be used (if any) | default=none
 
+```--ledrotate 180```
+
+Rotates the LED matrix | default=none
+
 Example start_robot:
 
 ```
 cd /home/pi/runmyrobot
-nohup scripts/repeat_start python controller.py YOURROBOTID --type motor_hat --male --voice_number 1 --led max7219 &> /dev/null &
+nohup scripts/repeat_start python controller.py YOURROBOTID --type motor_hat --male --voice-number 1 --led max7219 --ledrotate 180 &> /dev/null &
 nohup scripts/repeat_start python send_video.py YOURCAMERAID 0 &> /dev/null &
 ```
 
