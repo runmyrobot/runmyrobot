@@ -338,6 +338,10 @@ def timeInMilliseconds():
 
 def main():
 
+    # clean up, kill any ffmpeg process that are hanging around from a previous run
+    print "killing all ffmpeg processes"
+    os.system("killall ffmpeg")
+    
     print "main"
 
     streamProcessDict = None
