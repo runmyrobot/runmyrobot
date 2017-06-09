@@ -18,6 +18,7 @@ parser.add_argument('--male', dest='male', action='store_true')
 parser.add_argument('--female', dest='male', action='store_false')
 parser.add_argument('--voice-number', type=int, default=1)
 parser.add_argument('--led', help="Type of LED for example max7219", default=None)
+parser.add_argument('--ledrotate', help="Rotates the LED matrix. Example: 180", default=None)
 parser.add_argument('--tts-volume', type=int, default=80)
 parser.add_argument('--secret-key', default=None)
 parser.add_argument('--turn-delay', type=float, default=0.4)
@@ -98,6 +99,7 @@ from socketIO_client import SocketIO, LoggingNamespace
 
 
 chargeIONumber = 17
+robotID = commandArgs.robot_id
       
 if commandArgs.type == 'motor_hat':
     GPIO.setmode(GPIO.BCM)
@@ -108,10 +110,21 @@ if commandArgs.type == 'l298n':
     GPIO.cleanup()
     #Change the GPIO Pins to your connected motors
     #visit http://bit.ly/1S5nQ4y for reference
-    StepPinForward=12,16
-    StepPinBackward=11,15
-    StepPinLeft=15,12
-    StepPinRight=11,16
+    if robotID == "20134182": # StanleyBot
+        StepPinForward=12,16
+        StepPinBackward=11,15
+        StepPinLeft=15,12
+        StepPinRight=11,16
+    elif robotID == "53326365": # StaceyBot
+        StepPinForward=11,15
+        StepPinBackward=12,16
+        StepPinLeft=11,16
+        StepPinRight=15,12
+    else: # default settings
+        StepPinForward=12,16
+        StepPinBackward=11,15
+        StepPinLeft=15,12
+        StepPinRight=11,16
     GPIO.setmode(GPIO.BOARD)
     GPIO.setup(StepPinForward, GPIO.OUT)
     GPIO.setup(StepPinBackward, GPIO.OUT)
@@ -192,28 +205,41 @@ if commandArgs.led == 'max7219':
     spi.writebytes([0x00])
     columns = [0x1,0x2,0x3,0x4,0x5,0x6,0x7,0x8]
     LEDOn = [0xFF,0xFF,0xFF,0xFF,0xFF,0xFF,0xFF,0xFF] 
-    LEDOff = [0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0] 
+    LEDOff = [0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0]
+    LEDEmoteSmile = [0x0,0x0,0x24,0x0,0x42,0x3C,0x0,0x0]
+    LEDEmoteSad = [0x0,0x0,0x24,0x0,0x0,0x3C,0x42,0x0]
+    LEDEmoteTongue = [0x0,0x0,0x24,0x0,0x42,0x3C,0xC,0x0]
+    LEDEmoteSuprise = [0x0,0x0,0x24,0x0,0x18,0x24,0x24,0x18]
+    if commandArgs.ledrotate == '180':
+        LEDEmoteSmile = LEDEmoteSmile[::-1]
+        LEDEmoteSad = LEDEmoteSad[::-1]
+        LEDEmoteTongue = LEDEmoteTongue[::-1]
+        LEDEmoteSuprise = LEDEmoteSuprise[::-1]
     
 def SetLED_On():
   if commandArgs.led == 'max7219':
-    spi.xfer([columns[0],LEDOn[0]]) 
-    spi.xfer([columns[1],LEDOn[1]])
-    spi.xfer([columns[2],LEDOn[2]])
-    spi.xfer([columns[3],LEDOn[3]])
-    spi.xfer([columns[4],LEDOn[4]])
-    spi.xfer([columns[5],LEDOn[5]])
-    spi.xfer([columns[6],LEDOn[6]])
-    spi.xfer([columns[7],LEDOn[7]])
+    for i in range(len(columns)):
+        spi.xfer([columns[i],LEDOn[i]])
 def SetLED_Off():
+  if commandArgs.led == 'max7219': 
+    for i in range(len(columns)):
+        spi.xfer([columns[i],LEDOff[i]])
+def SetLED_E_Smiley():
   if commandArgs.led == 'max7219':
-    spi.xfer([columns[0],LEDOff[0]]) 
-    spi.xfer([columns[1],LEDOff[1]])
-    spi.xfer([columns[2],LEDOff[2]])
-    spi.xfer([columns[3],LEDOff[3]])
-    spi.xfer([columns[4],LEDOff[4]])
-    spi.xfer([columns[5],LEDOff[5]])
-    spi.xfer([columns[6],LEDOff[6]])
-    spi.xfer([columns[7],LEDOff[7]])
+    for i in range(len(columns)):
+        spi.xfer([columns[i],LEDEmoteSmile[i]]) 
+def SetLED_E_Sad():
+  if commandArgs.led == 'max7219':
+    for i in range(len(columns)):
+        spi.xfer([columns[i],LEDEmoteSad[i]])
+def SetLED_E_Tongue():
+  if commandArgs.led == 'max7219':
+    for i in range(len(columns)):
+        spi.xfer([columns[i],LEDEmoteTongue[i]])
+def SetLED_E_Suprised():
+  if commandArgs.led == 'max7219':
+    for i in range(len(columns)):
+        spi.xfer([columns[i],LEDEmoteSuprise[i]])
 def SetLED_Low():
   if commandArgs.led == 'max7219':
     # brightness MIN
@@ -266,7 +292,7 @@ armServo = [300, 300, 300]
 
 
 
-robotID = commandArgs.robot_id
+
 
 
 if commandArgs.env == 'dev':
@@ -435,10 +461,10 @@ elif robotID == "22027911": # Zip
     straightDelay = 0.5
     turnDelay = 0.8
 elif robotID == "78929358": # ZombieZip
-    forward = (-1, 1, 0, 0)
+    forward = (-1, 0, -1, 0)
     backward = times(forward, -1)
-    left = (1, 1, 0, 0) # was 1,1,1,1
-    right = (-1, -1, 0, 0)
+    left = (1, 0, -1, 0) # was 1,1,1,1
+    right = (-1, 0, 1, 0)
     straightDelay = 0.8
     turnDelay = 0.2
 elif robotID == "52225122": # Pippy
@@ -498,7 +524,10 @@ elif robotID == "88241899": #MadrivaBot
     straightDelay = 0.5
     turnDelay = 0.4
 elif robotID == "20134182": #StanleyBot
-    l298n_sleeptime=0.2
+    l298n_sleeptime=0.1
+    l298n_rotatetimes=5
+elif robotID == "53326365": #StaceyBot
+    l298n_sleeptime=0.1
     l298n_rotatetimes=5
 else: # default settings
     forward = (-1, 1, -1, 1)
@@ -673,6 +702,18 @@ def handle_command(args):
                 if command == 'LED_LOW':
                     SetLED_On()
                     SetLED_Low()
+                if command == 'LED_E_SMILEY':
+                    SetLED_On()
+                    SetLED_E_Smiley()
+                if command == 'LED_E_SAD':
+                    SetLED_On()
+                    SetLED_E_Sad()
+                if command == 'LED_E_TONGUE':
+                    SetLED_On()
+                    SetLED_E_Tongue()
+                if command == 'LED_E_SUPRISED':
+                    SetLED_On()
+                    SetLED_E_Suprised()
         handlingCommand = False
 
 def runl298n(direction):
