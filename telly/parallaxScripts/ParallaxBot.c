@@ -14,8 +14,7 @@
 
 void Step(int leftSpeed, int rightSpeed);
 void Stop(void);
-void led_blink();
-void eyes_blink();
+void blink();
 void motor_controller();
 void neopixel_controller();
 void set_motor_controller(int leftSpeed, int rightSpeed);
@@ -26,8 +25,7 @@ void pause(int ms);
 uint32_t ledColors[LED_COUNT];
 ws2812_t driver;
 int ticks_per_ms;
-uint8_t brightness = 255;
-uint32_t eye_color = 0x0F0F0F;
+uint8_t brightness = 50;
   
 
 fdserial *term; //enables full-duplex serilization of the terminal (In otherwise, 2 way signals between this computer and the robot)
@@ -63,14 +61,21 @@ int main()
 	term = fdserial_open(31, 30, 0, 9600);
  
    ticks_per_ms = CLKFREQ / 1000;
+   
+  cog_run(blink, 128);                  // Run blink in other cog
   
 	cog_run(motor_controller,128);
     // load the LED driver
     if (ws2812b_init(&driver) < 0)
        return 1;
-       pause(500);
-   eyes_blink();
-       
+   
+        int doot;
+        while(doot<LED_COUNT)
+        {
+        set_neopixel(doot,0xFFFF00);        
+        pause(10); 
+        doot+=1;
+        }       
 
 	char c;
 
@@ -183,12 +188,12 @@ void set_motor_controller(int leftSpeed, int rightSpeed)
 void Stop(void)
 {
 	//drive_feedback(0);
-  drive_close();
+	drive_speed(0, 0);
 
 
 }  
 
-void led_blink()                            // Blink function for other cog
+void blink()                            // Blink function for other cog
 {
 	while(1)                              // Endless loop for other cog
 	{
@@ -206,7 +211,7 @@ void motor_controller()
 	uint32_t wait_ms = 10;
 	uint32_t clk_wait = 80000*wait_ms;
 	uint32_t timeout_timer = 0;
-	uint32_t timeout_ms = 80000*500;
+	uint32_t timeout_ms = 80000*500  ;
 	while(1)
 	{
 
@@ -222,7 +227,7 @@ void motor_controller()
 			}
 			if(current_ms-timeout_timer >= timeout_ms)
 			{
-				Stop();
+				Step(0,0);
 			}          
 		}        
 	}  
@@ -263,40 +268,3 @@ void set_neopixel(uint8_t pixel_num, uint32_t color)
         }        
 }
 
-
-void eyes_blink()
-{
-        int doot;
-        doot=0;
-        while(doot<LED_COUNT)
-        {
-        if(doot==4||doot==13)
-        set_neopixel(doot,0x000000);  
-        else
-        set_neopixel(doot,eye_color);         
-        doot+=1;
-        pause(1);
-        }     
-        doot =0;   
-        pause(400);
-        while(doot<LED_COUNT)
-        {
-        if((doot>=3 && doot<=5)|| (doot>=12 && doot<=14))
-        set_neopixel(doot,eye_color);  
-        else
-        set_neopixel(doot,0x000000);         
-        doot+=1;
-           pause(1);
-        }     
-        doot =0; 
-        pause(400);
-                while(doot<LED_COUNT)
-        {
-        if(doot==4||doot==13)
-        set_neopixel(doot,0x000000);  
-        else
-        set_neopixel(doot,eye_color);         
-        doot+=1;
-           pause(1);
-                   }
-}  
