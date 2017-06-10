@@ -440,7 +440,7 @@ def main():
 
             if count % 30 == 0:
                 print "send status about this process and its child process ffmpeg"
-                ffmpegProcessExists = True# streamProcessDict['video_process'].poll() is None
+                ffmpegProcessExists = True #streamProcessDict['video_process'].poll() is None
                 socketIO.emit('send_video_status', {'send_video_process_exists': True,
                                                     'ffmpeg_process_exists': ffmpegProcessExists,
                                                     'camera_id':cameraIDAnswer})
@@ -450,12 +450,21 @@ def main():
             #    os.system("sudo reboot")
                 
             # if the video stream process dies, restart it
-            if streamProcessDict['video_process'].poll() is not None or streamProcessDict['audio_process'].poll():
+            if (streamProcessDict['video_process'].poll() is not None) or \
+               (streamProcessDict['audio_process'].poll() is not None):
+
+                # make sure audio and video ffmpeg processes are killed
+                streamProcessDict['video_process'].kill()
+                streamProcessDict['audio_process'].kill()
+                
                 # wait before trying to start ffmpeg
                 print "ffmpeg process is dead, waiting before trying to restart"
                 randomSleep()
+
+                # start video and audio capture again
                 streamProcessDict = startVideoCapture()
 
+                
         twitterSnapCount += 1
 
 if __name__ == "__main__":
