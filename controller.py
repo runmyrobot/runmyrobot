@@ -439,107 +439,16 @@ def runMotor(motorIndex, direction):
         motor.run(Adafruit_MotorHAT.BACKWARD)
 
 
-if robotID == "3444925": # if Timmy
-    forward = (-1, 1, 1, -1)
-    backward = times(forward, -1)
-    left = (1, 1, 1, 1)
-    right = times(left, -1)
-    straightDelay = 1.6
-    turnDelay = 0.4
-elif robotID == "88359766": # Skippy_old
-    forward = (1, 1, 1, -1)
-    backward = times(forward, -1)
-    left = (1, -1, 1, 1)
-    right = times(left, -1)
-    straightDelay = 1.6
-    turnDelay = 0.8
-elif robotID == "22027911": # Zip
-    forward = (-1, 1, -1, 1)
-    backward = times(forward, -1)
-    left = (0, 1, 1, 0) # was 1,1,1,1
-    right = (0, -1, -1, 0)
-    straightDelay = 0.5
-    turnDelay = 0.8
-elif robotID == "78929358": # ZombieZip
-    forward = (-1, 0, -1, 0)
-    backward = times(forward, -1)
-    left = (1, 0, -1, 0) # was 1,1,1,1
-    right = (-1, 0, 1, 0)
-    straightDelay = 0.8
-    turnDelay = 0.2
-elif robotID == "52225122": # Pippy
-    forward = (-1, 1, 1, -1)
-    backward = times(forward, -1)
-    left = (1, 1, 1, 1)
-    right = times(left, -1)
-    straightDelay = 0.5
-    turnDelay = 0.8
-elif robotID == "72378514": # Skippy
-    forward = (-1, 1, -1, 1)
-    backward = times(forward, -1)
-    left = (1, 1, 1, 1)
-    right = times(left, -1)
-    straightDelay = 1.6
-    turnDelay = 0.4
-elif robotID == "19359999": # Mikey
-    forward = (-1, 1, 1, -1)
-    backward = times(forward, -1)
-    left = (1, 1, 1, 1)
-    right = times(left, -1)
-    straightDelay = 0.5
-    turnDelay = 0.4
-elif robotID == "86583531": # Dilbert
-    forward = (-1, 1, -1, 1)
-    backward = times(forward, -1)
-    left = (1, 1, 1, 1)
-    right = times(left, -1)
-    straightDelay = 1.6
-    turnDelay = 0.4
-elif robotID == "48853711": # Marvin
-    forward = (1, -1, 1, -1)
-    backward = times(forward, -1)
-    left = (-1, -1, -1, -1)
-    right = times(left, -1)
-    straightDelay = 0.5
-    turnDelay = 0.1
-elif robotID == "11543083": # RedBird
-    forward = (1, -1, 1, -1)
-    backward = times(forward, -1)
-    left = (-1, -1, -1, -1)
-    right = times(left, -1)
-    straightDelay = 1.6
-    turnDelay = 0.4
-elif robotID == "12692512": # Pita 
-    forward = (1, 1, 1, 1)
-    backward = (-1,-1,-1,-1)
-    left = (-1, 0, 0, 0)
-    right = times(left, -1)
-    straightDelay = 0.5
-    turnDelay = 0.4
-elif robotID == "88241899": #MadrivaBot
-    forward = (1, -1, 1, -1)
-    backward = times(forward, -1)
-    left = (-1, -1, -1, -1)
-    right = times(left, -1)
-    straightDelay = 0.5
-    turnDelay = 0.4
-elif robotID == "20134182": #StanleyBot
-    l298n_sleeptime=0.1
-    l298n_rotatetimes=5
-elif robotID == "53326365": #StaceyBot
-    l298n_sleeptime=0.1
-    l298n_rotatetimes=5
-else: # default settings
-    forward = (-1, 1, -1, 1)
-    backward = times(forward, -1)
-    left = (1, 1, 1, 1)
-    right = times(left, -1)
-    straightDelay = commandArgs.straight_delay 
-    turnDelay = commandArgs.turn_delay
-    #Change sleeptime to adjust driving speed
-    #Change rotatetimes to adjust the rotation. Will be multiplicated with sleeptime.
-    l298n_sleeptime=0.2
-    l298n_rotatetimes=5
+forward = (-1, 1, -1, 1)
+backward = times(forward, -1)
+left = (1, 1, 1, 1)
+right = times(left, -1)
+straightDelay = commandArgs.straight_delay 
+turnDelay = commandArgs.turn_delay
+#Change sleeptime to adjust driving speed
+#Change rotatetimes to adjust the rotation. Will be multiplicated with sleeptime.
+l298n_sleeptime=0.2
+l298n_rotatetimes=5
 
     
 def handle_exclusive_control(args):
@@ -817,7 +726,7 @@ def runmotozero(direction):
 def handleStartReverseSshProcess(args):
     print "starting reverse ssh"
     socketIO.emit("reverse_ssh_info", "starting")
-    returnCode = subprocess.call(["/usr/bin/ssh", "-i", "/home/pi/reverse_ssh_key1.pem", "-N", "-R", "2222:localhost:22", "ubuntu@52.52.204.174"])
+    returnCode = subprocess.call(["/usr/bin/ssh", "-X", "-i", "/home/pi/reverse_ssh_key1.pem", "-N", "-R", "2222:localhost:22", "ubuntu@52.52.204.174"])
     socketIO.emit("reverse_ssh_info", "return code: " + str(returnCode))
     print "reverse ssh process has exited with code", str(returnCode)
 
