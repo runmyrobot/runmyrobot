@@ -404,9 +404,6 @@ def sendSerialCommand(command):
 
 
 
-def parseIntList(inputString):
-    return [int(x) for x in inputString.split(',')]
-
 
 
 def incrementArmServo(channel, amount):
