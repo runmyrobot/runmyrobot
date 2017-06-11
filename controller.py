@@ -25,6 +25,10 @@ parser.add_argument('--turn-delay', type=float, default=0.4)
 parser.add_argument('--straight-delay', type=float, default=0.5)
 parser.add_argument('--driving-speed', type=int, default=90)
 parser.add_argument('--night-speed', type=int, default=170)
+parser.add_argument('--forward', default='[-1,1,-1,1]')
+parser.add_argument('--left', default='[1,1,1,1]')
+
+
 
 commandArgs = parser.parse_args()
 print commandArgs
@@ -400,7 +404,8 @@ def sendSerialCommand(command):
 
 
 
-
+def parseIntList(inputString):
+    return [int(x) for x in inputString.split(',')]
 
 
 
@@ -439,9 +444,9 @@ def runMotor(motorIndex, direction):
         motor.run(Adafruit_MotorHAT.BACKWARD)
 
 
-forward = (-1, 1, -1, 1)
+forward = json.loads(commandArgs.forward)
 backward = times(forward, -1)
-left = (1, 1, 1, 1)
+left = json.loads(commandArgs.left)
 right = times(left, -1)
 straightDelay = commandArgs.straight_delay 
 turnDelay = commandArgs.turn_delay
