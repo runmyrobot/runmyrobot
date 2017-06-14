@@ -27,6 +27,8 @@ parser.add_argument('--driving-speed', type=int, default=90)
 parser.add_argument('--night-speed', type=int, default=170)
 parser.add_argument('--forward', default='[-1,1,-1,1]')
 parser.add_argument('--left', default='[1,1,1,1]')
+parser.add_argument('--festival-tts', dest='festival_tts', action='store_true')
+parser.set_defaults(festival_tts=False)
 
 
 
@@ -474,14 +476,20 @@ def handle_chat_message(args):
     f = open(tempFilePath, "w")
     f.write(message)
     f.close()
-    #os.system('festival --tts < /tmp/speech.txt')
+
+    
+    if commandArgs.festival_tts:
+        # festival tts
+        os.system('festival --tts < ' + tempFilePath)
     #os.system('espeak < /tmp/speech.txt')
 
-    for hardwareNumber in (2, 0, 1):
-        if commandArgs.male:
-            os.system('cat ' + tempFilePath + ' | espeak --stdout | aplay -D plughw:%d,0' % hardwareNumber)
-        else:
-            os.system('cat ' + tempFilePath + ' | espeak -ven-us+f%d -s170 --stdout | aplay -D plughw:%d,0' % (commandArgs.voice_number, hardwareNumber))
+    else:
+        # espeak tts
+        for hardwareNumber in (2, 0, 1):
+            if commandArgs.male:
+                os.system('cat ' + tempFilePath + ' | espeak --stdout | aplay -D plughw:%d,0' % hardwareNumber)
+            else:
+                os.system('cat ' + tempFilePath + ' | espeak -ven-us+f%d -s170 --stdout | aplay -D plughw:%d,0' % (commandArgs.voice_number, hardwareNumber))
 
     os.remove(tempFilePath)
 
