@@ -22,10 +22,12 @@ parser.add_argument('--contrast', default=75, type=int, help='camera contrast')
 parser.add_argument('--saturation', default=75, type=int, help='camera saturation')
 parser.add_argument('--rotate180', default=False, type=bool, help='rotate image 180 degrees')
 parser.add_argument('--env', default="prod")
-
+parser.add_argument('--screen-capture', dest='screen_capture', action='store_true')
+parser.set_defaults(screen_capture=False)
 
 args = parser.parse_args()
 
+print "args", args
 
 
 server = "runmyrobot.com"
@@ -276,7 +278,11 @@ def handleWindowsScreenCapture(deviceNumber, videoPort):
         
         
     device = devices[int(deviceAnswer)]
-    commandLine = 'ffmpeg -f dshow -i video="screen-capture-recorder" -vf "scale=640:480" -f mpeg1video -b 50k -r 20 http://%s:%s/hello/640/480/' % (server, videoPort)
+
+    #commandLine = 'ffmpeg -f dshow -i video="screen-capture-recorder" -vf "scale=640:480" -f mpeg1video -b 50k -r 20 http://%s:%s/hello/640/480/' % (server, videoPort)
+
+    commandLine = 'ffmpeg -f dshow -i video="screen-capture-recorder" -framerate 25 -video_size 640x480 -f mpegts -codec:v mpeg1video -s 640x480 -b:v %dk -bf 0 -muxdelay 0.001 http://%s:%s/hello/640/480/' % (args.kbps, server, videoPort)
+
     
     print "command line:", commandLine
     
@@ -323,8 +329,10 @@ def startVideoCapture():
     elif platform.system() == 'Linux':
         result = handleLinux(deviceNumber, videoPort, audioPort)
     elif platform.system() == 'Windows':
-        #result = handleWindowsScreenCapture(deviceNumber, videoPort)
-        result = handleWindows(deviceNumber, videoPort, audioPort)
+        if args.screen_capture:
+            result = handleWindowsScreenCapture(deviceNumber, videoPort)
+        else:
+            result = handleWindows(deviceNumber, videoPort, audioPort)
     else:
         print "unknown platform", platform.system()
 
