@@ -45,7 +45,8 @@ os.system("sudo /usr/sbin/service watchdog start")
 # set volume level
 
 # tested for 3.5mm audio jack
-#os.system("amixer set PCM -- -100")
+if commandArgs.tts_volume > 50:
+    os.system("amixer set PCM -- -100")
 
 # tested for USB audio device
 os.system("amixer -c 2 cset numid=3 %d%%" % commandArgs.tts_volume)
