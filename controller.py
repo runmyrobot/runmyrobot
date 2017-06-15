@@ -623,6 +623,8 @@ def handle_command(args):
             #setMotorsToIdle()
 	    if commandArgs.type == 'motozero':
 		runmotozero(command)
+	    if commandArgs.type == 'pololu':
+		runPololu(command)
             
             if commandArgs.led == 'max7219':
                 if command == 'LED_OFF':
@@ -749,20 +751,21 @@ def runmotozero(direction):
         GPIO.output(Motor4A, GPIO.LOW)
 	
 def runPololu(direction):
+    drivingSpeed = commandArgs.driving_speed
     if direction == 'F':
-	motors.setSpeeds(commandArgs.driving-speed, commandArgs.driving-speed)
+	motors.setSpeeds(drivingSpeed, drivingSpeed)
 	time.sleep(0.3)
 	motors.setSpeeds(0, 0)
     if direction == 'B':
-	motors.setSpeeds(commandArgs.driving-speed, commandArgs.driving-speed)
+	motors.setSpeeds(-drivingSpeed, -drivingSpeed)
 	time.sleep(0.3)
 	motors.setSpeeds(0, 0)
     if direction == 'L':
-	motors.setSpeeds(commandArgs.driving-speed, commandArgs.driving-speed)
+	motors.setSpeeds(-drivingSpeed, drivingSpeed)
 	time.sleep(0.3)
 	motors.setSpeeds(0, 0)
     if direction == 'R':
-	motors.setSpeeds(commandArgs.driving-speed, commandArgs.driving-speed)
+	motors.setSpeeds(drivingSpeed, -drivingSpeed)
 	time.sleep(0.3)
 	motors.setSpeeds(0, 0)
 	
