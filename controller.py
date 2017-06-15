@@ -139,7 +139,7 @@ if commandArgs.type == 'l298n':
     GPIO.setup(StepPinLeft, GPIO.OUT)
     GPIO.setup(StepPinRight, GPIO.OUT)
 #Test if user
-if commandArgs.type == "pololu"
+if commandArgs.type == "pololu":
     try:
 	from pololu_drv8835_rpi import motors, MAX_SPEED
     except ImportError:
