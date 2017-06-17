@@ -287,8 +287,9 @@ def handleWindowsScreenCapture(deviceNumber, videoPort):
     print "command line:", commandLine
     
     process = runFfmpeg(commandLine)
-
-    return {'process': process, 'device_answer': device}
+    
+    # todo: need to have an audio process not just another video process
+    return {'video_process': process, 'audio_process': process, 'device_answer': device}
     
 
 
