@@ -244,7 +244,7 @@ def handleWindows(deviceNumber, videoPort):
     
 
     
-def handleWindowsScreenCapture(deviceNumber, videoPort):
+def handleWindowsScreenCapture(deviceNumber, videoPort, audioPort):
 
     p = subprocess.Popen(["ffmpeg", "-list_devices", "true", "-f", "dshow", "-i", "dummy"], stdout=subprocess.PIPE, stderr=subprocess.PIPE)
     
@@ -283,7 +283,7 @@ def handleWindowsScreenCapture(deviceNumber, videoPort):
     #commandLine = 'ffmpeg -f dshow -i video="screen-capture-recorder" -vf "scale=640:480" -f mpeg1video -b 50k -r 20 http://%s:%s/hello/640/480/' % (server, videoPort)
 
     videoCommandLine = 'ffmpeg -f dshow -i video="screen-capture-recorder" -framerate 25 -video_size 640x480 -f mpegts -codec:v mpeg1video -s 640x480 -b:v %dk -bf 0 -muxdelay 0.001 http://%s:%s/hello/640/480/' % (args.kbps, server, videoPort)
-    audioCommandLine = 'ffmpeg -f dshow -ar 44100 -ac 1 -i audio="%s" -f mpegts -codec:a mp2 -b:a 32k -muxdelay 0.001 http://%s:%s/hello/640/480/' % (args.audio_input_device, server, videoPort)
+    audioCommandLine = 'ffmpeg -f dshow -ar 44100 -ac 1 -i audio="%s" -f mpegts -codec:a mp2 -b:a 32k -muxdelay 0.001 http://%s:%s/hello/640/480/' % (args.audio_input_device, server, audioPort)
     
     print "video command line:", videoCommandLine
     print "audio command line:", audioCommandLine
@@ -334,7 +334,7 @@ def startVideoCapture():
         result = handleLinux(deviceNumber, videoPort, audioPort)
     elif platform.system() == 'Windows':
         if args.screen_capture:
-            result = handleWindowsScreenCapture(deviceNumber, videoPort)
+            result = handleWindowsScreenCapture(deviceNumber, videoPort, audioPort)
         else:
             result = handleWindows(deviceNumber, videoPort, audioPort)
     else:
