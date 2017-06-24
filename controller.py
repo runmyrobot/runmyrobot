@@ -59,7 +59,9 @@ print "temporary directory:", tempDir
 
 
 # motor controller specific imports
-if commandArgs.type == 'serial':
+if commandArgs.type == 'none':
+    pass
+elif commandArgs.type == 'serial':
     import serial
 elif commandArgs.type == 'motor_hat':
     pass
