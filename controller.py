@@ -1,10 +1,10 @@
 import platform
-import serial
 import os
 import uuid
 import urllib2
 import json
 import traceback
+import tempfile
 
 
 
@@ -45,7 +45,8 @@ os.system("sudo /usr/sbin/service watchdog start")
 # set volume level
 
 # tested for 3.5mm audio jack
-#os.system("amixer set PCM -- -100")
+if commandArgs.tts_volume > 50:
+    os.system("amixer set PCM -- -100")
 
 # tested for USB audio device
 os.system("amixer -c 2 cset numid=3 %d%%" % commandArgs.tts_volume)
@@ -53,8 +54,13 @@ os.system("amixer -c 2 cset numid=3 %d%%" % commandArgs.tts_volume)
 server = "runmyrobot.com"
 #server = "52.52.213.92"
 
+tempDir = tempfile.gettempdir()
+print "temporary directory:", tempDir
+
+
+# motor controller specific imports
 if commandArgs.type == 'serial':
-    pass
+    import serial
 elif commandArgs.type == 'motor_hat':
     pass
 elif commandArgs.type == 'gopigo':
@@ -63,12 +69,13 @@ elif commandArgs.type == 'l298n':
     pass
 elif commandArgs.type == 'motozero':
     pass
+elif commandArgs.type == 'screencap':
+    pass
+elif commandArgs.led == 'max7219':
+    import spidev
 else:
     print "invalid --type in command line"
     exit(0)
-
-if commandArgs.led == 'max7219':
-    import spidev
     
 #serialDevice = '/dev/tty.usbmodem12341'
 #serialDevice = '/dev/ttyUSB0'
@@ -472,11 +479,13 @@ def handle_chat_message(args):
     rawMessage = args['message']
     withoutName = rawMessage.split(']')[1:]
     message = "".join(withoutName)
-    tempFilePath = os.path.join("/tmp", "text_" + str(uuid.uuid4()))
+    tempFilePath = os.path.join(tempDir, "text_" + str(uuid.uuid4()))
     f = open(tempFilePath, "w")
     f.write(message)
     f.close()
 
+
+    os.system('"C:\Program Files\Jampal\ptts.vbs" -u ' + tempFilePath)
     
     if commandArgs.festival_tts:
         # festival tts
