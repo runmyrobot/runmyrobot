@@ -24,6 +24,10 @@ parser.add_argument('--rotate180', default=False, type=bool, help='rotate image 
 parser.add_argument('--env', default="prod")
 parser.add_argument('--screen-capture', dest='screen_capture', action='store_true')
 parser.set_defaults(screen_capture=False)
+parser.add_argument('--no-mic', dest='mic', action='store_false')
+parser.set_defaults(mic=True)
+
+
 
 args = parser.parse_args()
 
@@ -196,7 +200,10 @@ def handleLinux(deviceNumber, videoPort, audioPort):
     print audioCommandLine
     
     videoProcess = runFfmpeg(videoCommandLine)
-    audioProcess = runFfmpeg(audioCommandLine)
+    if args.mic:
+        audioProcess = runFfmpeg(audioCommandLine)
+    else:
+        audioProcess = videoProcess # this is a hack to prevent errors, should just be None value
 
     return {'video_process': videoProcess, 'audio_process': audioProcess, 'device_answer': deviceAnswer}
 
