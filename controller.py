@@ -60,7 +60,9 @@ print "temporary directory:", tempDir
 
 
 # motor controller specific imports
-if commandArgs.type == 'serial':
+if commandArgs.type == 'none':
+    pass
+elif commandArgs.type == 'serial':
     import serial
 elif commandArgs.type == 'motor_hat':
     pass
@@ -72,6 +74,8 @@ elif commandArgs.type == 'motozero':
     pass
 elif commandArgs.type == 'screencap':
     pass
+elif commandArgs.type == 'adafruit_pwm':
+    from Adafruit_PWM_Servo_Driver import PWM
 elif commandArgs.led == 'max7219':
     import spidev
 else:
@@ -98,6 +102,7 @@ if commandArgs.type == 'motor_hat':
         print "Ctrl-C to quit"
         motorsEnabled = False
 
+# todo: specificity is not correct, this is specific to a bot with a claw, not all motor_hat based bots
 if commandArgs.type == 'motor_hat':
     from Adafruit_PWM_Servo_Driver import PWM
 
@@ -291,6 +296,9 @@ nightTimeDrivingSpeedActuallyUsed = commandArgs.night_speed
 # Initialise the PWM device
 if commandArgs.type == 'motor_hat':
     pwm = PWM(0x42)
+elif commandArgs.type == 'adafruit_pwm':
+    pwm = PWM(0x40) 
+
 # Note if you'd like more debug output you can instead run:
 #pwm = PWM(0x40, debug=True)
 servoMin = [150, 150, 130]  # Min pulse length out of 4096
@@ -347,7 +355,7 @@ def setServoPulse(channel, pulse):
   pwm.setPWM(channel, 0, pulse)
 
 
-if commandArgs.type == 'motor_hat':
+if commandArgs.type == 'motor_hat' or commandArgs.type == 'adafruit_pwm':
     pwm.setPWMFreq(60)                        # Set frequency to 60 Hz
 
 
@@ -535,6 +543,39 @@ def handle_chat_message(args):
     say(message)
 
 
+def moveAdafruitPWM(command):
+    print "move adafruit pwm command", command
+    if command == 'L':
+        pwm.setPWM(1, 0, 500)
+
+        pwm.setPWM(0, 0, 445)
+
+        time.sleep(0.5)
+        pwm.setPWM(1, 0, 400)
+
+        pwm.setPWM(0, 0, 335)
+
+        
+    if command == 'R':
+        pwm.setPWM(1, 0, 300)
+
+        pwm.setPWM(0, 0, 445)
+        
+        time.sleep(0.5)
+        pwm.setPWM(1, 0, 400)
+
+        pwm.setPWM(0, 0, 335)
+        
+    if command == 'F':
+        pwm.setPWM(0, 0, 445)
+        time.sleep(0.5)
+        pwm.setPWM(0, 0, 335)
+    if command == 'B':
+        pwm.setPWM(0, 0, 200)
+        time.sleep(0.5)
+        pwm.setPWM(0, 0, 335)
+
+    
 def moveGoPiGo(command):
     if command == 'L':
         gopigo.left_rot()
@@ -592,6 +633,9 @@ def handle_command(args):
 
             command = args['command']
 
+            if commandArgs.type == 'adafruit_pwm':
+                moveAdafruitPWM(command)
+            
             if commandArgs.type == 'gopigo':
                 moveGoPiGo(command)
             
