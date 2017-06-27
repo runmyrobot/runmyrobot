@@ -29,7 +29,8 @@ parser.add_argument('--forward', default='[-1,1,-1,1]')
 parser.add_argument('--left', default='[1,1,1,1]')
 parser.add_argument('--festival-tts', dest='festival_tts', action='store_true')
 parser.set_defaults(festival_tts=False)
-
+parser.add_argument('--auto-wifi', dest='auto_wifi', action='store_true')
+parser.set_defaults(auto_wifi=False)
 
 
 commandArgs = parser.parse_args()
@@ -366,7 +367,15 @@ network={{
             key_mgmt=WPA-PSK
     }}
 """
-    
+
+
+def isInternetConnected():
+    try:
+        urllib2.urlopen('http://216.58.192.142', timeout=1)
+        return True
+    except urllib2.URLError as err:
+        return False
+
     
 def configWifiLogin(secretKey):
 
@@ -377,13 +386,29 @@ def configWifiLogin(secretKey):
         responseJson = json.loads(response)
         print "get wifi login response:", response
 
+        with open("/etc/wpa_supplicant/wpa_supplicant.conf", 'r') as originalWPAFile:
+            originalWPAText = originalWPAFile.read()
 
-        wpaFile = open("/etc/wpa_supplicant/wpa_supplicant.conf", 'w')
         wpaText = WPA_FILE_TEMPLATE.format(name=responseJson['wifi_name'], password=responseJson['wifi_password'])
-        print wpaText
-        print
-        wpaFile.write(wpaText)
-        wpaFile.close()
+
+
+        print "original(" + originalWPAText + ")"
+        print "new(" + wpaText + ")"
+        
+        if originalWPAText != wpaText:
+
+            wpaFile = open("/etc/wpa_supplicant/wpa_supplicant.conf", 'w')        
+
+            print wpaText
+            print
+            wpaFile.write(wpaText)
+            wpaFile.close()
+
+            say("Updated wifi settings. I will automatically reset in 10 seconds.")
+            time.sleep(8)
+            say("Reseting")
+            time.sleep(2)
+            os.system("reboot")
 
         
     except:
@@ -473,12 +498,9 @@ def handle_exclusive_control(args):
                 print "end exclusive control"
 
 
-def handle_chat_message(args):
+                
+def say(message):
 
-    print "chat message received:", args
-    rawMessage = args['message']
-    withoutName = rawMessage.split(']')[1:]
-    message = "".join(withoutName)
     tempFilePath = os.path.join(tempDir, "text_" + str(uuid.uuid4()))
     f = open(tempFilePath, "w")
     f.write(message)
@@ -501,6 +523,16 @@ def handle_chat_message(args):
                 os.system('cat ' + tempFilePath + ' | espeak -ven-us+f%d -s170 --stdout | aplay -D plughw:%d,0' % (commandArgs.voice_number, hardwareNumber))
 
     os.remove(tempFilePath)
+
+    
+                
+def handle_chat_message(args):
+
+    print "chat message received:", args
+    rawMessage = args['message']
+    withoutName = rawMessage.split(']')[1:]
+    message = "".join(withoutName)
+    say(message)
 
 
 def moveGoPiGo(command):
@@ -842,8 +874,7 @@ waitCounter = 0
 
 
 identifyRobotId()
-if commandArgs.secret_key is not None:
-    configWifiLogin(commandArgs.secret_key)
+
 
 
 if platform.system() == 'Darwin':
@@ -853,9 +884,24 @@ elif platform.system() == 'Linux':
     ipInfoUpdate()
 
 
+lastInternetStatus = False
+    
 while True:
-    socketIO.wait(seconds=10)
-    if (waitCounter % 10) == 0:
+    socketIO.wait(seconds=1)
+
+    internetStatus = isInternetConnected()
+    if internetStatus != lastInternetStatus:
+        if internetStatus:
+            say("ok")
+        else:
+            say("missing internet connection")
+    lastInternetStatus = internetStatus
+
+    if commandArgs.auto_wifi:
+        if commandArgs.secret_key is not None:
+            configWifiLogin(commandArgs.secret_key)
+    
+    if (waitCounter % 60) == 0:
 
         # tell the server what robot id is using this connection
         identifyRobotId()
