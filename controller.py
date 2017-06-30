@@ -931,7 +931,7 @@ elif platform.system() == 'Linux':
 lastInternetStatus = False
     
 while True:
-    socketIO.wait(seconds=1)
+    socketIO.wait(seconds=10)
 
     internetStatus = isInternetConnected()
     if internetStatus != lastInternetStatus:
@@ -945,7 +945,7 @@ while True:
         if commandArgs.secret_key is not None:
             configWifiLogin(commandArgs.secret_key)
     
-    if (waitCounter % 60) == 0:
+    if (waitCounter % 6) == 0:
 
         # tell the server what robot id is using this connection
         identifyRobotId()
