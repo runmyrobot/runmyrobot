@@ -92,7 +92,7 @@ make -j4 &&\
 sudo make install
 
 cd ~ &&\
-sudo git clone https://github.com/runmyrobot/runmyrobot &&\
+git clone https://github.com/runmyrobot/runmyrobot &&\
 
 # Add start_robot script to crontab, it might throw an error, but it works anyways
 crontab -l | { cat; echo "@reboot /bin/bash /home/pi/start_robot"; } | crontab -
