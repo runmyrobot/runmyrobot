@@ -51,8 +51,10 @@ echo "nohup scripts/repeat_start python send_video.py ${input_camera} 0 &> /dev/
 
 # Make sure the system is up to date
 sudo apt-get -y update
-sudo apt-get -y upgrade
-sudo apt-get -y dist-upgrade
+
+# This stuff takes forever, therefore not a default, but enable it if you want
+#sudo apt-get -y upgrade
+#sudo apt-get -y dist-upgrade
 
 # Start installing everything needed
 sudo apt-get -y install python-serial python-dev libgnutls28-dev espeak python-smbus python-pip git
