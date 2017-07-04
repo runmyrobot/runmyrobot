@@ -538,7 +538,7 @@ def handle_command(args):
         global drivingSpeed
         global handlingCommand
 
-        #print "received command:", args
+        if 'robot_id' in args and args['robot_id'] == robotID: print "received message:", args
         # Note: If you are adding features to your bot,
         # you can get direct access to incomming commands right here.
 
