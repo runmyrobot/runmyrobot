@@ -28,6 +28,8 @@ parser.set_defaults(screen_capture=False)
 parser.add_argument('--no-mic', dest='mic', action='store_false')
 parser.set_defaults(mic=True)
 
+parser.add_argument('--mic-channels', type=int, help='microphone channels, typically 1 or 2', default=1)
+
 parser.add_argument('--audio-input-device', default='Microphone (HD Webcam C270)') # currently, this option is only used for windows screen capture
 
 
@@ -196,7 +198,7 @@ def handleLinux(deviceNumber, videoPort, audioPort):
 
     # video with audio
     videoCommandLine = '/usr/local/bin/ffmpeg -f v4l2 -framerate 25 -video_size 640x480 -i /dev/video%s %s -f mpegts -codec:v mpeg1video -s 640x480 -b:v %dk -bf 0 -muxdelay 0.001 http://%s:%s/hello/640/480/' % (deviceAnswer, rotationOption, args.kbps, server, videoPort)
-    audioCommandLine = '/usr/local/bin/ffmpeg -f alsa -ar 44100 -ac 1 -i hw:1 -f mpegts -codec:a mp2 -b:a 32k -muxdelay 0.001 http://%s:%s/hello/640/480/' % (server, audioPort)
+    audioCommandLine = '/usr/local/bin/ffmpeg -f alsa -ar 44100 -ac %d -i hw:1 -f mpegts -codec:a mp2 -b:a 32k -muxdelay 0.001 http://%s:%s/hello/640/480/' % (args.mic_channels, server, audioPort)
 
     print videoCommandLine
     print audioCommandLine
@@ -474,8 +476,11 @@ def main():
                (streamProcessDict['audio_process'].poll() is not None):
 
                 # make sure audio and video ffmpeg processes are killed
-                streamProcessDict['video_process'].kill()
-                streamProcessDict['audio_process'].kill()
+                #streamProcessDict['video_process'].kill()
+                #try:
+                #    streamProcessDict['audio_process'].kill()
+                #except:
+                #    print "error: cound not kill audio process"
                 
                 # wait before trying to start ffmpeg
                 print "ffmpeg process is dead, waiting before trying to restart"

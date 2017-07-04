@@ -29,7 +29,8 @@ parser.add_argument('--forward', default='[-1,1,-1,1]')
 parser.add_argument('--left', default='[1,1,1,1]')
 parser.add_argument('--festival-tts', dest='festival_tts', action='store_true')
 parser.set_defaults(festival_tts=False)
-
+parser.add_argument('--auto-wifi', dest='auto_wifi', action='store_true')
+parser.set_defaults(auto_wifi=False)
 
 
 commandArgs = parser.parse_args()
@@ -73,6 +74,8 @@ elif commandArgs.type == 'motozero':
     pass
 elif commandArgs.type == 'screencap':
     pass
+elif commandArgs.type == 'adafruit_pwm':
+    from Adafruit_PWM_Servo_Driver import PWM
 elif commandArgs.led == 'max7219':
     import spidev
 else:
@@ -99,6 +102,7 @@ if commandArgs.type == 'motor_hat':
         print "Ctrl-C to quit"
         motorsEnabled = False
 
+# todo: specificity is not correct, this is specific to a bot with a claw, not all motor_hat based bots
 if commandArgs.type == 'motor_hat':
     from Adafruit_PWM_Servo_Driver import PWM
 
@@ -292,6 +296,9 @@ nightTimeDrivingSpeedActuallyUsed = commandArgs.night_speed
 # Initialise the PWM device
 if commandArgs.type == 'motor_hat':
     pwm = PWM(0x42)
+elif commandArgs.type == 'adafruit_pwm':
+    pwm = PWM(0x40) 
+
 # Note if you'd like more debug output you can instead run:
 #pwm = PWM(0x40, debug=True)
 servoMin = [150, 150, 130]  # Min pulse length out of 4096
@@ -348,7 +355,7 @@ def setServoPulse(channel, pulse):
   pwm.setPWM(channel, 0, pulse)
 
 
-if commandArgs.type == 'motor_hat':
+if commandArgs.type == 'motor_hat' or commandArgs.type == 'adafruit_pwm':
     pwm.setPWMFreq(60)                        # Set frequency to 60 Hz
 
 
@@ -368,7 +375,15 @@ network={{
             key_mgmt=WPA-PSK
     }}
 """
-    
+
+
+def isInternetConnected():
+    try:
+        urllib2.urlopen('https://www.google.com', timeout=1)
+        return True
+    except urllib2.URLError as err:
+        return False
+
     
 def configWifiLogin(secretKey):
 
@@ -379,13 +394,29 @@ def configWifiLogin(secretKey):
         responseJson = json.loads(response)
         print "get wifi login response:", response
 
+        with open("/etc/wpa_supplicant/wpa_supplicant.conf", 'r') as originalWPAFile:
+            originalWPAText = originalWPAFile.read()
 
-        wpaFile = open("/etc/wpa_supplicant/wpa_supplicant.conf", 'w')
         wpaText = WPA_FILE_TEMPLATE.format(name=responseJson['wifi_name'], password=responseJson['wifi_password'])
-        print wpaText
-        print
-        wpaFile.write(wpaText)
-        wpaFile.close()
+
+
+        print "original(" + originalWPAText + ")"
+        print "new(" + wpaText + ")"
+        
+        if originalWPAText != wpaText:
+
+            wpaFile = open("/etc/wpa_supplicant/wpa_supplicant.conf", 'w')        
+
+            print wpaText
+            print
+            wpaFile.write(wpaText)
+            wpaFile.close()
+
+            say("Updated wifi settings. I will automatically reset in 10 seconds.")
+            time.sleep(8)
+            say("Reseting")
+            time.sleep(2)
+            os.system("reboot")
 
         
     except:
@@ -475,12 +506,9 @@ def handle_exclusive_control(args):
                 print "end exclusive control"
 
 
-def handle_chat_message(args):
+                
+def say(message):
 
-    print "chat message received:", args
-    rawMessage = args['message']
-    withoutName = rawMessage.split(']')[1:]
-    message = "".join(withoutName)
     tempFilePath = os.path.join(tempDir, "text_" + str(uuid.uuid4()))
     f = open(tempFilePath, "w")
     f.write(message)
@@ -504,7 +532,50 @@ def handle_chat_message(args):
 
     os.remove(tempFilePath)
 
+    
+                
+def handle_chat_message(args):
 
+    print "chat message received:", args
+    rawMessage = args['message']
+    withoutName = rawMessage.split(']')[1:]
+    message = "".join(withoutName)
+    say(message)
+
+
+def moveAdafruitPWM(command):
+    print "move adafruit pwm command", command
+    if command == 'L':
+        pwm.setPWM(1, 0, 500)
+
+        pwm.setPWM(0, 0, 445)
+
+        time.sleep(0.5)
+        pwm.setPWM(1, 0, 400)
+
+        pwm.setPWM(0, 0, 335)
+
+        
+    if command == 'R':
+        pwm.setPWM(1, 0, 300)
+
+        pwm.setPWM(0, 0, 445)
+        
+        time.sleep(0.5)
+        pwm.setPWM(1, 0, 400)
+
+        pwm.setPWM(0, 0, 335)
+        
+    if command == 'F':
+        pwm.setPWM(0, 0, 445)
+        time.sleep(0.5)
+        pwm.setPWM(0, 0, 335)
+    if command == 'B':
+        pwm.setPWM(0, 0, 200)
+        time.sleep(0.5)
+        pwm.setPWM(0, 0, 335)
+
+    
 def moveGoPiGo(command):
     if command == 'L':
         gopigo.left_rot()
@@ -562,6 +633,9 @@ def handle_command(args):
 
             command = args['command']
 
+            if commandArgs.type == 'adafruit_pwm':
+                moveAdafruitPWM(command)
+            
             if commandArgs.type == 'gopigo':
                 moveGoPiGo(command)
             
@@ -844,8 +918,7 @@ waitCounter = 0
 
 
 identifyRobotId()
-if commandArgs.secret_key is not None:
-    configWifiLogin(commandArgs.secret_key)
+
 
 
 if platform.system() == 'Darwin':
@@ -855,9 +928,25 @@ elif platform.system() == 'Linux':
     ipInfoUpdate()
 
 
+lastInternetStatus = False
+    
 while True:
     socketIO.wait(seconds=10)
-    if (waitCounter % 10) == 0:
+
+    if (waitCounter % 100) == 0:
+        internetStatus = isInternetConnected()
+        if internetStatus != lastInternetStatus:
+            if internetStatus:
+                say("ok")
+            else:
+                say("missing internet connection")
+        lastInternetStatus = internetStatus
+
+    if commandArgs.auto_wifi:
+        if commandArgs.secret_key is not None:
+            configWifiLogin(commandArgs.secret_key)
+    
+    if (waitCounter % 6) == 0:
 
         # tell the server what robot id is using this connection
         identifyRobotId()
