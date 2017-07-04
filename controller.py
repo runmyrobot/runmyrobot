@@ -933,7 +933,7 @@ lastInternetStatus = False
 while True:
     socketIO.wait(seconds=1)
 
-    if (waitCounter % 10) == 0:
+    if (waitCounter % 100) == 0:
         internetStatus = isInternetConnected()
         if internetStatus != lastInternetStatus:
             if internetStatus:
