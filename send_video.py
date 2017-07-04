@@ -17,9 +17,9 @@ parser = argparse.ArgumentParser(description='robot control')
 parser.add_argument('camera_id')
 parser.add_argument('video_device_number', default=0, type=int)
 parser.add_argument('--kbps', default=350, type=int)
-parser.add_argument('--brightness', default=75, type=int, help='camera brightness')
-parser.add_argument('--contrast', default=75, type=int, help='camera contrast')
-parser.add_argument('--saturation', default=75, type=int, help='camera saturation')
+parser.add_argument('--brightness', type=int, help='camera brightness')
+parser.add_argument('--contrast', type=int, help='camera contrast')
+parser.add_argument('--saturation', type=int, help='camera saturation')
 parser.add_argument('--rotate180', default=False, type=bool, help='rotate image 180 degrees')
 parser.add_argument('--env', default="prod")
 parser.add_argument('--screen-capture', dest='screen_capture', action='store_true') # tells windows to pull from different camera, this should just be replaced with a video input device option
@@ -172,10 +172,13 @@ def handleLinux(deviceNumber, videoPort, audioPort):
     #out, err = p.communicate()
     #print err
 
-
-    os.system("v4l2-ctl -c brightness={brightness} -c contrast={contrast} -c saturation={saturation}".format(brightness=args.brightness,
-                                                                                                             contrast=args.contrast,
-                                                                                                             saturation=args.saturation))
+    if (args.brightness is not None) or (args.contrast is not None) or (args.saturation is not None):
+        print "adjusting camera settings"
+        os.system("v4l2-ctl -c brightness={brightness} -c contrast={contrast} -c saturation={saturation}".format(brightness=args.brightness,
+                                  contrast=args.contrast,
+                                  saturation=args.saturation))
+    else:
+        print "camera settings at default"
 
 
     if deviceNumber is None:
