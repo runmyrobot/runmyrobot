@@ -132,6 +132,16 @@ def randomSleep():
 def startVideoCaptureLinux():
 
     videoPort = getVideoPort()
+
+    # set brightness, contrast, saturation
+    if (args.brightness is not None) or (args.contrast is not None) or (args.saturation is not None):
+        print "adjusting camera settings"
+        os.system("v4l2-ctl -c brightness={brightness} -c contrast={contrast} -c saturation={saturation}".format(brightness=args.brightness,
+                                  contrast=args.contrast,
+                                  saturation=args.saturation))
+    else:
+        print "camera settings at default"
+
     
     videoCommandLine = '/usr/local/bin/ffmpeg -f v4l2 -framerate 25 -video_size 640x480 -i /dev/video%s %s -f mpegts -codec:v mpeg1video -s 640x480 -b:v %dk -bf 0 -muxdelay 0.001 http://%s:%s/hello/640/480/' % (args.video_device_number, rotationOption(), args.kbps, server, videoPort)
     print videoCommandLine
