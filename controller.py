@@ -379,7 +379,7 @@ network={{
 
 def isInternetConnected():
     try:
-        urllib2.urlopen('http://216.58.192.142', timeout=1)
+        urllib2.urlopen('https://www.google.com', timeout=1)
         return True
     except urllib2.URLError as err:
         return False
@@ -933,13 +933,14 @@ lastInternetStatus = False
 while True:
     socketIO.wait(seconds=1)
 
-    internetStatus = isInternetConnected()
-    if internetStatus != lastInternetStatus:
-        if internetStatus:
-            say("ok")
-        else:
-            say("missing internet connection")
-    lastInternetStatus = internetStatus
+    if (waitCounter % 10) == 0:
+        internetStatus = isInternetConnected()
+        if internetStatus != lastInternetStatus:
+            if internetStatus:
+                say("ok")
+            else:
+                say("missing internet connection")
+        lastInternetStatus = internetStatus
 
     if commandArgs.auto_wifi:
         if commandArgs.secret_key is not None:
