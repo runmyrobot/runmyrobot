@@ -170,6 +170,12 @@ def main():
 
         time.sleep(1)
 
+
+        socketIO.emit('send_video_status', {'send_video_process_exists': True,
+                                            'ffmpeg_process_exists': True,
+                                            'camera_id':args.camera_id})
+       
+        
         
         if args.camera_enabled:
         
@@ -177,7 +183,7 @@ def main():
 
             # restart video if needed
             if videoProcess.poll() != None:
-                time.sleep(10)
+                time.sleep(5)
                 videoProcess = startVideoCaptureLinux()
                 numVideoRestarts += 1
             
@@ -188,7 +194,7 @@ def main():
 
             # restart audio if needed
             if audioProcess.poll() != None:
-                time.sleep(10)
+                time.sleep(5)
                 audioProcess = startAudioCaptureLinux()
                 numAudioRestarts += 1
         
