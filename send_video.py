@@ -133,14 +133,20 @@ def startVideoCaptureLinux():
 
     videoPort = getVideoPort()
 
-    # set brightness, contrast, saturation
-    if (args.brightness is not None) or (args.contrast is not None) or (args.saturation is not None):
-        print "adjusting camera settings"
-        os.system("v4l2-ctl -c brightness={brightness} -c contrast={contrast} -c saturation={saturation}".format(brightness=args.brightness,
-                                  contrast=args.contrast,
-                                  saturation=args.saturation))
-    else:
-        print "camera settings at default"
+    # set brightness
+    if (args.brightness is not None):
+        print "brightness"
+        os.system("v4l2-ctl -c brightness={brightness}".format(brightness=args.brightness))
+
+    # set contrast
+    if (args.contrast is not None):
+        print "contrast"
+        os.system("v4l2-ctl -c contrast={contrast}".format(contrast=args.contrast))
+
+    # set saturation
+    if (args.saturation is not None):
+        print "saturation"
+        os.system("v4l2-ctl -c saturation={saturation}".format(saturation=args.saturation))
 
     
     videoCommandLine = '/usr/local/bin/ffmpeg -f v4l2 -framerate 25 -video_size 640x480 -i /dev/video%s %s -f mpegts -codec:v mpeg1video -s 640x480 -b:v %dk -bf 0 -muxdelay 0.001 http://%s:%s/hello/640/480/' % (args.video_device_number, rotationOption(), args.kbps, server, videoPort)
