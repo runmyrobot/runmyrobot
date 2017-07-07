@@ -78,6 +78,8 @@ elif commandArgs.type == 'adafruit_pwm':
     from Adafruit_PWM_Servo_Driver import PWM
 elif commandArgs.led == 'max7219':
     import spidev
+elif commandArgs.type == 'owi_arm':
+    import owi_arm
 else:
     print "invalid --type in command line"
     exit(0)
@@ -638,6 +640,10 @@ def handle_command(args):
             
             if commandArgs.type == 'gopigo':
                 moveGoPiGo(command)
+
+            if commandArgs.type == 'owi_arm':
+                owi_arm.handleOwiArm(command)
+
             
             if commandArgs.type == 'serial':
                 sendSerialCommand(command)
