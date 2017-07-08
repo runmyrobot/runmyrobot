@@ -549,46 +549,46 @@ def moveAdafruitPWM(command):
     print "move adafruit pwm command", command
         
     if command == 'L':
-        pwm.setPWM(1, 0, 300)
-        pwm.setPWM(0, 0, 445)
+        pwm.setPWM(1, 0, 300) # turn left
+        pwm.setPWM(0, 0, 445) # drive forward
         time.sleep(0.5)
-        pwm.setPWM(1, 0, 400)
-        pwm.setPWM(0, 0, 335)
+        pwm.setPWM(1, 0, 400) # turn neutral
+        pwm.setPWM(0, 0, 335) # drive neutral
 
     if command == 'R':
-        pwm.setPWM(1, 0, 500)
-        pwm.setPWM(0, 0, 445)
+        pwm.setPWM(1, 0, 500) # turn right
+        pwm.setPWM(0, 0, 445) # drive forward
         time.sleep(0.5)
-        pwm.setPWM(1, 0, 400)
-        pwm.setPWM(0, 0, 335)
+        pwm.setPWM(1, 0, 400) # turn neutral
+        pwm.setPWM(0, 0, 335) # drive neutral
 
     if command == 'BL':
-        pwm.setPWM(1, 0, 300)
-        pwm.setPWM(0, 0, 445)
+        pwm.setPWM(1, 0, 300) # turn left
+        pwm.setPWM(0, 0, 270) # drive backward
         time.sleep(0.5)
-        pwm.setPWM(1, 0, 400)
-        pwm.setPWM(0, 0, 335)
+        pwm.setPWM(1, 0, 400) # turn neutral
+        pwm.setPWM(0, 0, 335) # drive neutral
 
     if command == 'BR':
-        pwm.setPWM(1, 0, 500)
-        pwm.setPWM(0, 0, 445)
+        pwm.setPWM(1, 0, 500) # turn right
+        pwm.setPWM(0, 0, 270) # drive backward
         time.sleep(0.5)
-        pwm.setPWM(1, 0, 400)
-        pwm.setPWM(0, 0, 335)
+        pwm.setPWM(1, 0, 400) # turn neurtral
+        pwm.setPWM(0, 0, 335) # drive neutral
 
         
     if command == 'F':
-        pwm.setPWM(0, 0, 445)
+        pwm.setPWM(0, 0, 445) # drive forward
         time.sleep(0.3)
-        pwm.setPWM(0, 0, 345)
+        pwm.setPWM(0, 0, 345) # drive slowly forward
         time.sleep(0.4)
-        pwm.setPWM(0, 0, 335)
+        pwm.setPWM(0, 0, 335) # drive neutral
     if command == 'B':
-        pwm.setPWM(0, 0, 270)
+        pwm.setPWM(0, 0, 270) # drive backward
         time.sleep(0.3)
-        pwm.setPWM(0, 0, 325)
+        pwm.setPWM(0, 0, 325) # drive slowly backward
         time.sleep(0.4)
-        pwm.setPWM(0, 0, 335)
+        pwm.setPWM(0, 0, 335) # drive neutral
 
     if command == 'S2INC': # neutral
         pwm.setPWM(2, 0, 300)
