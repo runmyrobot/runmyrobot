@@ -24,7 +24,8 @@ parser.add_argument('--secret-key', default=None)
 parser.add_argument('--turn-delay', type=float, default=0.4)
 parser.add_argument('--straight-delay', type=float, default=0.5)
 parser.add_argument('--driving-speed', type=int, default=90)
-parser.add_argument('--night-speed', type=int, default=170)
+parser.add_argument('--day-speed', type=int, default=250)
+parser.add_argument('--night-speed', type=int, default=190)
 parser.add_argument('--forward', default='[-1,1,-1,1]')
 parser.add_argument('--left', default='[1,1,1,1]')
 parser.add_argument('--festival-tts', dest='festival_tts', action='store_true')
@@ -292,7 +293,7 @@ handlingCommand = False
 
 # Marvin
 turningSpeedActuallyUsed = 250
-dayTimeDrivingSpeedActuallyUsed = 250
+dayTimeDrivingSpeedActuallyUsed = commandArgs.day_speed
 nightTimeDrivingSpeedActuallyUsed = commandArgs.night_speed
 
 # Initialise the PWM device
