@@ -235,8 +235,8 @@ def main():
             if audioProcess.poll() != None:
                 randomSleep()
                 audioProcess = startAudioCaptureLinux()
-                time.sleep(30)
-                socketIO.emit('send_video_process_start_event', {'camera_id': args.camera_id})               
+                #time.sleep(30)
+                #socketIO.emit('send_video_process_start_event', {'camera_id': args.camera_id})               
                 numAudioRestarts += 1
 
         
