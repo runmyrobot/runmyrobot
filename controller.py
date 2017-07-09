@@ -78,6 +78,8 @@ elif commandArgs.type == 'adafruit_pwm':
     from Adafruit_PWM_Servo_Driver import PWM
 elif commandArgs.led == 'max7219':
     import spidev
+elif commandArgs.type == 'owi_arm':
+    import owi_arm
 else:
     print "invalid --type in command line"
     exit(0)
@@ -545,36 +547,64 @@ def handle_chat_message(args):
 
 def moveAdafruitPWM(command):
     print "move adafruit pwm command", command
+        
     if command == 'L':
-        pwm.setPWM(1, 0, 500)
-
-        pwm.setPWM(0, 0, 445)
-
+        pwm.setPWM(1, 0, 300) # turn left
+        pwm.setPWM(0, 0, 445) # drive forward
         time.sleep(0.5)
-        pwm.setPWM(1, 0, 400)
+        pwm.setPWM(1, 0, 400) # turn neutral
+        pwm.setPWM(0, 0, 335) # drive neutral
 
-        pwm.setPWM(0, 0, 335)
-
-        
     if command == 'R':
-        pwm.setPWM(1, 0, 300)
-
-        pwm.setPWM(0, 0, 445)
-        
+        pwm.setPWM(1, 0, 500) # turn right
+        pwm.setPWM(0, 0, 445) # drive forward
         time.sleep(0.5)
-        pwm.setPWM(1, 0, 400)
+        pwm.setPWM(1, 0, 400) # turn neutral
+        pwm.setPWM(0, 0, 335) # drive neutral
 
-        pwm.setPWM(0, 0, 335)
+    if command == 'BL':
+        pwm.setPWM(1, 0, 300) # turn left
+        pwm.setPWM(0, 0, 270) # drive backward
+        time.sleep(0.5)
+        pwm.setPWM(1, 0, 400) # turn neutral
+        pwm.setPWM(0, 0, 335) # drive neutral
+
+    if command == 'BR':
+        pwm.setPWM(1, 0, 500) # turn right
+        pwm.setPWM(0, 0, 270) # drive backward
+        time.sleep(0.5)
+        pwm.setPWM(1, 0, 400) # turn neurtral
+        pwm.setPWM(0, 0, 335) # drive neutral
+
         
     if command == 'F':
-        pwm.setPWM(0, 0, 445)
-        time.sleep(0.5)
-        pwm.setPWM(0, 0, 335)
+        pwm.setPWM(0, 0, 445) # drive forward
+        time.sleep(0.3)
+        pwm.setPWM(0, 0, 345) # drive slowly forward
+        time.sleep(0.4)
+        pwm.setPWM(0, 0, 335) # drive neutral
     if command == 'B':
-        pwm.setPWM(0, 0, 200)
-        time.sleep(0.5)
-        pwm.setPWM(0, 0, 335)
+        pwm.setPWM(0, 0, 270) # drive backward
+        time.sleep(0.3)
+        pwm.setPWM(0, 0, 325) # drive slowly backward
+        time.sleep(0.4)
+        pwm.setPWM(0, 0, 335) # drive neutral
 
+    if command == 'S2INC': # neutral
+        pwm.setPWM(2, 0, 300)
+
+    if command == 'S2DEC':
+        pwm.setPWM(2, 0, 400)
+
+    if command == 'POS60':
+        pwm.setPWM(2, 0, 490)        
+
+    if command == 'NEG60':
+        pwm.setPWM(2, 0, 100)                
+
+
+
+        
     
 def moveGoPiGo(command):
     if command == 'L':
@@ -638,6 +668,10 @@ def handle_command(args):
             
             if commandArgs.type == 'gopigo':
                 moveGoPiGo(command)
+
+            if commandArgs.type == 'owi_arm':
+                owi_arm.handleOwiArm(command)
+
             
             if commandArgs.type == 'serial':
                 sendSerialCommand(command)
@@ -682,9 +716,10 @@ def handle_command(args):
                     time.sleep(0.05)
                 if command == 'C':
                     #mhArm.getMotor(2).setSpeed(127)
-                    #mhArm.getMotor(2).run(Adafruit_MotorHAT.FORWARD)           
+                    #mhArm.getMotor(2).run(Adafruit_MotorHAT.FORWARD)
                     incrementArmServo(2, 10)
                     time.sleep(0.05)
+
 
             if commandArgs.type == 'motor_hat':
                 turnOffMotors()

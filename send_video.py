@@ -24,6 +24,8 @@ class DummyProcess:
 
 parser = argparse.ArgumentParser(description='robot control')
 parser.add_argument('camera_id')
+parser.add_argument('--xres', type=int, default=640)
+parser.add_argument('--yres', type=int, default=480)
 parser.add_argument('video_device_number', default=0, type=int)
 parser.add_argument('--kbps', default=350, type=int)
 parser.add_argument('--brightness', type=int, help='camera brightness')
@@ -135,17 +137,23 @@ def startVideoCaptureLinux():
 
     videoPort = getVideoPort()
 
-    # set brightness, contrast, saturation
-    if (args.brightness is not None) or (args.contrast is not None) or (args.saturation is not None):
-        print "adjusting camera settings"
-        os.system("v4l2-ctl -c brightness={brightness} -c contrast={contrast} -c saturation={saturation}".format(brightness=args.brightness,
-                                  contrast=args.contrast,
-                                  saturation=args.saturation))
-    else:
-        print "camera settings at default"
+    # set brightness
+    if (args.brightness is not None):
+        print "brightness"
+        os.system("v4l2-ctl -c brightness={brightness}".format(brightness=args.brightness))
+
+    # set contrast
+    if (args.contrast is not None):
+        print "contrast"
+        os.system("v4l2-ctl -c contrast={contrast}".format(contrast=args.contrast))
+
+    # set saturation
+    if (args.saturation is not None):
+        print "saturation"
+        os.system("v4l2-ctl -c saturation={saturation}".format(saturation=args.saturation))
 
     
-    videoCommandLine = '/usr/local/bin/ffmpeg -f v4l2 -framerate 25 -video_size 640x480 -i /dev/video%s %s -f mpegts -codec:v mpeg1video -s 640x480 -b:v %dk -bf 0 -muxdelay 0.001 http://%s:%s/hello/640/480/' % (args.video_device_number, rotationOption(), args.kbps, server, videoPort)
+    videoCommandLine = '/usr/local/bin/ffmpeg -f v4l2 -framerate 25 -video_size 640x480 -i /dev/video{video_device_number} {rotation_option} -f mpegts -codec:v mpeg1video -s {xres}x{yres} -b:v {kbps}k -bf 0 -muxdelay 0.001 http://{server}:{video_port}/hello/{xres}/{yres}/'.format(video_device_number=args.video_device_number, rotation_option=rotationOption(), kbps=args.kbps, server=server, video_port=videoPort, xres=args.xres, yres=args.yres)
     print videoCommandLine
     return subprocess.Popen(shlex.split(videoCommandLine))
     
@@ -180,6 +188,9 @@ def main():
     if args.mic_enabled:
         if not args.dry_run:
             audioProcess = startAudioCaptureLinux()
+            time.sleep(30)
+            os.system("killall ffmpeg")
+            #socketIO.emit('send_video_process_start_event', {'camera_id': args.camera_id})
         else:
             audioProcess = DummyProcess()
 
@@ -244,7 +255,10 @@ def main():
             if audioProcess.poll() != None:
                 randomSleep()
                 audioProcess = startAudioCaptureLinux()
+                #time.sleep(30)
+                #socketIO.emit('send_video_process_start_event', {'camera_id': args.camera_id})               
                 numAudioRestarts += 1
+
         
         count += 1
 
