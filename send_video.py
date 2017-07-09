@@ -22,6 +22,8 @@ class DummyProcess:
 
 parser = argparse.ArgumentParser(description='robot control')
 parser.add_argument('camera_id')
+parser.add_argument('--xres', type=int, default=640)
+parser.add_argument('--yres', type=int, default=480)
 parser.add_argument('video_device_number', default=0, type=int)
 parser.add_argument('--kbps', default=350, type=int)
 parser.add_argument('--brightness', type=int, help='camera brightness')
@@ -149,7 +151,7 @@ def startVideoCaptureLinux():
         os.system("v4l2-ctl -c saturation={saturation}".format(saturation=args.saturation))
 
     
-    videoCommandLine = '/usr/local/bin/ffmpeg -f v4l2 -framerate 25 -video_size 640x480 -i /dev/video%s %s -f mpegts -codec:v mpeg1video -s 640x480 -b:v %dk -bf 0 -muxdelay 0.001 http://%s:%s/hello/640/480/' % (args.video_device_number, rotationOption(), args.kbps, server, videoPort)
+    videoCommandLine = '/usr/local/bin/ffmpeg -f v4l2 -framerate 25 -video_size 640x480 -i /dev/video{video_device_number} {rotation_option} -f mpegts -codec:v mpeg1video -s {xres}x{yres} -b:v {kbps}k -bf 0 -muxdelay 0.001 http://{server}:{video_port}/hello/{xres}/{yres}/'.format(video_device_number=args.video_device_number, rotation_option=rotationOption(), kbps=args.kbps, server=server, video_port=videoPort, xres=args.xres, yres=args.yres)
     print videoCommandLine
     return subprocess.Popen(shlex.split(videoCommandLine))
     
