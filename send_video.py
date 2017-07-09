@@ -9,6 +9,8 @@ import json
 import sys
 import base64
 import random
+import datetime
+import traceback
 
 
 import argparse
@@ -185,12 +187,15 @@ def main():
     numVideoRestarts = 0
     numAudioRestarts = 0
 
-
+    count = 0
 
     
     # loop forever and monitor status of ffmpeg processes
     while True:
 
+
+        print "------------------------------------------" + str(count) + "-----------------------------------------------------"
+        
         time.sleep(1)
 
 
@@ -203,6 +208,21 @@ def main():
                                             'ffmpeg_process_exists': True,
                                             'camera_id':args.camera_id})
        
+        if count % 10 == 0:
+            try:
+                with os.fdopen(os.open('/tmp/send_video_summary.txt', os.O_WRONLY | os.O_CREAT, 0o777), 'w') as statusFile:
+                    statusFile.write("time" + str(datetime.datetime.now()) + "\n")
+                    statusFile.write("video process poll " + str(videoProcess.poll()) + " pid " + str(videoProcess.pid) + " restarts " + str(numVideoRestarts) + " \n")
+                    statusFile.write("audio process poll " + str(audioProcess.poll()) + " pid " + str(audioProcess.pid) + " restarts " + str(numAudioRestarts) + " \n")
+                print "status file written"
+                sys.stdout.flush()
+            except:
+                print "status file could not be written"
+                traceback.print_exc()
+                sys.stdout.flush()
+                
+                
+        
         
         
         if args.camera_enabled:
@@ -226,8 +246,9 @@ def main():
                 audioProcess = startAudioCaptureLinux()
                 numAudioRestarts += 1
         
-        
+        count += 1
 
+        
 main()
 
 
