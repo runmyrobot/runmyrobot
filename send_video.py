@@ -184,6 +184,9 @@ def main():
     if args.mic_enabled:
         if not args.dry_run:
             audioProcess = startAudioCaptureLinux()
+            time.sleep(30)
+            os.system("killall ffmpeg")
+            #socketIO.emit('send_video_process_start_event', {'camera_id': args.camera_id})
         else:
             audioProcess = DummyProcess()
 
@@ -230,7 +233,10 @@ def main():
             if audioProcess.poll() != None:
                 randomSleep()
                 audioProcess = startAudioCaptureLinux()
+                time.sleep(30)
+                socketIO.emit('send_video_process_start_event', {'camera_id': args.camera_id})               
                 numAudioRestarts += 1
+
         
         
 
