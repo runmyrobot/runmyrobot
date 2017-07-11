@@ -5,7 +5,7 @@ import urllib2
 import json
 import traceback
 import tempfile
-
+import re
 
 
 import argparse
@@ -32,8 +32,10 @@ parser.add_argument('--festival-tts', dest='festival_tts', action='store_true')
 parser.set_defaults(festival_tts=False)
 parser.add_argument('--auto-wifi', dest='auto_wifi', action='store_true')
 parser.set_defaults(auto_wifi=False)
-
-
+parser.add_argument('--no-anon-tts', dest='anon_tts', action='store_false')
+parser.set_defaults(anon_tts=True)
+parser.add_argument('--filter-url-tts', dest='filter_url_tts', action='store_true')
+parser.set_defaults(filter_url_tts=False)
 commandArgs = parser.parse_args()
 print commandArgs
 
@@ -543,7 +545,16 @@ def handle_chat_message(args):
     rawMessage = args['message']
     withoutName = rawMessage.split(']')[1:]
     message = "".join(withoutName)
-    say(message)
+    urlRegExp = "(http|ftp|https)://([\w_-]+(?:(?:\.[\w_-]+)+))([\w.,@?^=%&:/~+#-]*[\w@?^=%&/~+#-])?"
+    if message[1] == ".":
+       exit()
+    elif commandArgs.anon_tts != True and args['anonymous'] == True:
+       exit()   
+    elif commandArgs.filter_url_tts == True and re.search(urlRegExp, message):
+       exit()
+    else:
+          say(message)
+
 
 
 def moveAdafruitPWM(command):
