@@ -12,7 +12,7 @@ import argparse
 parser = argparse.ArgumentParser(description='start robot control program')
 parser.add_argument('robot_id', help='Robot ID')
 parser.add_argument('--env', help="Environment for example dev or prod, prod is default", default='prod')
-parser.add_argument('--type', help="serial or motor_hat or gopigo or l298n or motozero", default='motor_hat')
+parser.add_argument('--type', help="serial or motor_hat or gopigo or l298n or motozero or pololu", default='motor_hat')
 parser.add_argument('--serial-device', help="serial device", default='/dev/ttyACM0')
 parser.add_argument('--male', dest='male', action='store_true')
 parser.add_argument('--female', dest='male', action='store_false')
@@ -75,6 +75,8 @@ elif commandArgs.type == 'l298n':
     pass
 elif commandArgs.type == 'motozero':
     pass
+elif commandArgs.type == 'pololu':
+    pass
 elif commandArgs.type == 'screencap':
     pass
 elif commandArgs.type == 'adafruit_pwm':
@@ -121,7 +123,6 @@ if (commandArgs.type == 'motor_hat') or (commandArgs.type == 'l298n') or (comman
 import datetime
 from socketIO_client import SocketIO, LoggingNamespace
 
-
 chargeIONumber = 17
 robotID = commandArgs.robot_id
       
@@ -150,6 +151,18 @@ if commandArgs.type == 'l298n':
     GPIO.setup(StepPinBackward, GPIO.OUT)
     GPIO.setup(StepPinLeft, GPIO.OUT)
     GPIO.setup(StepPinRight, GPIO.OUT)
+#Test if user
+if commandArgs.type == "pololu":
+    try:
+	from pololu_drv8835_rpi import motors, MAX_SPEED
+    except ImportError:
+	print "You need to install drv8835-motor-driver-rpi"
+        print "Please install drv8835-motor-driver-rpi for python and restart this script."
+        print "To install: cd /usr/local/src && sudo git clone https://github.com/pololu/drv8835-motor-driver-rpi"
+        print "cd /usr/local/src/drv8835-motor-driver-rpi && sudo python setup.py install"
+        print "Running in test mode."
+        print "Ctrl-C to quit"
+   
 if commandArgs.type == 'motozero':
     GPIO.cleanup()
     GPIO.setmode(GPIO.BCM)
@@ -197,6 +210,7 @@ if commandArgs.type == 'motozero':
     GPIO.setup(Motor4A,GPIO.OUT)
     GPIO.setup(Motor4B,GPIO.OUT)
     GPIO.setup(Motor4Enable,GPIO.OUT)
+	
 
 #LED controlling
 if commandArgs.led == 'max7219':
@@ -734,8 +748,10 @@ def handle_command(args):
             if commandArgs.type == 'l298n':
                 runl298n(command)                                 
             #setMotorsToIdle()
-        if commandArgs.type == 'motozero':
-        runmotozero(command)
+            if commandArgs.type == 'motozero':
+                runmotozero(command)
+	          if commandArgs.type == 'pololu':
+		            runPololu(command)
             
             if commandArgs.led == 'max7219':
                 if command == 'LED_OFF':
@@ -860,7 +876,26 @@ def runmotozero(direction):
         GPIO.output(Motor1B, GPIO.LOW)
         GPIO.output(Motor2A, GPIO.LOW)
         GPIO.output(Motor4A, GPIO.LOW)
-    
+	
+def runPololu(direction):
+    drivingSpeed = commandArgs.driving_speed
+    if direction == 'F':
+	      motors.setSpeeds(drivingSpeed, drivingSpeed)
+	      time.sleep(0.3)
+	      motors.setSpeeds(0, 0)
+    if direction == 'B':
+	      motors.setSpeeds(-drivingSpeed, -drivingSpeed)
+	      time.sleep(0.3)
+	      motors.setSpeeds(0, 0)
+    if direction == 'L':
+	      motors.setSpeeds(-drivingSpeed, drivingSpeed)
+	      time.sleep(0.3)
+	      motors.setSpeeds(0, 0)
+    if direction == 'R':
+	      motors.setSpeeds(drivingSpeed, -drivingSpeed)
+	      time.sleep(0.3)
+	      motors.setSpeeds(0, 0)
+
 def handleStartReverseSshProcess(args):
     print "starting reverse ssh"
     socketIO.emit("reverse_ssh_info", "starting")
