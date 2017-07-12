@@ -6,7 +6,7 @@ import json
 import traceback
 import tempfile
 import re
-
+import configparser
 
 import argparse
 parser = argparse.ArgumentParser(description='start robot control program')
@@ -133,23 +133,19 @@ if commandArgs.type == 'l298n':
     mode=GPIO.getmode()
     print " mode ="+str(mode)
     GPIO.cleanup()
-    #Change the GPIO Pins to your connected motors
+    #Change the GPIO Pins to your connected motors in gpio.conf
     #visit http://bit.ly/1S5nQ4y for reference
-    if robotID == "20134182": # StanleyBot
-        StepPinForward=12,16
-        StepPinBackward=11,15
-        StepPinLeft=15,12
-        StepPinRight=11,16
-    elif robotID == "53326365": # StaceyBot
-        StepPinForward=11,15
-        StepPinBackward=12,16
-        StepPinLeft=11,16
-        StepPinRight=15,12
-    else: # default settings
-        StepPinForward=12,16
-        StepPinBackward=11,15
-        StepPinLeft=15,12
-        StepPinRight=11,16
+    gpio_config = configparser.ConfigParser()
+	gpio_config.read('gpio.conf')
+    if str(robotID) in gpio_config.sections():
+        config_id = str(robotID)
+    else:
+        config_id = 'default'		
+    StepPinForward = int(str(config[config_id]['StepPinForward']).split(',')[0]),int(str(config[config_id]['StepPinForward']).split(',')[1])
+    StepPinBackward = int(str(config[config_id]['StepPinBackward']).split(',')[0]),int(str(config[config_id]['StepPinBackward']).split(',')[1])
+    StepPinLeft = int(str(config[config_id]['StepPinLeft']).split(',')[0]),int(str(config[config_id]['StepPinLeft']).split(',')[1])
+    StepPinRight = int(str(config[config_id]['StepPinRight']).split(',')[0]),int(str(config[config_id]['StepPinRight']).split(',')[1])
+	
     GPIO.setmode(GPIO.BOARD)
     GPIO.setup(StepPinForward, GPIO.OUT)
     GPIO.setup(StepPinBackward, GPIO.OUT)
@@ -534,7 +530,7 @@ def say(message):
     f.close()
 
 
-    os.system('"C:\Program Files\Jampal\ptts.vbs" -u ' + tempFilePath)
+    #os.system('"C:\Program Files\Jampal\ptts.vbs" -u ' + tempFilePath) Whaa?
     
     if commandArgs.festival_tts:
         # festival tts
@@ -752,10 +748,10 @@ def handle_command(args):
             if commandArgs.type == 'l298n':
                 runl298n(command)                                 
             #setMotorsToIdle()
-	    if commandArgs.type == 'motozero':
-		runmotozero(command)
-	    if commandArgs.type == 'pololu':
-		runPololu(command)
+            if commandArgs.type == 'motozero':
+                runmotozero(command)
+	          if commandArgs.type == 'pololu':
+		            runPololu(command)
             
             if commandArgs.led == 'max7219':
                 if command == 'LED_OFF':
@@ -884,22 +880,22 @@ def runmotozero(direction):
 def runPololu(direction):
     drivingSpeed = commandArgs.driving_speed
     if direction == 'F':
-	motors.setSpeeds(drivingSpeed, drivingSpeed)
-	time.sleep(0.3)
-	motors.setSpeeds(0, 0)
+	      motors.setSpeeds(drivingSpeed, drivingSpeed)
+	      time.sleep(0.3)
+	      motors.setSpeeds(0, 0)
     if direction == 'B':
-	motors.setSpeeds(-drivingSpeed, -drivingSpeed)
-	time.sleep(0.3)
-	motors.setSpeeds(0, 0)
+	      motors.setSpeeds(-drivingSpeed, -drivingSpeed)
+	      time.sleep(0.3)
+	      motors.setSpeeds(0, 0)
     if direction == 'L':
-	motors.setSpeeds(-drivingSpeed, drivingSpeed)
-	time.sleep(0.3)
-	motors.setSpeeds(0, 0)
+	      motors.setSpeeds(-drivingSpeed, drivingSpeed)
+	      time.sleep(0.3)
+	      motors.setSpeeds(0, 0)
     if direction == 'R':
-	motors.setSpeeds(drivingSpeed, -drivingSpeed)
-	time.sleep(0.3)
-	motors.setSpeeds(0, 0)
-	
+	      motors.setSpeeds(drivingSpeed, -drivingSpeed)
+	      time.sleep(0.3)
+	      motors.setSpeeds(0, 0)
+
 def handleStartReverseSshProcess(args):
     print "starting reverse ssh"
     socketIO.emit("reverse_ssh_info", "starting")

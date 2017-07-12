@@ -3,6 +3,7 @@ single_frame_image.jpg
 robotoutput.txt
 nohup.out
 npm-debug.log
+gpio.conf
 
 #ignore (open?) files with ~ in name:
 *~
