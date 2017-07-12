@@ -750,8 +750,8 @@ def handle_command(args):
             #setMotorsToIdle()
             if commandArgs.type == 'motozero':
                 runmotozero(command)
-	          if commandArgs.type == 'pololu':
-		            runPololu(command)
+	        if commandArgs.type == 'pololu':
+		        runPololu(command)
             
             if commandArgs.led == 'max7219':
                 if command == 'LED_OFF':
