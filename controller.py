@@ -132,8 +132,8 @@ if commandArgs.type == 'l298n':
     mode=GPIO.getmode()
     print " mode ="+str(mode)
     GPIO.cleanup()
-    #Change the GPIO Pins to your connected motors in gpio.json
-    #visit http://bit.ly/1S5nQ4y for reference (ChangeMe)
+    #Change the GPIO Pins to your connected motors in gpio.conf
+    #visit http://bit.ly/1S5nQ4y for reference
     gpio_config = configparser.ConfigParser()
 	gpio_config.read('gpio.conf')
     if str(robotID) in gpio_config.sections():
