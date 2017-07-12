@@ -515,7 +515,7 @@ def say(message):
     f.close()
 
 
-    os.system('"C:\Program Files\Jampal\ptts.vbs" -u ' + tempFilePath)
+    #os.system('"C:\Program Files\Jampal\ptts.vbs" -u ' + tempFilePath) Whaa?
     
     if commandArgs.festival_tts:
         # festival tts
