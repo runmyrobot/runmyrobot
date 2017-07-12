@@ -132,23 +132,18 @@ if commandArgs.type == 'l298n':
     mode=GPIO.getmode()
     print " mode ="+str(mode)
     GPIO.cleanup()
-    #Change the GPIO Pins to your connected motors
-    #visit http://bit.ly/1S5nQ4y for reference
-    if robotID == "20134182": # StanleyBot
-        StepPinForward=12,16
-        StepPinBackward=11,15
-        StepPinLeft=15,12
-        StepPinRight=11,16
-    elif robotID == "53326365": # StaceyBot
-        StepPinForward=11,15
-        StepPinBackward=12,16
-        StepPinLeft=11,16
-        StepPinRight=15,12
-    else: # default settings
-        StepPinForward=12,16
-        StepPinBackward=11,15
-        StepPinLeft=15,12
-        StepPinRight=11,16
+    #Change the GPIO Pins to your connected motors in gpio.json
+    #visit http://bit.ly/1S5nQ4y for reference (ChangeMe)
+    with open('gpio.json') as gpio_file: 
+        gpio_json = json.load(gpio_file)
+    if str(robotID) in gpio_json:
+		robo_json = gpio_json[str(robotID)]
+    else:
+        robo_json = gpio_json['default']
+    StepPinForward = int(robo_json['StepPinForward'].split(',')[0]),int(robo_json['StepPinForward'].split(',')[1])
+    StepPinBackward = int(robo_json['StepPinBackward'].split(',')[0]),int(robo_json['StepPinBackward'].split(',')[1])
+    StepPinLeft = int(robo_json['StepPinLeft'].split(',')[0]),int(robo_json['StepPinLeft'].split(',')[1])
+    StepPinRight = int(robo_json['StepPinRight'].split(',')[0]),int(robo_json['StepPinRight'].split(',')[1])
     GPIO.setmode(GPIO.BOARD)
     GPIO.setup(StepPinForward, GPIO.OUT)
     GPIO.setup(StepPinBackward, GPIO.OUT)
