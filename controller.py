@@ -6,7 +6,7 @@ import json
 import traceback
 import tempfile
 import re
-
+import configparser
 
 import argparse
 parser = argparse.ArgumentParser(description='start robot control program')
@@ -134,16 +134,17 @@ if commandArgs.type == 'l298n':
     GPIO.cleanup()
     #Change the GPIO Pins to your connected motors in gpio.json
     #visit http://bit.ly/1S5nQ4y for reference (ChangeMe)
-    with open('gpio.json') as gpio_file: 
-        gpio_json = json.load(gpio_file)
-    if str(robotID) in gpio_json:
-        robo_json = gpio_json[str(robotID)]
+    gpio_config = configparser.ConfigParser()
+	gpio_config.read('gpio.conf')
+    if str(robotID) in gpio_config.sections():
+        config_id = str(robotID)
     else:
-        robo_json = gpio_json['default']
-    StepPinForward = int(robo_json['StepPinForward'].split(',')[0]),int(robo_json['StepPinForward'].split(',')[1])
-    StepPinBackward = int(robo_json['StepPinBackward'].split(',')[0]),int(robo_json['StepPinBackward'].split(',')[1])
-    StepPinLeft = int(robo_json['StepPinLeft'].split(',')[0]),int(robo_json['StepPinLeft'].split(',')[1])
-    StepPinRight = int(robo_json['StepPinRight'].split(',')[0]),int(robo_json['StepPinRight'].split(',')[1])
+        config_id = 'default'		
+    StepPinForward = int(str(config[config_id]['StepPinForward']).split(',')[0]),int(str(config[config_id]['StepPinForward']).split(',')[1])
+    StepPinBackward = int(str(config[config_id]['StepPinBackward']).split(',')[0]),int(str(config[config_id]['StepPinBackward']).split(',')[1])
+    StepPinLeft = int(str(config[config_id]['StepPinLeft']).split(',')[0]),int(str(config[config_id]['StepPinLeft']).split(',')[1])
+    StepPinRight = int(str(config[config_id]['StepPinRight']).split(',')[0]),int(str(config[config_id]['StepPinRight']).split(',')[1])
+	
     GPIO.setmode(GPIO.BOARD)
     GPIO.setup(StepPinForward, GPIO.OUT)
     GPIO.setup(StepPinBackward, GPIO.OUT)
