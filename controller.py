@@ -137,7 +137,7 @@ if commandArgs.type == 'l298n':
     with open('gpio.json') as gpio_file: 
         gpio_json = json.load(gpio_file)
     if str(robotID) in gpio_json:
-		robo_json = gpio_json[str(robotID)]
+        robo_json = gpio_json[str(robotID)]
     else:
         robo_json = gpio_json['default']
     StepPinForward = int(robo_json['StepPinForward'].split(',')[0]),int(robo_json['StepPinForward'].split(',')[1])
@@ -733,8 +733,8 @@ def handle_command(args):
             if commandArgs.type == 'l298n':
                 runl298n(command)                                 
             #setMotorsToIdle()
-	    if commandArgs.type == 'motozero':
-		runmotozero(command)
+        if commandArgs.type == 'motozero':
+        runmotozero(command)
             
             if commandArgs.led == 'max7219':
                 if command == 'LED_OFF':
@@ -859,7 +859,7 @@ def runmotozero(direction):
         GPIO.output(Motor1B, GPIO.LOW)
         GPIO.output(Motor2A, GPIO.LOW)
         GPIO.output(Motor4A, GPIO.LOW)
-	
+    
 def handleStartReverseSshProcess(args):
     print "starting reverse ssh"
     socketIO.emit("reverse_ssh_info", "starting")
