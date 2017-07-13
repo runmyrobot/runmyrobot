@@ -6,7 +6,7 @@ import json
 import traceback
 import tempfile
 import re
-import configparser
+#import configparser
 
 import argparse
 parser = argparse.ArgumentParser(description='start robot control program')
@@ -136,7 +136,7 @@ if commandArgs.type == 'l298n':
     #Change the GPIO Pins to your connected motors in gpio.conf
     #visit http://bit.ly/1S5nQ4y for reference
     gpio_config = configparser.ConfigParser()
-	gpio_config.read('gpio.conf')
+    gpio_config.read('gpio.conf')
     if str(robotID) in gpio_config.sections():
         config_id = str(robotID)
     else:
