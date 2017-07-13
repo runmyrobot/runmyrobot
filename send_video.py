@@ -51,6 +51,10 @@ parser.add_argument('--audio-input-device', default='Microphone (HD Webcam C270)
 
 commandArgs = parser.parse_args()
 
+# True if devices on
+camera_on = commandArgs.camera_enabled
+mic_on = commandArgs.mic_enabled
+
 print "commandArgs", commandArgs
 
 
@@ -187,13 +191,14 @@ def onCommandToRobot(*args):
         if command == 'VIDOFF':
             print ('disabling camera capture process')
             print "args", args
-            commandArgs.camera_enabled = False
+            camera_on = False
             os.system("killall ffmpeg")
 
         if command == 'VIDON':
-            print ('enabling camera capture process')
-            print "args", args
-            commandArgs.camera_enabled = True
+            if commandArgs.camera_enabled:
+                print ('enabling camera capture process')
+                print "args", args
+                camera_on = True
         
         sys.stdout.flush()
 
@@ -217,13 +222,13 @@ def main():
     sys.stdout.flush()
 
     
-    if commandArgs.camera_enabled:
+    if camera_on:
         if not commandArgs.dry_run:
             videoProcess = startVideoCaptureLinux()
         else:
             videoProcess = DummyProcess()
 
-    if commandArgs.mic_enabled:
+    if mic_on:
         if not commandArgs.dry_run:
             audioProcess = startAudioCaptureLinux()
             time.sleep(30)
@@ -274,7 +279,7 @@ def main():
         
         
         
-        if commandArgs.camera_enabled:
+        if camera_on:
         
             print "video process poll", videoProcess.poll(), "pid", videoProcess.pid, "restarts", numVideoRestarts
 
@@ -285,7 +290,7 @@ def main():
                 numVideoRestarts += 1
             
                 
-        if commandArgs.mic_enabled:
+        if mic_on:
 
             print "audio process poll", audioProcess.poll(), "pid", audioProcess.pid, "restarts", numAudioRestarts
 
