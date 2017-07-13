@@ -183,6 +183,7 @@ def rotationOption():
 
 def onCommandToRobot(*args):
     global robotID
+    global camera_on
     if len(args) > 0 and 'robot_id' in args[0] and args[0]['robot_id'] == robotID:
         commandMessage = args[0]
         print('command for this robot received:', commandMessage)
@@ -212,6 +213,7 @@ def onConnection(*args):
 def main():
 
     global robotID
+    global camera_on
     robotID = getRobotID()    
 
     socketIO.on('command_to_robot', onCommandToRobot)
