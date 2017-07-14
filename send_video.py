@@ -49,9 +49,13 @@ parser.add_argument('--audio-input-device', default='Microphone (HD Webcam C270)
 #global numAudioRestarts
 #numAudioRestarts = 0
 
-args = parser.parse_args()
+commandArgs = parser.parse_args()
 
-print "args", args
+# True if devices on
+camera_on = commandArgs.camera_enabled
+mic_on = commandArgs.mic_enabled
+
+print "commandArgs", commandArgs
 
 
 server = "runmyrobot.com"
@@ -64,17 +68,17 @@ from socketIO_client import SocketIO, LoggingNamespace
 os.system("sudo modprobe bcm2835-v4l2")
 
 
-if args.env == "dev":
+if commandArgs.env == "dev":
     print "using dev port 8122"
     port = 8122
-elif args.env == "prod":
+elif commandArgs.env == "prod":
     print "using prod port 8022"
     port = 8022
 else:
     print "invalid environment"
     sys.exit(0)
 
-    
+
 print "initializing socket io"
 print "server:", server
 print "port:", port
@@ -85,42 +89,43 @@ print "finished initializing socket io"
 
 
 
+def getWithRetry(url):
+
+    for retryNumber in range(2000):
+        try:
+            print "GET", url
+            response = urllib2.urlopen(url).read()
+            break
+        except:
+            print "could not open url ", url
+            time.sleep(2)
+
+    return response
+
+
 
     
 
 def getVideoPort():
 
-
-    url = 'http://%s/get_video_port/%s' % (server, args.camera_id)
-
-
-    for retryNumber in range(2000):
-        try:
-            print "GET", url
-            response = urllib2.urlopen(url).read()
-            break
-        except:
-            print "could not open url ", url
-            time.sleep(2)
-
+    url = 'http://%s/get_video_port/%s' % (server, commandArgs.camera_id)
+    response = getWithRetry(url)
     return json.loads(response)['mpeg_stream_port']
+
+
 
 def getAudioPort():
 
-
-    url = 'http://%s/get_audio_port/%s' % (server, args.camera_id)
-
-
-    for retryNumber in range(2000):
-        try:
-            print "GET", url
-            response = urllib2.urlopen(url).read()
-            break
-        except:
-            print "could not open url ", url
-            time.sleep(2)
-
+    url = 'http://%s/get_audio_port/%s' % (server, commandArgs.camera_id)
+    response = getWithRetry(url)
     return json.loads(response)['audio_stream_port']
+
+
+def getRobotID():
+
+    url = 'http://%s/get_robot_id/%s' % (server, commandArgs.camera_id)
+    response = getWithRetry(url)
+    return json.loads(response)['robot_id']
 
 
 
@@ -138,22 +143,22 @@ def startVideoCaptureLinux():
     videoPort = getVideoPort()
 
     # set brightness
-    if (args.brightness is not None):
+    if (commandArgs.brightness is not None):
         print "brightness"
-        os.system("v4l2-ctl -c brightness={brightness}".format(brightness=args.brightness))
+        os.system("v4l2-ctl -c brightness={brightness}".format(brightness=commandArgs.brightness))
 
     # set contrast
-    if (args.contrast is not None):
+    if (commandArgs.contrast is not None):
         print "contrast"
-        os.system("v4l2-ctl -c contrast={contrast}".format(contrast=args.contrast))
+        os.system("v4l2-ctl -c contrast={contrast}".format(contrast=commandArgs.contrast))
 
     # set saturation
-    if (args.saturation is not None):
+    if (commandArgs.saturation is not None):
         print "saturation"
-        os.system("v4l2-ctl -c saturation={saturation}".format(saturation=args.saturation))
+        os.system("v4l2-ctl -c saturation={saturation}".format(saturation=commandArgs.saturation))
 
     
-    videoCommandLine = '/usr/local/bin/ffmpeg -f v4l2 -framerate 25 -video_size 640x480 -i /dev/video{video_device_number} {rotation_option} -f mpegts -codec:v mpeg1video -s {xres}x{yres} -b:v {kbps}k -bf 0 -muxdelay 0.001 http://{server}:{video_port}/hello/{xres}/{yres}/'.format(video_device_number=args.video_device_number, rotation_option=rotationOption(), kbps=args.kbps, server=server, video_port=videoPort, xres=args.xres, yres=args.yres)
+    videoCommandLine = '/usr/local/bin/ffmpeg -f v4l2 -framerate 25 -video_size 640x480 -i /dev/video{video_device_number} {rotation_option} -f mpegts -codec:v mpeg1video -s {xres}x{yres} -b:v {kbps}k -bf 0 -muxdelay 0.001 http://{server}:{video_port}/hello/{xres}/{yres}/'.format(video_device_number=commandArgs.video_device_number, rotation_option=rotationOption(), kbps=commandArgs.kbps, server=server, video_port=videoPort, xres=commandArgs.xres, yres=commandArgs.yres)
     print videoCommandLine
     return subprocess.Popen(shlex.split(videoCommandLine))
     
@@ -162,7 +167,7 @@ def startAudioCaptureLinux():
 
     audioPort = getAudioPort()
     
-    audioCommandLine = '/usr/local/bin/ffmpeg -f alsa -ar 44100 -ac %d -i hw:1 -f mpegts -codec:a mp2 -b:a 32k -muxdelay 0.001 http://%s:%s/hello/640/480/' % (args.mic_channels, server, audioPort)
+    audioCommandLine = '/usr/local/bin/ffmpeg -f alsa -ar 44100 -ac %d -i hw:1 -f mpegts -codec:a mp2 -b:a 32k -muxdelay 0.001 http://%s:%s/hello/640/480/' % (commandArgs.mic_channels, server, audioPort)
     print audioCommandLine
     return subprocess.Popen(shlex.split(audioCommandLine))
 
@@ -170,27 +175,67 @@ def startAudioCaptureLinux():
 
 def rotationOption():
 
-    if args.rotate180:
+    if commandArgs.rotate180:
         return "-vf transpose=2,transpose=2"
     else:
         return ""
 
-    
+
+def onCommandToRobot(*args):
+    global robotID
+    global camera_on
+    if len(args) > 0 and 'robot_id' in args[0] and args[0]['robot_id'] == robotID:
+        commandMessage = args[0]
+        print('command for this robot received:', commandMessage)
+        command = commandMessage['command']
+
+        if command == 'VIDOFF':
+            print ('disabling camera capture process')
+            print "args", args
+            camera_on = False
+            os.system("killall ffmpeg")
+
+        if command == 'VIDON':
+            if commandArgs.camera_enabled:
+                print ('enabling camera capture process')
+                print "args", args
+                camera_on = True
+        
+        sys.stdout.flush()
+
+
+def onConnection(*args):
+    print('connection:', args)
+    sys.stdout.flush()
+
+
 
 def main():
 
-    if args.camera_enabled:
-        if not args.dry_run:
+    global robotID
+    global camera_on
+    robotID = getRobotID()    
+
+    socketIO.on('command_to_robot', onCommandToRobot)
+    socketIO.on('connection', onConnection)    
+
+
+    print "robot id:", robotID
+    sys.stdout.flush()
+
+    
+    if camera_on:
+        if not commandArgs.dry_run:
             videoProcess = startVideoCaptureLinux()
         else:
             videoProcess = DummyProcess()
 
-    if args.mic_enabled:
-        if not args.dry_run:
+    if mic_on:
+        if not commandArgs.dry_run:
             audioProcess = startAudioCaptureLinux()
             time.sleep(30)
             os.system("killall ffmpeg")
-            #socketIO.emit('send_video_process_start_event', {'camera_id': args.camera_id})
+            #socketIO.emit('send_video_process_start_event', {'camera_id': commandArgs.camera_id})
         else:
             audioProcess = DummyProcess()
 
@@ -207,7 +252,7 @@ def main():
 
         print "------------------------------------------" + str(count) + "-----------------------------------------------------"
         
-        time.sleep(1)
+        socketIO.wait(seconds=1)
 
 
         # todo: note about the following ffmpeg_process_exists is not technically true, but need to update
@@ -217,9 +262,9 @@ def main():
         # send status to server
         socketIO.emit('send_video_status', {'send_video_process_exists': True,
                                             'ffmpeg_process_exists': True,
-                                            'camera_id':args.camera_id})
+                                            'camera_id':commandArgs.camera_id})
        
-        if count % 10 == 0:
+        if count % 20 == 0:
             try:
                 with os.fdopen(os.open('/tmp/send_video_summary.txt', os.O_WRONLY | os.O_CREAT, 0o777), 'w') as statusFile:
                     statusFile.write("time" + str(datetime.datetime.now()) + "\n")
@@ -236,7 +281,7 @@ def main():
         
         
         
-        if args.camera_enabled:
+        if camera_on:
         
             print "video process poll", videoProcess.poll(), "pid", videoProcess.pid, "restarts", numVideoRestarts
 
@@ -247,7 +292,7 @@ def main():
                 numVideoRestarts += 1
             
                 
-        if args.mic_enabled:
+        if mic_on:
 
             print "audio process poll", audioProcess.poll(), "pid", audioProcess.pid, "restarts", numAudioRestarts
 
@@ -256,7 +301,7 @@ def main():
                 randomSleep()
                 audioProcess = startAudioCaptureLinux()
                 #time.sleep(30)
-                #socketIO.emit('send_video_process_start_event', {'camera_id': args.camera_id})               
+                #socketIO.emit('send_video_process_start_event', {'camera_id': commandArgs.camera_id})               
                 numAudioRestarts += 1
 
         

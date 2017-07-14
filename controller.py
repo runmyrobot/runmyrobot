@@ -7,7 +7,6 @@ import traceback
 import tempfile
 import re
 
-
 import argparse
 parser = argparse.ArgumentParser(description='start robot control program')
 parser.add_argument('robot_id', help='Robot ID')
