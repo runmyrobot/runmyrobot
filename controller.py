@@ -7,6 +7,7 @@ import traceback
 import tempfile
 import re
 
+
 import argparse
 parser = argparse.ArgumentParser(description='start robot control program')
 parser.add_argument('robot_id', help='Robot ID')
@@ -145,10 +146,10 @@ if commandArgs.type == 'l298n':
         config_id = str(robotID)
     else:
         config_id = 'default'		
-    StepPinForward = int(str(config[config_id]['StepPinForward']).split(',')[0]),int(str(config[config_id]['StepPinForward']).split(',')[1])
-    StepPinBackward = int(str(config[config_id]['StepPinBackward']).split(',')[0]),int(str(config[config_id]['StepPinBackward']).split(',')[1])
-    StepPinLeft = int(str(config[config_id]['StepPinLeft']).split(',')[0]),int(str(config[config_id]['StepPinLeft']).split(',')[1])
-    StepPinRight = int(str(config[config_id]['StepPinRight']).split(',')[0]),int(str(config[config_id]['StepPinRight']).split(',')[1])
+    StepPinForward = int(str(gpio_config[config_id]['StepPinForward']).split(',')[0]),int(str(gpio_config[config_id]['StepPinForward']).split(',')[1])
+    StepPinBackward = int(str(gpio_config[config_id]['StepPinBackward']).split(',')[0]),int(str(gpio_config[config_id]['StepPinBackward']).split(',')[1])
+    StepPinLeft = int(str(config[gpio_config_id]['StepPinLeft']).split(',')[0]),int(str(gpio_config[config_id]['StepPinLeft']).split(',')[1])
+    StepPinRight = int(str(gpio_config[config_id]['StepPinRight']).split(',')[0]),int(str(gpio_config[config_id]['StepPinRight']).split(',')[1])
 	
     GPIO.setmode(GPIO.BOARD)
     GPIO.setup(StepPinForward, GPIO.OUT)
