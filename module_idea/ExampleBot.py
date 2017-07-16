@@ -1,6 +1,9 @@
 import RunMyRobot
 robotID = 'ChangeMe'
 
+@RunMyRobot.commands
+def commands(args):
+    print args	
 	
 @RunMyRobot.messages
 def messages(args):

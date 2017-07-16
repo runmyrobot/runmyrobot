@@ -11,52 +11,32 @@ from socketIO_client import SocketIO, LoggingNamespace
 robotID = '0' #Do not change this here.
 server = "runmyrobot.com"
 port = 8022
-print 'using socket io to connect to', server
+print 'Using socket io to connect to', server
 socketIO = SocketIO(server, port, LoggingNamespace)
-print 'finished using socket io to connect to', server
+print 'Finished using socket io to connect to', server
 funcs = {}
-
+#Decorators
 def commands(func):
-    global funcs
     funcs['commands'] = func
 	
 def messages(func):
-    global funcs
     funcs['messages'] = func
 	
 def exclusive_control(func):
-    global funcs
     funcs['exclusive_control'] = func
-   
-def handle_exclusive_control(args):
-    global funcs
-    if 'exclusive_control' in funcs and 'status' in args and 'robot_id' in args and args['robot_id'] == robotID:
-        function = funcs['exclusive_control']
-        function(args)
-      
-def handle_chat_message(args):
-    global funcs
-    if 'messages' in funcs:
-        function = funcs['messages']
-        function(args)    
-      
-def handle_command(args):
-    global funcs
-    if args['robot_id'] == robotID and 'commands' in funcs:
-        function = funcs['commands']
-
-        function(args)
-
+#Handlers	
 def on_handle_command(*args):
-   thread.start_new_thread(handle_command, args)
+    if args[0]['robot_id'] == robotID and 'commands' in funcs:    
+        thread.start_new_thread(funcs['commands'], args)
 
 def on_handle_exclusive_control(*args):
-   thread.start_new_thread(handle_exclusive_control, args)
+    if args[0]['robot_id'] == robotID and 'exclusive_control' in funcs:    
+        thread.start_new_thread(funcs['exclusive_control'], args)
 
 def on_handle_chat_message(*args):
-   thread.start_new_thread(handle_chat_message, args)
-
-   
+    if args[0]['robot_id'] == robotID and 'messages' in funcs:    
+        thread.start_new_thread(funcs['messages'], args)
+		
 #from communication import socketIO
 socketIO.on('command_to_robot', on_handle_command)
 socketIO.on('exclusive_control', on_handle_exclusive_control)
@@ -69,12 +49,6 @@ def myWait():
 def ipInfoUpdate():
     socketIO.emit('ip_information',
                   {'ip': subprocess.check_output(["hostname", "-I"]), 'robot_id': robotID})
-
-def sendChargeState():
-    charging = GPIO.input(chargeIONumber) == 1
-    chargeState = {'robot_id': robotID, 'charging': charging}
-    socketIO.emit('charge_state', chargeState)
-    print "charge state:", chargeState
 
 def sendChargeStateCallback(x):
     sendChargeState()
