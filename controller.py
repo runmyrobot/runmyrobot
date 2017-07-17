@@ -6,7 +6,7 @@ import json
 import traceback
 import tempfile
 import re
-#import configparser
+
 
 import argparse
 parser = argparse.ArgumentParser(description='start robot control program')
@@ -72,7 +72,12 @@ elif commandArgs.type == 'motor_hat':
 elif commandArgs.type == 'gopigo':
     import gopigo
 elif commandArgs.type == 'l298n':
-    pass
+    try:
+        import configparser
+    except ImportError:
+        print "You need to install configparser (sudo python -m pip install configparser)\n Ctrl-C to quit"
+        while True:
+            pass # Halt program	to avoid error down the line.
 elif commandArgs.type == 'motozero':
     pass
 elif commandArgs.type == 'pololu':
@@ -141,10 +146,10 @@ if commandArgs.type == 'l298n':
         config_id = str(robotID)
     else:
         config_id = 'default'		
-    StepPinForward = int(str(config[config_id]['StepPinForward']).split(',')[0]),int(str(config[config_id]['StepPinForward']).split(',')[1])
-    StepPinBackward = int(str(config[config_id]['StepPinBackward']).split(',')[0]),int(str(config[config_id]['StepPinBackward']).split(',')[1])
-    StepPinLeft = int(str(config[config_id]['StepPinLeft']).split(',')[0]),int(str(config[config_id]['StepPinLeft']).split(',')[1])
-    StepPinRight = int(str(config[config_id]['StepPinRight']).split(',')[0]),int(str(config[config_id]['StepPinRight']).split(',')[1])
+    StepPinForward = int(str(gpio_config[config_id]['StepPinForward']).split(',')[0]),int(str(gpio_config[config_id]['StepPinForward']).split(',')[1])
+    StepPinBackward = int(str(gpio_config[config_id]['StepPinBackward']).split(',')[0]),int(str(gpio_config[config_id]['StepPinBackward']).split(',')[1])
+    StepPinLeft = int(str(gpio_config[config_id]['StepPinLeft']).split(',')[0]),int(str(gpio_config[config_id]['StepPinLeft']).split(',')[1])
+    StepPinRight = int(str(gpio_config[config_id]['StepPinRight']).split(',')[0]),int(str(gpio_config[config_id]['StepPinRight']).split(',')[1])
 	
     GPIO.setmode(GPIO.BOARD)
     GPIO.setup(StepPinForward, GPIO.OUT)
