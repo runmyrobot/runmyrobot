@@ -108,7 +108,7 @@ def getWithRetry(url):
 
 def getVideoPort():
 
-    url = 'http://%s/get_video_port/%s' % (server, commandArgs.camera_id)
+    url = 'https://%s/get_video_port/%s' % (server, commandArgs.camera_id)
     response = getWithRetry(url)
     return json.loads(response)['mpeg_stream_port']
 
@@ -116,14 +116,14 @@ def getVideoPort():
 
 def getAudioPort():
 
-    url = 'http://%s/get_audio_port/%s' % (server, commandArgs.camera_id)
+    url = 'https://%s/get_audio_port/%s' % (server, commandArgs.camera_id)
     response = getWithRetry(url)
     return json.loads(response)['audio_stream_port']
 
 
 def getRobotID():
 
-    url = 'http://%s/get_robot_id/%s' % (server, commandArgs.camera_id)
+    url = 'https://%s/get_robot_id/%s' % (server, commandArgs.camera_id)
     response = getWithRetry(url)
     return json.loads(response)['robot_id']
 
