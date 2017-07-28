@@ -6,7 +6,25 @@ RunMyRobot is a site for interacts with other using telepresence robots. User cr
 https://runmyrobot.com
 
 
-<h2> Installing robot control and video scripts </h2>
+<h2> Quick Install </h2>
+
+
+Copy this into the terminal, and follow the instructions.
+This script has been tested on a Raspberry Pi 3, with a fresh flash of "2017-04-10-raspbian-jessie-lite".
+
+```
+sudo wget https://raw.githubusercontent.com/runmyrobot/runmyrobot/master/scripts/install.sh -O /tmp/install.sh && bash /tmp/install.sh
+```
+
+After end installtion, all the files needed should be installed and ready for use, but you still might need to change some arguments in your "/home/pi/start_robot" file, to make it suit your robot.
+
+To edit your start_robot file, put this into the terminal.
+
+```sudo nano /home/pi/start_robot```
+
+<h2> Manual Install </h2>
+
+<h3> Installing robot control and video scripts </h3>
 
 
 The RasPi will need the following things install so it can talk to your motor and talk to the internet.
@@ -170,16 +188,4 @@ MotoZero
 
 Missing something?, you can add it, open source!
 
-<h1> Quicker install </h1>
-Copy this into the terminal, and follow the instructions.
-This script has been tested on a Raspberry Pi 3, with a fresh flash of "2017-04-10-raspbian-jessie-lite".
 
-```
-sudo wget https://raw.githubusercontent.com/runmyrobot/runmyrobot/master/scripts/install.sh -O /tmp/install.sh && bash /tmp/install.sh
-```
-
-After end installtion, all the files needed should be installed and ready for use, but you still might need to change some arguments in your "/home/pi/start_robot" file, to make it suit your robot.
-
-To edit your start_robot file, put this into the terminal.
-
-```sudo nano /home/pi/start_robot```
