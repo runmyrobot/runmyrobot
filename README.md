@@ -189,3 +189,11 @@ MotoZero
 Missing something?, you can add it, open source!
 
 
+<h1> Instructions for Specific Hardward Configurations </h1>
+
+<h2> GoPiGo3 </h2>
+Add this to .bashrc after installing gopigo3 software:
+export PYTHONPATH="/home/pi/Dexter/GoPiGo3/Software/Python"
+
+
+
