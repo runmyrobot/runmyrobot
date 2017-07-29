@@ -192,8 +192,8 @@ Missing something?, you can add it, open source!
 <h1> Instructions for Specific Hardward Configurations </h1>
 
 <h2> GoPiGo3 </h2>
-Add this to .bashrc after installing gopigo3 software:
-export PYTHONPATH="/home/pi/Dexter/GoPiGo3/Software/Python"
+
+For GoPiGo3, you will need to install the gopigo3 python module (which is different than older versions). It will need to be installed with the installation script from Dexter. Also, PYTHONPATH needs to be set to "/home/pi/Dexter/GoPiGo3/Software/Python"
 
 
 
