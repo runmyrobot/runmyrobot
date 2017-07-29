@@ -6,13 +6,14 @@ import json
 import traceback
 import tempfile
 import re
+import sys
 
 
 import argparse
 parser = argparse.ArgumentParser(description='start robot control program')
 parser.add_argument('robot_id', help='Robot ID')
 parser.add_argument('--env', help="Environment for example dev or prod, prod is default", default='prod')
-parser.add_argument('--type', help="serial or motor_hat or gopigo or l298n or motozero or pololu", default='motor_hat')
+parser.add_argument('--type', help="serial or motor_hat or gopigo2 or gopigo3 or l298n or motozero or pololu", default='motor_hat')
 parser.add_argument('--serial-device', help="serial device", default='/dev/ttyACM0')
 parser.add_argument('--male', dest='male', action='store_true')
 parser.add_argument('--female', dest='male', action='store_false')
@@ -62,15 +63,19 @@ tempDir = tempfile.gettempdir()
 print "temporary directory:", tempDir
 
 
-# motor controller specific imports
+# motor controller specific intializations
 if commandArgs.type == 'none':
     pass
 elif commandArgs.type == 'serial':
     import serial
 elif commandArgs.type == 'motor_hat':
     pass
-elif commandArgs.type == 'gopigo':
+elif commandArgs.type == 'gopigo2':
     import gopigo
+elif commandArgs.type == 'gopigo3':
+    sys.path.append("/home/pi/Dexter/GoPiGo3/Software/Python")
+    import easygopigo3
+    easyGoPiGo3 = easygopigo3.EasyGoPiGo3()
 elif commandArgs.type == 'l298n':
     try:
         import configparser
@@ -633,7 +638,7 @@ def moveAdafruitPWM(command):
 
         
     
-def moveGoPiGo(command):
+def moveGoPiGo2(command):
     if command == 'L':
         gopigo.left_rot()
         time.sleep(0.15)
@@ -650,6 +655,28 @@ def moveGoPiGo(command):
         gopigo.backward()
         time.sleep(0.35)
         gopigo.stop()
+
+
+def moveGoPiGo3(command):
+    e = easyGoPiGo3
+    if command == 'L':
+        e.set_motor_dps(e.MOTOR_LEFT, -e.get_speed())
+        e.set_motor_dps(e.MOTOR_RIGHT, e.get_speed())
+        time.sleep(0.15)
+        easyGoPiGo3.stop()
+    if command == 'R':
+        e.set_motor_dps(e.MOTOR_LEFT, e.get_speed())
+        e.set_motor_dps(e.MOTOR_RIGHT, -e.get_speed())
+        time.sleep(0.15)
+        easyGoPiGo3.stop()
+    if command == 'F':
+        easyGoPiGo3.forward()
+        time.sleep(0.35)
+        easyGoPiGo3.stop()
+    if command == 'B':
+        easyGoPiGo3.backward()
+        time.sleep(0.35)
+        easyGoPiGo3.stop()
 
     
                 
@@ -693,9 +720,12 @@ def handle_command(args):
             if commandArgs.type == 'adafruit_pwm':
                 moveAdafruitPWM(command)
             
-            if commandArgs.type == 'gopigo':
-                moveGoPiGo(command)
+            if commandArgs.type == 'gopigo2':
+                moveGoPiGo2(command)
 
+            if commandArgs.type == 'gopigo3':
+                moveGoPiGo3(command)
+                
             if commandArgs.type == 'owi_arm':
                 owi_arm.handleOwiArm(command)
 
