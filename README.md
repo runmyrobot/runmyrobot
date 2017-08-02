@@ -3,7 +3,7 @@
 <h1> Open Robot Control Code For Connecting to LetsRobot.tv </h1>
 
 LetsRobot.tv is a site for interacts with other using telepresence robots. User create their own robots and add them to the site.
-https://letrobot.tv
+https://letsrobot.tv
 
 
 <h2> Quick Install </h2>
