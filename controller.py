@@ -664,7 +664,7 @@ def moveGoPiGo2(command):
 def changeVolumeHighThenNormal():
 
     os.system("amixer -c 2 cset numid=3 %d%%" % 100)
-    time.sleep(20)
+    time.sleep(25)
     os.system("amixer -c 2 cset numid=3 %d%%" % commandArgs.tts_volume)
 
 
