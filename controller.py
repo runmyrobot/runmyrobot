@@ -6,16 +6,12 @@ import json
 import traceback
 import tempfile
 import re
-
 import getpass
 #import configparser
-
 import sys
-
-
-
-
 import argparse
+import random
+
 
 parser = argparse.ArgumentParser(description='start robot control program')
 parser.add_argument('robot_id', help='Robot ID')
@@ -1065,6 +1061,15 @@ def identifyRobotId():
 
 
 
+def setSpeedBasedOnCharge():
+    if chargeValue < 30:
+        dayTimeDrivingSpeedActuallyUsed = random.randint(commandArgs.day_speed/4, commandArgs.day_speed)
+        nightTimeDrivingSpeedActuallyUsed = random.randint(commandArgs.night_speed/4, commandArgs.night_speed)
+    else:
+        dayTimeDrivingSpeedActuallyUsed = commandArgs.day_speed
+        nightTimeDrivingSpeedActuallyUsed = commandArgs.night_speed
+    
+
 def updateChargeApproximation():
 
     global chargeValue
@@ -1134,6 +1139,7 @@ while True:
         if commandArgs.type == 'motor_hat':
             updateChargeApproximation()
             sendChargeState()
+            setSpeedBasedOnCharge()
 
             
     if (waitCounter % 1000) == 0:
