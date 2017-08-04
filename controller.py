@@ -47,10 +47,10 @@ parser.set_defaults(filter_url_tts=False)
 commandArgs = parser.parse_args()
 print commandArgs
 
-chargeCheckInterval = 1
+chargeCheckInterval = 5
 chargeValue = 0.0
-secondsToCharge = 60 * 2  # value in seconds
-secondsToDischarge = 60 * 3 # value in seconds
+secondsToCharge = 60 * 60 * 2  # value in seconds
+secondsToDischarge = 60 * 60 * 10 # value in seconds
 
 
 # watch dog timer
@@ -1038,9 +1038,12 @@ def ipInfoUpdate():
 
 # true if it's on the charger and it needs to be charging
 def isCharging():
+    print "is charging current value", chargeValue
     if chargeValue < 99:
+        print "charge value is low"
         return GPIO.input(chargeIONumber) == 1
     else:
+        print "charge value is high"
         return False
     
 def sendChargeState():
@@ -1064,8 +1067,10 @@ def identifyRobotId():
 
 def updateChargeApproximation():
 
+    global chargeValue
+    
     username = getpass.getuser()
-    path = "/tmp/charge_state_%s.txt" % username
+    path = "/home/pi/charge_state_%s.txt" % username
 
     # read charge value
     # assume it is zero if no file exists
@@ -1074,12 +1079,13 @@ def updateChargeApproximation():
         chargeValue = float(file.read())
         file.close()
     else:
+        print "setting charge value to zero"
         chargeValue = 0
 
     chargePerSecond = 1.0 / secondsToCharge
     dischargePerSecond = 1.0 / secondsToDischarge
     
-    if isCharging():
+    if GPIO.input(chargeIONumber) == 1:
         chargeValue += 100.0 * chargePerSecond * chargeCheckInterval
     else:
         chargeValue -= 100.0 * dischargePerSecond * chargeCheckInterval
@@ -1125,9 +1131,12 @@ while True:
 
 
     if (waitCounter % chargeCheckInterval) == 0:
-        print "hello"
+
         updateChargeApproximation()
 
+        if commandArgs.type == 'motor_hat':
+            sendChargeState()
+        
         
     if (waitCounter % 1000) == 0:
         
@@ -1154,7 +1163,5 @@ while True:
         if platform.system() == 'Linux':
             ipInfoUpdate()
 
-        if commandArgs.type == 'motor_hat':
-            sendChargeState()
 
     waitCounter += 1
