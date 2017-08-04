@@ -1129,15 +1129,13 @@ lastInternetStatus = False
 while True:
     socketIO.wait(seconds=1)
 
-
+    
     if (waitCounter % chargeCheckInterval) == 0:
-
-        updateChargeApproximation()
-
         if commandArgs.type == 'motor_hat':
+            updateChargeApproximation()
             sendChargeState()
-        
-        
+
+            
     if (waitCounter % 1000) == 0:
         
         internetStatus = isInternetConnected()
