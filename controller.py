@@ -6,9 +6,8 @@ import json
 import traceback
 import tempfile
 import re
-
-
 import argparse
+
 parser = argparse.ArgumentParser(description='start robot control program')
 parser.add_argument('robot_id', help='Robot ID')
 parser.add_argument('--env', help="Environment for example dev or prod, prod is default", default='prod')
@@ -651,7 +650,21 @@ def moveGoPiGo(command):
         time.sleep(0.35)
         gopigo.stop()
 
+
+        
+def changeVolumeHighThenNormal():
+
+    os.system("amixer -c 2 cset numid=3 %d%%" % 100)
+    time.sleep(20)
+    os.system("amixer -c 2 cset numid=3 %d%%" % commandArgs.tts_volume)
+
+
     
+def handleLoudCommand():
+
+    thread.start_new_thread(changeVolumeHighThenNormal, ())
+    
+        
                 
 def handle_command(args):
         now = datetime.datetime.now()
@@ -690,6 +703,10 @@ def handle_command(args):
 
             command = args['command']
 
+            if command == 'LOUD':
+                handleLoudCommand()
+
+            
             if commandArgs.type == 'adafruit_pwm':
                 moveAdafruitPWM(command)
             
