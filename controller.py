@@ -40,6 +40,8 @@ parser.add_argument('--no-anon-tts', dest='anon_tts', action='store_false')
 parser.set_defaults(anon_tts=True)
 parser.add_argument('--filter-url-tts', dest='filter_url_tts', action='store_true')
 parser.set_defaults(filter_url_tts=False)
+parser.add_argument('--slow-for-low-battery', dest='slow_for_low_battery', action='store_true')
+parser.set_defaults(slow_for_low_battery=False)
 commandArgs = parser.parse_args()
 print commandArgs
 
@@ -1139,7 +1141,8 @@ while True:
         if commandArgs.type == 'motor_hat':
             updateChargeApproximation()
             sendChargeState()
-            setSpeedBasedOnCharge()
+            if commandArgs.slow_for_low_battery:
+                setSpeedBasedOnCharge()
 
             
     if (waitCounter % 1000) == 0:
