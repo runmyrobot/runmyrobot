@@ -51,6 +51,10 @@ parser.add_argument('--audio-input-device', default='Microphone (HD Webcam C270)
 
 commandArgs = parser.parse_args()
 
+# True if devices on
+camera_on = commandArgs.camera_enabled
+mic_on = commandArgs.mic_enabled
+
 print "commandArgs", commandArgs
 
 
@@ -104,7 +108,7 @@ def getWithRetry(url):
 
 def getVideoPort():
 
-    url = 'http://%s/get_video_port/%s' % (server, commandArgs.camera_id)
+    url = 'https://%s/get_video_port/%s' % (server, commandArgs.camera_id)
     response = getWithRetry(url)
     return json.loads(response)['mpeg_stream_port']
 
@@ -112,14 +116,14 @@ def getVideoPort():
 
 def getAudioPort():
 
-    url = 'http://%s/get_audio_port/%s' % (server, commandArgs.camera_id)
+    url = 'https://%s/get_audio_port/%s' % (server, commandArgs.camera_id)
     response = getWithRetry(url)
     return json.loads(response)['audio_stream_port']
 
 
 def getRobotID():
 
-    url = 'http://%s/get_robot_id/%s' % (server, commandArgs.camera_id)
+    url = 'https://%s/get_robot_id/%s' % (server, commandArgs.camera_id)
     response = getWithRetry(url)
     return json.loads(response)['robot_id']
 
@@ -179,6 +183,7 @@ def rotationOption():
 
 def onCommandToRobot(*args):
     global robotID
+    global camera_on
     if len(args) > 0 and 'robot_id' in args[0] and args[0]['robot_id'] == robotID:
         commandMessage = args[0]
         print('command for this robot received:', commandMessage)
@@ -187,13 +192,14 @@ def onCommandToRobot(*args):
         if command == 'VIDOFF':
             print ('disabling camera capture process')
             print "args", args
-            commandArgs.camera_enabled = False
+            camera_on = False
             os.system("killall ffmpeg")
 
         if command == 'VIDON':
-            print ('enabling camera capture process')
-            print "args", args
-            commandArgs.camera_enabled = True
+            if commandArgs.camera_enabled:
+                print ('enabling camera capture process')
+                print "args", args
+                camera_on = True
         
         sys.stdout.flush()
 
@@ -207,6 +213,7 @@ def onConnection(*args):
 def main():
 
     global robotID
+    global camera_on
     robotID = getRobotID()    
 
     socketIO.on('command_to_robot', onCommandToRobot)
@@ -217,13 +224,13 @@ def main():
     sys.stdout.flush()
 
     
-    if commandArgs.camera_enabled:
+    if camera_on:
         if not commandArgs.dry_run:
             videoProcess = startVideoCaptureLinux()
         else:
             videoProcess = DummyProcess()
 
-    if commandArgs.mic_enabled:
+    if mic_on:
         if not commandArgs.dry_run:
             audioProcess = startAudioCaptureLinux()
             time.sleep(30)
@@ -274,7 +281,7 @@ def main():
         
         
         
-        if commandArgs.camera_enabled:
+        if camera_on:
         
             print "video process poll", videoProcess.poll(), "pid", videoProcess.pid, "restarts", numVideoRestarts
 
@@ -285,7 +292,7 @@ def main():
                 numVideoRestarts += 1
             
                 
-        if commandArgs.mic_enabled:
+        if mic_on:
 
             print "audio process poll", audioProcess.poll(), "pid", audioProcess.pid, "restarts", numAudioRestarts
 
