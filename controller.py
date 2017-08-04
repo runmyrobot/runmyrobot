@@ -6,7 +6,12 @@ import json
 import traceback
 import tempfile
 import re
+
+import getpass
+#import configparser
+
 import sys
+
 
 
 
@@ -42,6 +47,10 @@ parser.set_defaults(filter_url_tts=False)
 commandArgs = parser.parse_args()
 print commandArgs
 
+chargeCheckInterval = 1
+chargeValue = 0.0
+secondsToCharge = 60 * 2  # value in seconds
+secondsToDischarge = 60 * 3 # value in seconds
 
 
 # watch dog timer
@@ -1026,8 +1035,16 @@ def ipInfoUpdate():
     socketIO.emit('ip_information',
                   {'ip': subprocess.check_output(["hostname", "-I"]), 'robot_id': robotID})
 
+
+# true if it's on the charger and it needs to be charging
+def isCharging():
+    if chargeValue < 99:
+        return GPIO.input(chargeIONumber) == 1
+    else:
+        return False
+    
 def sendChargeState():
-    charging = GPIO.input(chargeIONumber) == 1
+    charging = isCharging()
     chargeState = {'robot_id': robotID, 'charging': charging}
     socketIO.emit('charge_state', chargeState)
     print "charge state:", chargeState
@@ -1044,6 +1061,42 @@ def identifyRobotId():
     socketIO.emit('identify_robot_id', robotID);
 
 
+
+def updateChargeApproximation():
+
+    username = getpass.getuser()
+    path = "/tmp/charge_state_%s.txt" % username
+
+    # read charge value
+    # assume it is zero if no file exists
+    if os.path.isfile(path):
+        file = open(path, 'r')
+        chargeValue = float(file.read())
+        file.close()
+    else:
+        chargeValue = 0
+
+    chargePerSecond = 1.0 / secondsToCharge
+    dischargePerSecond = 1.0 / secondsToDischarge
+    
+    if isCharging():
+        chargeValue += 100.0 * chargePerSecond * chargeCheckInterval
+    else:
+        chargeValue -= 100.0 * dischargePerSecond * chargeCheckInterval
+
+    if chargeValue > 100.0:
+        chargeValue = 100.0
+    if chargeValue < 0:
+        chargeValue = 0.0
+        
+    # write new charge value
+    file = open(path, 'w')
+    file.write(str(chargeValue))
+    file.close()        
+
+    print "charge value updated to", chargeValue
+
+    
 
 #setMotorsToIdle()
 
@@ -1068,9 +1121,16 @@ elif platform.system() == 'Linux':
 lastInternetStatus = False
     
 while True:
-    socketIO.wait(seconds=10)
+    socketIO.wait(seconds=1)
 
-    if (waitCounter % 100) == 0:
+
+    if (waitCounter % chargeCheckInterval) == 0:
+        print "hello"
+        updateChargeApproximation()
+
+        
+    if (waitCounter % 1000) == 0:
+        
         internetStatus = isInternetConnected()
         if internetStatus != lastInternetStatus:
             if internetStatus:
@@ -1079,11 +1139,14 @@ while True:
                 say("missing internet connection")
         lastInternetStatus = internetStatus
 
-    if commandArgs.auto_wifi:
-        if commandArgs.secret_key is not None:
-            configWifiLogin(commandArgs.secret_key)
-    
-    if (waitCounter % 6) == 0:
+        
+    if (waitCounter % 10) == 0:
+        if commandArgs.auto_wifi:
+            if commandArgs.secret_key is not None:
+                configWifiLogin(commandArgs.secret_key)
+
+                
+    if (waitCounter % 60) == 0:
 
         # tell the server what robot id is using this connection
         identifyRobotId()
