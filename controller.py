@@ -1064,6 +1064,8 @@ def identifyRobotId():
 
 
 def setSpeedBasedOnCharge():
+    global dayTimeDrivingSpeedActuallyUsed
+    global nightTimeDrivingSpeedActuallyUsed
     if chargeValue < 30:
         dayTimeDrivingSpeedActuallyUsed = random.randint(commandArgs.day_speed/4, commandArgs.day_speed)
         nightTimeDrivingSpeedActuallyUsed = random.randint(commandArgs.night_speed/4, commandArgs.night_speed)
