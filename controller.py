@@ -6,16 +6,12 @@ import json
 import traceback
 import tempfile
 import re
-
 import getpass
 #import configparser
-
 import sys
-
-
-
-
 import argparse
+import random
+
 
 parser = argparse.ArgumentParser(description='start robot control program')
 parser.add_argument('robot_id', help='Robot ID')
@@ -44,6 +40,8 @@ parser.add_argument('--no-anon-tts', dest='anon_tts', action='store_false')
 parser.set_defaults(anon_tts=True)
 parser.add_argument('--filter-url-tts', dest='filter_url_tts', action='store_true')
 parser.set_defaults(filter_url_tts=False)
+parser.add_argument('--slow-for-low-battery', dest='slow_for_low_battery', action='store_true')
+parser.set_defaults(slow_for_low_battery=False)
 commandArgs = parser.parse_args()
 print commandArgs
 
@@ -1065,6 +1063,15 @@ def identifyRobotId():
 
 
 
+def setSpeedBasedOnCharge():
+    if chargeValue < 30:
+        dayTimeDrivingSpeedActuallyUsed = random.randint(commandArgs.day_speed/4, commandArgs.day_speed)
+        nightTimeDrivingSpeedActuallyUsed = random.randint(commandArgs.night_speed/4, commandArgs.night_speed)
+    else:
+        dayTimeDrivingSpeedActuallyUsed = commandArgs.day_speed
+        nightTimeDrivingSpeedActuallyUsed = commandArgs.night_speed
+    
+
 def updateChargeApproximation():
 
     global chargeValue
@@ -1129,15 +1136,15 @@ lastInternetStatus = False
 while True:
     socketIO.wait(seconds=1)
 
-
+    
     if (waitCounter % chargeCheckInterval) == 0:
-
-        updateChargeApproximation()
-
         if commandArgs.type == 'motor_hat':
+            updateChargeApproximation()
             sendChargeState()
-        
-        
+            if commandArgs.slow_for_low_battery:
+                setSpeedBasedOnCharge()
+
+            
     if (waitCounter % 1000) == 0:
         
         internetStatus = isInternetConnected()
