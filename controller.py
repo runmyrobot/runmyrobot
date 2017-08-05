@@ -47,7 +47,7 @@ print commandArgs
 
 chargeCheckInterval = 5
 chargeValue = 0.0
-secondsToCharge = 60 * 60 * 2  # value in seconds
+secondsToCharge = 60 * 60 * 3  # value in seconds
 secondsToDischarge = 60 * 60 * 10 # value in seconds
 
 

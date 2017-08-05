@@ -263,7 +263,11 @@ def main():
         socketIO.emit('send_video_status', {'send_video_process_exists': True,
                                             'ffmpeg_process_exists': True,
                                             'camera_id':commandArgs.camera_id})
-       
+
+        if numVideoRestarts > 100:
+            time.sleep(20)
+            os.system("sudo reboot")
+        
         if count % 20 == 0:
             try:
                 with os.fdopen(os.open('/tmp/send_video_summary.txt', os.O_WRONLY | os.O_CREAT, 0o777), 'w') as statusFile:
