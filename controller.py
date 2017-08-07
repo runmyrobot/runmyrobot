@@ -1083,7 +1083,11 @@ def updateChargeApproximation():
     # assume it is zero if no file exists
     if os.path.isfile(path):
         file = open(path, 'r')
-        chargeValue = float(file.read())
+        try:
+            chargeValue = float(file.read())
+            print "error reading float from file", path
+        except:
+            chargeValue = 0
         file.close()
     else:
         print "setting charge value to zero"
