@@ -1067,7 +1067,7 @@ def setSpeedBasedOnCharge():
     global dayTimeDrivingSpeedActuallyUsed
     global nightTimeDrivingSpeedActuallyUsed
     if chargeValue < 30:
-        multiples = [0.2, 0.2, 0.2, 0.3, 0.3, 0.3, 0.3, 1.0, 1.0]
+        multiples = [0.2, 1.0]
         multiple = random.choice(multiples)
         dayTimeDrivingSpeedActuallyUsed = int(float(commandArgs.day_speed) * multiple)
         nightTimeDrivingSpeedActuallyUsed = int(float(commandArgs.night_speed) * multiple)
