@@ -1155,7 +1155,7 @@ while True:
     if (waitCounter % 60) == 0:
         if commandArgs.slow_for_low_battery:
             if chargeValue < 30:
-                say("battery low, %d percent", int(chargeValue))
+                say("battery low, %d percent" % int(chargeValue))
                 
             
     if (waitCounter % 1000) == 0:
