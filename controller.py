@@ -1067,8 +1067,10 @@ def setSpeedBasedOnCharge():
     global dayTimeDrivingSpeedActuallyUsed
     global nightTimeDrivingSpeedActuallyUsed
     if chargeValue < 30:
-        dayTimeDrivingSpeedActuallyUsed = random.randint(commandArgs.day_speed/4, commandArgs.day_speed)
-        nightTimeDrivingSpeedActuallyUsed = random.randint(commandArgs.night_speed/4, commandArgs.night_speed)
+        multiples = [0.2, 0.2, 0.2, 0.3, 0.3, 0.3, 0.3, 1.0, 1.0]
+        multiple = random.choice(multiples)
+        dayTimeDrivingSpeedActuallyUsed = int(float(commandArgs.day_speed) * multiple)
+        nightTimeDrivingSpeedActuallyUsed = int(float(commandArgs.night_speed) * multiple)
     else:
         dayTimeDrivingSpeedActuallyUsed = commandArgs.day_speed
         nightTimeDrivingSpeedActuallyUsed = commandArgs.night_speed
@@ -1150,6 +1152,10 @@ while True:
             if commandArgs.slow_for_low_battery:
                 setSpeedBasedOnCharge()
 
+    if (waitCounter % 60) == 0:
+        if commandArgs.slow_for_low_battery:
+            say("battery low")
+                
             
     if (waitCounter % 1000) == 0:
         
