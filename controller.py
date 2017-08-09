@@ -539,7 +539,7 @@ def say(message):
 
     else:
         # espeak tts
-        for hardwareNumber in (2, 0, 1):
+        for hardwareNumber in (2, 0, 3, 1):
             if commandArgs.male:
                 os.system('cat ' + tempFilePath + ' | espeak --stdout | aplay -D plughw:%d,0' % hardwareNumber)
             else:

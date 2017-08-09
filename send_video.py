@@ -167,7 +167,7 @@ def startAudioCaptureLinux():
 
     audioPort = getAudioPort()
     
-    audioCommandLine = '/usr/local/bin/ffmpeg -f alsa -ar 44100 -ac %d -i hw:1 -f mpegts -codec:a mp2 -b:a 32k -muxdelay 0.001 http://%s:%s/hello/640/480/' % (commandArgs.mic_channels, server, audioPort)
+    audioCommandLine = '/usr/local/bin/ffmpeg -f alsa -ar 44100 -ac %d -i hw:2 -f mpegts -codec:a mp2 -b:a 32k -muxdelay 0.001 http://%s:%s/hello/640/480/' % (commandArgs.mic_channels, server, audioPort)
     print audioCommandLine
     return subprocess.Popen(shlex.split(audioCommandLine))
 
