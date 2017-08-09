@@ -27,6 +27,7 @@ parser.add_argument('camera_id')
 parser.add_argument('--xres', type=int, default=640)
 parser.add_argument('--yres', type=int, default=480)
 parser.add_argument('video_device_number', default=0, type=int)
+parser.add_argument('audio_device_number', default=1, type=int)
 parser.add_argument('--kbps', default=350, type=int)
 parser.add_argument('--brightness', type=int, help='camera brightness')
 parser.add_argument('--contrast', type=int, help='camera contrast')
@@ -167,7 +168,7 @@ def startAudioCaptureLinux():
 
     audioPort = getAudioPort()
     
-    audioCommandLine = '/usr/local/bin/ffmpeg -f alsa -ar 44100 -ac %d -i hw:2 -f mpegts -codec:a mp2 -b:a 32k -muxdelay 0.001 http://%s:%s/hello/640/480/' % (commandArgs.mic_channels, server, audioPort)
+    audioCommandLine = '/usr/local/bin/ffmpeg -f alsa -ar 44100 -ac %d -i hw:%d -f mpegts -codec:a mp2 -b:a 32k -muxdelay 0.001 http://%s:%s/hello/640/480/' % (commandArgs.mic_channels, commandArgs.audio_device_number, server, audioPort)
     print audioCommandLine
     return subprocess.Popen(shlex.split(audioCommandLine))
 
