@@ -8,3 +8,7 @@ gpio.conf
 #ignore (open?) files with ~ in name:
 *~
 *.pyc
+
+#ignore emacs temporary files
+\#*\#
+.\#*
