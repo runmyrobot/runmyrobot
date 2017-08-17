@@ -6,6 +6,7 @@ import traceback
 import time
 import sys
 import thread
+import subprocess
 from socketIO_client import SocketIO, LoggingNamespace
 
 robotID = '0' #Do not change this here.

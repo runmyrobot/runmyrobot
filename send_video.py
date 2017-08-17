@@ -43,6 +43,7 @@ parser.set_defaults(camera_enabled=True)
 parser.add_argument('--dry-run', dest='dry_run', action='store_true')
 parser.add_argument('--mic-channels', type=int, help='microphone channels, typically 1 or 2', default=1)
 parser.add_argument('--audio-input-device', default='Microphone (HD Webcam C270)') # currently, this option is only used for windows screen capture
+parser.add_argument('--stream-key', default='hello')
 
 
 #global numVideoRestarts
@@ -86,8 +87,8 @@ print "port:", port
 socketIO = SocketIO(server, port, LoggingNamespace)
 print "finished initializing socket io"
 
-#ffmpeg -f qtkit -i 0 -f mpeg1video -b 400k -r 30 -s 320x240 http://52.8.81.124:8082/hello/320/240/
 
+#ffmpeg -f qtkit -i 0 -f mpeg1video -b 400k -r 30 -s 320x240 http://52.8.81.124:8082/hello/320/240/
 
 
 
@@ -143,7 +144,7 @@ def startVideoCaptureLinux():
         os.system("v4l2-ctl -c saturation={saturation}".format(saturation=commandArgs.saturation))
 
     
-    videoCommandLine = '/usr/local/bin/ffmpeg -f v4l2 -framerate 25 -video_size 640x480 -i /dev/video{video_device_number} {rotation_option} -f mpegts -codec:v mpeg1video -s {xres}x{yres} -b:v {kbps}k -bf 0 -muxdelay 0.001 http://{server}:{video_port}/hello/{xres}/{yres}/'.format(video_device_number=commandArgs.video_device_number, rotation_option=rotationOption(), kbps=commandArgs.kbps, server=server, video_port=videoPort, xres=commandArgs.xres, yres=commandArgs.yres)
+    videoCommandLine = '/usr/local/bin/ffmpeg -f v4l2 -framerate 25 -video_size 640x480 -i /dev/video{video_device_number} {rotation_option} -f mpegts -codec:v mpeg1video -s {xres}x{yres} -b:v {kbps}k -bf 0 -muxdelay 0.001 http://{server}:{video_port}/{stream_key}/{xres}/{yres}/'.format(video_device_number=commandArgs.video_device_number, rotation_option=rotationOption(), kbps=commandArgs.kbps, server=server, video_port=videoPort, xres=commandArgs.xres, yres=commandArgs.yres, stream_key=commandArgs.stream_key)
     print videoCommandLine
     return subprocess.Popen(shlex.split(videoCommandLine))
     
@@ -152,7 +153,7 @@ def startAudioCaptureLinux():
 
     audioPort = getAudioPort()
     
-    audioCommandLine = '/usr/local/bin/ffmpeg -f alsa -ar 44100 -ac %d -i hw:%d -f mpegts -codec:a mp2 -b:a 32k -muxdelay 0.001 http://%s:%s/hello/640/480/' % (commandArgs.mic_channels, commandArgs.audio_device_number, server, audioPort)
+    audioCommandLine = '/usr/local/bin/ffmpeg -f alsa -ar 44100 -ac %d -i hw:%d -f mpegts -codec:a mp2 -b:a 32k -muxdelay 0.001 http://%s:%s/%s/640/480/' % (commandArgs.mic_channels, commandArgs.audio_device_number, server, audioPort, commandArgs.stream_key)
     print audioCommandLine
     return subprocess.Popen(shlex.split(audioCommandLine))
 

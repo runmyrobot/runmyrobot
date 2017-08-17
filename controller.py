@@ -43,6 +43,9 @@ parser.add_argument('--filter-url-tts', dest='filter_url_tts', action='store_tru
 parser.set_defaults(filter_url_tts=False)
 parser.add_argument('--slow-for-low-battery', dest='slow_for_low_battery', action='store_true')
 parser.set_defaults(slow_for_low_battery=False)
+parser.add_argument('--reverse_ssh_key_file', default='/home/pi/reverse_ssh_key1.pem')
+parser.add_argument('--reverse_ssh_host', default='ubuntu@52.52.204.174')
+
 commandArgs = parser.parse_args()
 print commandArgs
 
@@ -975,7 +978,14 @@ def runPololu(direction):
 def handleStartReverseSshProcess(args):
     print "starting reverse ssh"
     socketIO.emit("reverse_ssh_info", "starting")
-    returnCode = subprocess.call(["/usr/bin/ssh", "-X", "-i", "/home/pi/reverse_ssh_key1.pem", "-N", "-R", "2222:localhost:22", "ubuntu@52.52.204.174"])
+
+    returnCode = subprocess.call(["/usr/bin/ssh",
+                                  "-X",
+                                  "-i", commandArgs.reverse_ssh_key_file,
+                                  "-N",
+                                  "-R", "2222:localhost:22",
+                                  commandArgs.reverse_ssh_host])
+
     socketIO.emit("reverse_ssh_info", "return code: " + str(returnCode))
     print "reverse ssh process has exited with code", str(returnCode)
 
@@ -1047,12 +1057,15 @@ def ipInfoUpdate():
 # true if it's on the charger and it needs to be charging
 def isCharging():
     print "is charging current value", chargeValue
-    if chargeValue < 99:
-        print "charge value is low"
-        return GPIO.input(chargeIONumber) == 1
-    else:
-        print "charge value is high"
-        return False
+
+    if 'GPIO' in sys.modules: # if we have the module to read the hardware
+        if chargeValue < 99: # if it's not full charged already
+            print "charge value is low"
+            return GPIO.input(chargeIONumber) == 1 # return whether it's connected to the dock
+
+    return False
+
+        
     
 def sendChargeState():
     charging = isCharging()
