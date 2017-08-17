@@ -11,6 +11,7 @@ import getpass
 import sys
 import argparse
 import random
+import robot_util
 
 
 parser = argparse.ArgumentParser(description='start robot control program')
@@ -65,8 +66,11 @@ if commandArgs.tts_volume > 50:
 # tested for USB audio device
 os.system("amixer -c 2 cset numid=3 %d%%" % commandArgs.tts_volume)
 
-server = "runmyrobot.com"
-#server = "52.52.213.92"
+infoServer = "letsrobot.tv"
+#infoServer = "runmyrobot.com"
+#infoServer = "52.52.213.92"
+print "info server:", infoServer
+
 
 tempDir = tempfile.gettempdir()
 print "temporary directory:", tempDir
@@ -346,22 +350,17 @@ armServo = [300, 300, 300]
 #        mh.getMotor(i).run(Adafruit_MotorHAT.FORWARD)
 
 
-
-
-
-
-
-if commandArgs.env == 'dev':
-    print 'DEV MODE ***************'
-    print "using dev port 8122"
-    port = 8122
-elif commandArgs.env == 'prod':
-    print 'PROD MODE *************'
-    print "using prod port 8022"
-    port = 8022
-else:
-    print "invalid environment"
-    sys.exit(0)
+#if commandArgs.env == 'dev':
+#    print 'DEV MODE ***************'
+#    print "using dev port 8122"
+#    port = 8122
+#elif commandArgs.env == 'prod':
+#    print 'PROD MODE *************'
+#    print "using prod port 8022"
+#    port = 8022
+#else:
+#    print "invalid environment"
+#    sys.exit(0)
 
 
 if commandArgs.type == 'serial':
@@ -371,11 +370,20 @@ if commandArgs.type == 'serial':
     #ser = serial.Serial('/dev/tty.usbmodem12341', 19200, timeout=1)  # open serial
     ser = serial.Serial(serialDevice, serialBaud, timeout=1)  # open serial
 
+
+def getControlHostPort():
+
+    url = 'https://%s/get_control_host_port/%s' % (infoServer, commandArgs.robot_id)
+    response = robot_util.getWithRetry(url)
+    return json.loads(response)
+
     
-    
-print 'using socket io to connect to', server
-socketIO = SocketIO(server, port, LoggingNamespace)
-print 'finished using socket io to connect to', server
+controlHostPort = getControlHostPort()
+
+print "using socket io to connect to", controlHostPort
+
+socketIO = SocketIO(controlHostPort['host'], controlHostPort['port'], LoggingNamespace)
+print 'finished using socket io to connect to', controlHostPort
 
 
 def setServoPulse(channel, pulse):
@@ -418,10 +426,12 @@ def isInternetConnected():
     except urllib2.URLError as err:
         return False
 
+
+
     
 def configWifiLogin(secretKey):
 
-    url = 'https://%s/get_wifi_login/%s' % (server, secretKey)
+    url = 'https://%s/get_wifi_login/%s' % (infoServer, secretKey)
     try:
         print "GET", url
         response = urllib2.urlopen(url).read()

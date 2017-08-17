@@ -3,7 +3,6 @@ import shlex
 import re
 import os
 import time
-import urllib2
 import platform
 import json
 import sys
@@ -11,6 +10,7 @@ import base64
 import random
 import datetime
 import traceback
+import robot_util
 
 
 import argparse
@@ -90,27 +90,11 @@ print "finished initializing socket io"
 
 
 
-def getWithRetry(url):
-
-    for retryNumber in range(2000):
-        try:
-            print "GET", url
-            response = urllib2.urlopen(url).read()
-            break
-        except:
-            print "could not open url ", url
-            time.sleep(2)
-
-    return response
-
-
-
-    
 
 def getVideoPort():
 
     url = 'https://%s/get_video_port/%s' % (server, commandArgs.camera_id)
-    response = getWithRetry(url)
+    response = robot_util.getWithRetry(url)
     return json.loads(response)['mpeg_stream_port']
 
 
@@ -118,14 +102,14 @@ def getVideoPort():
 def getAudioPort():
 
     url = 'https://%s/get_audio_port/%s' % (server, commandArgs.camera_id)
-    response = getWithRetry(url)
+    response = robot_util.getWithRetry(url)
     return json.loads(response)['audio_stream_port']
 
 
 def getRobotID():
 
     url = 'https://%s/get_robot_id/%s' % (server, commandArgs.camera_id)
-    response = getWithRetry(url)
+    response = robot_util.getWithRetry(url)
     return json.loads(response)['robot_id']
 
 
