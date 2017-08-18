@@ -1058,10 +1058,13 @@ def ipInfoUpdate():
 def isCharging():
     print "is charging current value", chargeValue
 
-    if 'GPIO' in sys.modules: # if we have the module to read the hardware
+    if 'RPi.GPIO' in sys.modules: # if we have the module to read the hardware
+        print "RPi.GPIO is in sys.modules"
         if chargeValue < 99: # if it's not full charged already
             print "charge value is low"
             return GPIO.input(chargeIONumber) == 1 # return whether it's connected to the dock
+    else:
+        print "warning: RPi.GPIO not in sys.modules, charge state will not be read"
 
     return False
 
