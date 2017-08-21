@@ -43,16 +43,19 @@ parser.add_argument('--filter-url-tts', dest='filter_url_tts', action='store_tru
 parser.set_defaults(filter_url_tts=False)
 parser.add_argument('--slow-for-low-battery', dest='slow_for_low_battery', action='store_true')
 parser.set_defaults(slow_for_low_battery=False)
-parser.add_argument('--reverse_ssh_key_file', default='/home/pi/reverse_ssh_key1.pem')
-parser.add_argument('--reverse_ssh_host', default='ubuntu@52.52.204.174')
+parser.add_argument('--reverse-ssh-key-file', default='/home/pi/reverse_ssh_key1.pem')
+parser.add_argument('--reverse-ssh-host', default='ubuntu@52.52.204.174')
+parser.add_argument('--charge-hours', type=float, default = 3.0)
+parser.add_argument('--discharge-hours', type=float, default = 8.0)
+
 
 commandArgs = parser.parse_args()
 print commandArgs
 
 chargeCheckInterval = 5
 chargeValue = 0.0
-secondsToCharge = 60 * 60 * 3  # value in seconds
-secondsToDischarge = 60 * 60 * 8 # value in seconds
+secondsToCharge = 60.0 * 60.0 * commandArgs.charge_time
+secondsToDischarge = 60.0 * 60.0 * commandArgs.discharge_time
 
 
 # watch dog timer
