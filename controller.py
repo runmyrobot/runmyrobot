@@ -54,8 +54,8 @@ print commandArgs
 
 chargeCheckInterval = 5
 chargeValue = 0.0
-secondsToCharge = 60.0 * 60.0 * commandArgs.charge_time
-secondsToDischarge = 60.0 * 60.0 * commandArgs.discharge_time
+secondsToCharge = 60.0 * 60.0 * commandArgs.charge_hours
+secondsToDischarge = 60.0 * 60.0 * commandArgs.discharge_hours
 
 
 # watch dog timer
