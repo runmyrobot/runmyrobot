@@ -1191,7 +1191,7 @@ while True:
         if not isCharging():
             if commandArgs.slow_for_low_battery:
                 if chargeValue <= 25:
-                    say("need to charge")                
+                    say("need to charge")
                 
             
     if (waitCounter % 1000) == 0:
