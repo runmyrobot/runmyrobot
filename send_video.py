@@ -245,11 +245,6 @@ def main():
         # server code to check for send_video_process_exists if you want to set it technically accurate
         # because the process doesn't always exist, like when the relay is not started yet.
 
-        # send status to server
-        socketIO.emit('send_video_status', {'send_video_process_exists': True,
-                                            'ffmpeg_process_exists': True,
-                                            'camera_id':commandArgs.camera_id})
-
         if numVideoRestarts > 100:
             time.sleep(20)
             os.system("sudo reboot")
