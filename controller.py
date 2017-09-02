@@ -383,7 +383,7 @@ def getControlHostPort():
     return json.loads(response)
 
 def getChatHostPort():
-    url = 'https://%s/api/v1/services/chat/%s' % (infoServer, commandArgs.robot_id)
+    url = 'https://%s:3100/api/v1/services/chat/%s' % (infoServer, commandArgs.robot_id)
     response = robot_util.getWithRetry(url)
     return json.loads(response)
 
@@ -391,6 +391,7 @@ controlHostPort = getControlHostPort()
 chatHostPort = getChatHostPort()
 
 print "using socket io to connect to", controlHostPort
+print "using socket io to connect to chat", chatHostPort
 
 socketIO = SocketIO(controlHostPort['host'], controlHostPort['port'], LoggingNamespace)
 chatSocketIO = SocketIO(chatHostPort['host'], chatHostPort['port'], LoggingNamespace)
@@ -591,7 +592,6 @@ def say(message):
                 
 def handle_chat_message(args):
 
-    print "chat message received:", args
     rawMessage = args['message']
     withoutName = rawMessage.split(']')[1:]
     message = "".join(withoutName)
