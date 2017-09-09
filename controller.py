@@ -1095,8 +1095,8 @@ if commandArgs.type == 'motor_hat':
 
 
 def identifyRobotId():
-    socketIO.emit('identify_robot_id', robotID);
     chatSocket.emit('identify_robot_id', robotID);
+    socketIO.emit('identify_robot_id', robotID);
 
 
 
@@ -1180,6 +1180,7 @@ lastInternetStatus = False
     
 while True:
     socketIO.wait(seconds=1)
+    chatSocket.wait(seconds=1)
 
     
     if (waitCounter % chargeCheckInterval) == 0:
