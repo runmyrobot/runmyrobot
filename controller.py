@@ -378,23 +378,17 @@ if commandArgs.type == 'serial':
 
 
 def getControlHostPort():
-    url = 'https://%s/get_control_host_port/%s' % (infoServer, commandArgs.robot_id)
-    response = robot_util.getWithRetry(url)
-    return json.loads(response)
 
-def getChatHostPort():
-    url = 'https://%s/get_chat_host_port/%s' % (infoServer, commandArgs.robot_id)
+    url = 'https://%s/get_control_host_port/%s' % (infoServer, commandArgs.robot_id)
     response = robot_util.getWithRetry(url)
     return json.loads(response)
 
     
 controlHostPort = getControlHostPort()
-chatHostPort = getChatHostPort()
 
 print "using socket io to connect to", controlHostPort
 
 socketIO = SocketIO(controlHostPort['host'], controlHostPort['port'], LoggingNamespace)
-chatSocket = SocketIO(chatHostPort['host'], chatHostPort['port'], LoggingNamespace)
 print 'finished using socket io to connect to', controlHostPort
 
 
@@ -1017,7 +1011,7 @@ def on_handle_chat_message(*args):
 #from communication import socketIO
 socketIO.on('command_to_robot', on_handle_command)
 socketIO.on('exclusive_control', on_handle_exclusive_control)
-chatSocket.on('chat_message_with_name', on_handle_chat_message)
+socketIO.on('chat_message_with_name', on_handle_chat_message)
 
 
 def startReverseSshProcess(*args):
