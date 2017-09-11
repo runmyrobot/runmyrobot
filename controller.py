@@ -1065,13 +1065,12 @@ def ipInfoUpdate():
 def isCharging():
     print "is charging current value", chargeValue
 
-    if 'RPi.GPIO' in sys.modules: # if we have the module to read the hardware
+    # only tested for motor hat robot currently, so only runs with that type
+    if commandArgs.type == "motor_hat":
         print "RPi.GPIO is in sys.modules"
         if chargeValue < 99: # if it's not full charged already
             print "charge value is low"
             return GPIO.input(chargeIONumber) == 1 # return whether it's connected to the dock
-    else:
-        print "warning: RPi.GPIO not in sys.modules, charge state will not be read"
 
     return False
 
@@ -1195,7 +1194,7 @@ while True:
         if not isCharging():
             if commandArgs.slow_for_low_battery:
                 if chargeValue <= 25:
-                    say("need to charge")                
+                    say("need to charge")
                 
             
     if (waitCounter % 1000) == 0:
