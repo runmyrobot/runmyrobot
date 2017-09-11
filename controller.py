@@ -827,6 +827,10 @@ def handle_command(args):
 
             if commandArgs.type == 'motor_hat':
                 turnOffMotors()
+                if command == 'WALL':
+                    handleLoudCommand()
+                    os.system("aplay -D plughw:2,0 /home/pi/wall.wav")
+                    
             if commandArgs.type == 'l298n':
                 runl298n(command)                                 
             #setMotorsToIdle()
