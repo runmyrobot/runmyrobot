@@ -114,7 +114,7 @@ def getRobotID():
     return json.loads(response)['robot_id']
 
 def getWebsocketRelayHost():
-    url = 'https://%s/get_websocket_relay_host/%s' % (infoServer, commandArgs.camera_id)
+    url = 'https://%s/get_websocket_relay_host/%s' % (server, commandArgs.camera_id)
     response = robot_util.getWithRetry(url)
     return json.loads(response)
 
