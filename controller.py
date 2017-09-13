@@ -11,10 +11,16 @@ import getpass
 import sys
 import argparse
 import random
-
+from multiprocessing import Process
+from shutil import copyfile
+import os.path
+import subprocess
+import sys
 
 parser = argparse.ArgumentParser(description='start robot control program')
 parser.add_argument('robot_id', help='Robot ID')
+parser.add_argument('--no-mic', dest='mic_enabled', action='store_false')
+parser.set_defaults(mic_enabled=True)
 parser.add_argument('--env', help="Environment for example dev or prod, prod is default", default='prod')
 parser.add_argument('--type', help="serial or motor_hat or gopigo2 or gopigo3 or l298n or motozero or pololu", default='motor_hat')
 parser.add_argument('--serial-device', help="serial device", default='/dev/ttyACM0')
@@ -23,7 +29,7 @@ parser.add_argument('--female', dest='male', action='store_false')
 parser.add_argument('--voice-number', type=int, default=1)
 parser.add_argument('--led', help="Type of LED for example max7219", default=None)
 parser.add_argument('--ledrotate', help="Rotates the LED matrix. Example: 180", default=None)
-parser.add_argument('--tts-volume', type=int, default=80)
+parser.add_argument('--tts-volume', type=int, default=90)
 parser.add_argument('--secret-key', default=None)
 parser.add_argument('--turn-delay', type=float, default=0.4)
 parser.add_argument('--straight-delay', type=float, default=0.5)
@@ -43,6 +49,9 @@ parser.set_defaults(filter_url_tts=False)
 parser.add_argument('--slow-for-low-battery', dest='slow_for_low_battery', action='store_true')
 parser.set_defaults(slow_for_low_battery=False)
 commandArgs = parser.parse_args()
+
+mic_on = commandArgs.mic_enabled
+
 print commandArgs
 
 chargeCheckInterval = 5
@@ -91,7 +100,7 @@ elif commandArgs.type == 'l298n':
     except ImportError:
         print "You need to install configparser (sudo python -m pip install configparser)\n Ctrl-C to quit"
         while True:
-            pass # Halt program	to avoid error down the line.
+            pass # Halt program to avoid error down the line.
 elif commandArgs.type == 'motozero':
     pass
 elif commandArgs.type == 'pololu':
@@ -159,12 +168,12 @@ if commandArgs.type == 'l298n':
     if str(robotID) in gpio_config.sections():
         config_id = str(robotID)
     else:
-        config_id = 'default'		
+        config_id = 'default'       
     StepPinForward = int(str(gpio_config[config_id]['StepPinForward']).split(',')[0]),int(str(gpio_config[config_id]['StepPinForward']).split(',')[1])
     StepPinBackward = int(str(gpio_config[config_id]['StepPinBackward']).split(',')[0]),int(str(gpio_config[config_id]['StepPinBackward']).split(',')[1])
     StepPinLeft = int(str(gpio_config[config_id]['StepPinLeft']).split(',')[0]),int(str(gpio_config[config_id]['StepPinLeft']).split(',')[1])
     StepPinRight = int(str(gpio_config[config_id]['StepPinRight']).split(',')[0]),int(str(gpio_config[config_id]['StepPinRight']).split(',')[1])
-	
+    
     GPIO.setmode(GPIO.BOARD)
     GPIO.setup(StepPinForward, GPIO.OUT)
     GPIO.setup(StepPinBackward, GPIO.OUT)
@@ -173,15 +182,15 @@ if commandArgs.type == 'l298n':
 #Test if user
 if commandArgs.type == "pololu":
     try:
-	from pololu_drv8835_rpi import motors, MAX_SPEED
+        from pololu_drv8835_rpi import motors, MAX_SPEED
     except ImportError:
-	print "You need to install drv8835-motor-driver-rpi"
+        print "You need to install drv8835-motor-driver-rpi"
         print "Please install drv8835-motor-driver-rpi for python and restart this script."
         print "To install: cd /usr/local/src && sudo git clone https://github.com/pololu/drv8835-motor-driver-rpi"
         print "cd /usr/local/src/drv8835-motor-driver-rpi && sudo python setup.py install"
         print "Running in test mode."
         print "Ctrl-C to quit"
-   
+       
 if commandArgs.type == 'motozero':
     GPIO.cleanup()
     GPIO.setmode(GPIO.BCM)
@@ -229,7 +238,7 @@ if commandArgs.type == 'motozero':
     GPIO.setup(Motor4A,GPIO.OUT)
     GPIO.setup(Motor4B,GPIO.OUT)
     GPIO.setup(Motor4Enable,GPIO.OUT)
-	
+    
 
 #LED controlling
 if commandArgs.led == 'max7219':
@@ -366,10 +375,11 @@ else:
 
 if commandArgs.type == 'serial':
     # initialize serial connection
-    serialBaud = 9600
+    serialBaud = 115200
     print "baud:", serialBaud
     #ser = serial.Serial('/dev/tty.usbmodem12341', 19200, timeout=1)  # open serial
     ser = serial.Serial(serialDevice, serialBaud, timeout=1)  # open serial
+    ser.write("reset\r\n")
 
     
     
@@ -458,9 +468,7 @@ def configWifiLogin(secretKey):
         traceback.print_exc()
 
 
-
 def sendSerialCommand(command):
-
 
     print(ser.name)         # check which port was really used
     ser.nonblocking()
@@ -479,6 +487,71 @@ def sendSerialCommand(command):
     #ser.close()
 
 
+
+
+def statusUpdateThread():
+    statuscheckcount = 0
+    lasttankpressure = 0
+    lastfreefired = 0
+    lastballsensor = 0
+    lastgunstate = 0
+    tankpressure = 0
+    guntilt = 0
+    lastlastfree = 0
+    freeready = 0
+    shotsfired = 0
+    lastfree = 0
+    freefired = 0
+    lastshotsfired = 0
+    
+    sourcefolder = "/home/pi/runmyrobot/hud/"
+    copyfile(sourcefolder + "logo.png", "/dev/shm/logo.png")
+    while True:
+        ser.write("status\r\n")
+        statusline = ser.readline()
+
+        for arg in statusline.split(","):
+            if "PSI" in arg:
+                tankpressure = int(arg[4:]) -5
+            elif "TILT" in arg:
+                guntilt = int(arg[5:])
+            elif "FREEREADY" in arg:
+                freeready = int(arg[10:])
+            elif "LASTFREE" in arg:
+                lastfree = ( int( arg[9:] ) / 1.2 ) 
+            elif "SHOTSFIRED" in arg:
+                shotsfired = int(arg[11:])
+            elif "FREEFIRED" in arg:
+                freefired = int(arg[10:])
+        
+
+        if lasttankpressure != tankpressure:
+            if tankpressure < 80 and os.path.isfile("/dev/shm/psi.png"):
+                os.remove( "/dev/shm/psi.png" )
+            for x in range(7, 1, -1):
+                if tankpressure > ( 85 + ( x - 1 ) * 5 ):             
+                    copyfile(sourcefolder + "psi0" + str(x) + ".png", "/dev/shm/psi.png")
+                    break
+        lasttankpressure = tankpressure
+        lastguntilt = guntilt
+        lastfreeready = freeready
+        lastshotsfired = shotsfired
+        lastfreefired = freefired
+
+        statuscheckcount = statuscheckcount + 1
+        if statuscheckcount > 120:
+            statuscheckcount = 0
+            lasttankpressure = 0
+            lastguntilt = 0
+            lastfreeready = 0
+            lastlastfree = 0
+            lastshotsfired = 0
+            lastfreefired = 0
+
+        time.sleep( .5)
+
+p = Process(target=statusUpdateThread)
+p.start()
 
 
 
@@ -554,15 +627,17 @@ def say(message):
     if commandArgs.festival_tts:
         # festival tts
         os.system('festival --tts < ' + tempFilePath)
-    #os.system('espeak < /tmp/speech.txt')
+    #os.system('espeak < /tmp/speech.txt')aplay `ls | shuf -n 1`
 
     else:
         # espeak tts
         for hardwareNumber in (2, 0, 3, 1):
             if commandArgs.male:
-                os.system('cat ' + tempFilePath + ' | espeak --stdout | aplay -D plughw:%d,0' % hardwareNumber)
+                subprocess.call('cat ' + tempFilePath + ' | espeak --stdout | aplay -D plughw:%d,0' % hardwareNumber, shell=True )
+                #os.system('cat ' + tempFilePath + ' | espeak --stdout | aplay -D plughw:%d,0' % hardwareNumber)
             else:
-                os.system('cat ' + tempFilePath + ' | espeak -ven-us+f%d -s170 --stdout | aplay -D plughw:%d,0' % (commandArgs.voice_number, hardwareNumber))
+            	subprocess.call('cat ' + tempFilePath + ' | espeak -ven-us+f%d -s170 --stdout | aplay -D plughw:%d,0' % (commandArgs.voice_number, hardwareNumber), shell=True )            	
+                #os.system('cat ' + tempFilePath + ' | espeak -ven-us+f%d -s170 --stdout | aplay -D plughw:%d,0' % (commandArgs.voice_number, hardwareNumber))
 
     os.remove(tempFilePath)
 
@@ -571,9 +646,17 @@ def say(message):
 def handle_chat_message(args):
 
     print "chat message received:", args
+    
     rawMessage = args['message']
     withoutName = rawMessage.split(']')[1:]
     message = "".join(withoutName)
+    
+    if 'diabeteman' == args['name'] or 'roboempress' == args['name']:
+        if 'addfree' in message:
+            sendSerialCommand(message.strip())
+        if 'forcefire' in message:
+            sendSerialCommand(message.strip())
+   
     urlRegExp = "(http|ftp|https)://([\w_-]+(?:(?:\.[\w_-]+)+))([\w.,@?^=%&:/~+#-]*[\w@?^=%&/~+#-])?"
     if message[1] == ".":
        exit()
@@ -582,7 +665,7 @@ def handle_chat_message(args):
     elif commandArgs.filter_url_tts == True and re.search(urlRegExp, message):
        exit()
     else:
-          say(message)
+        say(message)
 
 
 
@@ -708,7 +791,8 @@ def moveGoPiGo3(command):
         
                 
 def handle_command(args):
-        now = datetime.datetime.now()
+        # print( args )
+	now = datetime.datetime.now()
         now_time = now.time()
         # if it's late, make the robot slower
         if now_time >= datetime.time(21,30) or now_time <= datetime.time(9,30):
@@ -736,33 +820,29 @@ def handle_command(args):
         #if 'command' in args:
         #    print "args command:", args['command']
 
-
+            
             
         if 'command' in args and 'robot_id' in args and args['robot_id'] == robotID:
-
-            print('got command', args)
-
+            
             command = args['command']
+            #print('got command', args)
 
             if command == 'LOUD':
-                handleLoudCommand()
-
-            
+                handleLoudCommand()            
             if commandArgs.type == 'adafruit_pwm':
-                moveAdafruitPWM(command)
-            
+                moveAdafruitPWM(command)            
             if commandArgs.type == 'gopigo2':
                 moveGoPiGo2(command)
-
             if commandArgs.type == 'gopigo3':
-                moveGoPiGo3(command)
-                
+                moveGoPiGo3(command)                
             if commandArgs.type == 'owi_arm':
                 owi_arm.handleOwiArm(command)
 
-            
             if commandArgs.type == 'serial':
-                sendSerialCommand(command)
+                if args['key_position'] == 'up' or command == 'stop':
+                    command = command
+                else:
+                    sendSerialCommand( command )
 
             if commandArgs.type == 'motor_hat' and motorsEnabled:
                 motorA.setSpeed(drivingSpeed)
@@ -816,8 +896,8 @@ def handle_command(args):
             #setMotorsToIdle()
             if commandArgs.type == 'motozero':
                 runmotozero(command)
-	        if commandArgs.type == 'pololu':
-		        runPololu(command)
+            if commandArgs.type == 'pololu':
+                runPololu(command)
             
             if commandArgs.led == 'max7219':
                 if command == 'LED_OFF':
@@ -942,25 +1022,25 @@ def runmotozero(direction):
         GPIO.output(Motor1B, GPIO.LOW)
         GPIO.output(Motor2A, GPIO.LOW)
         GPIO.output(Motor4A, GPIO.LOW)
-	
+    
 def runPololu(direction):
     drivingSpeed = commandArgs.driving_speed
     if direction == 'F':
-	      motors.setSpeeds(drivingSpeed, drivingSpeed)
-	      time.sleep(0.3)
-	      motors.setSpeeds(0, 0)
+          motors.setSpeeds(drivingSpeed, drivingSpeed)
+          time.sleep(0.3)
+          motors.setSpeeds(0, 0)
     if direction == 'B':
-	      motors.setSpeeds(-drivingSpeed, -drivingSpeed)
-	      time.sleep(0.3)
-	      motors.setSpeeds(0, 0)
+          motors.setSpeeds(-drivingSpeed, -drivingSpeed)
+          time.sleep(0.3)
+          motors.setSpeeds(0, 0)
     if direction == 'L':
-	      motors.setSpeeds(-drivingSpeed, drivingSpeed)
-	      time.sleep(0.3)
-	      motors.setSpeeds(0, 0)
+          motors.setSpeeds(-drivingSpeed, drivingSpeed)
+          time.sleep(0.3)
+          motors.setSpeeds(0, 0)
     if direction == 'R':
-	      motors.setSpeeds(drivingSpeed, -drivingSpeed)
-	      time.sleep(0.3)
-	      motors.setSpeeds(0, 0)
+          motors.setSpeeds(drivingSpeed, -drivingSpeed)
+          time.sleep(0.3)
+          motors.setSpeeds(0, 0)
 
 def handleStartReverseSshProcess(args):
     print "starting reverse ssh"
@@ -1039,7 +1119,8 @@ def isCharging():
     print "is charging current value", chargeValue
     if chargeValue < 99:
         print "charge value is low"
-        return GPIO.input(chargeIONumber) == 1
+        #return GPIO.input(chargeIONumber) == 1
+        return False 
     else:
         print "charge value is high"
         return False
@@ -1143,8 +1224,28 @@ lastInternetStatus = False
     
 while True:
     socketIO.wait(seconds=1)
+    if (waitCounter % 1000) == 0:        
+        internetStatus = isInternetConnected()
+        if internetStatus != lastInternetStatus:
+            if internetStatus:
+                say("ok")
+            else:
+                say("missing internet connection")
+        lastInternetStatus = internetStatus
+    if (waitCounter % 60) == 0:
 
-    
+        # tell the server what robot id is using this connection
+        identifyRobotId()
+        
+        if platform.system() == 'Linux':
+            ipInfoUpdate()
+    waitCounter += 1
+    if (waitCounter % 10) == 0:
+        if commandArgs.type == 'serial' and mic_on == True:
+            sendSerialCommand( "microphoneon" )
+        if commandArgs.type == 'serial' and mic_on == False:
+            sendSerialCommand( "microphoneoff" )
+'''
     if (waitCounter % chargeCheckInterval) == 0:
         if commandArgs.type == 'motor_hat':
             updateChargeApproximation()
@@ -1164,31 +1265,15 @@ while True:
                 if chargeValue <= 25:
                     say("need to charge")                
                 
-            
-    if (waitCounter % 1000) == 0:
-        
-        internetStatus = isInternetConnected()
-        if internetStatus != lastInternetStatus:
-            if internetStatus:
-                say("ok")
-            else:
-                say("missing internet connection")
-        lastInternetStatus = internetStatus
-
-        
+'''
+    
+'''
     if (waitCounter % 10) == 0:
         if commandArgs.auto_wifi:
             if commandArgs.secret_key is not None:
                 configWifiLogin(commandArgs.secret_key)
-
+'''
                 
-    if (waitCounter % 60) == 0:
-
-        # tell the server what robot id is using this connection
-        identifyRobotId()
-        
-        if platform.system() == 'Linux':
-            ipInfoUpdate()
 
 
-    waitCounter += 1
+

@@ -168,7 +168,7 @@ def startAudioCaptureLinux():
 
     audioPort = getAudioPort()
     
-    audioCommandLine = '/usr/local/bin/ffmpeg -f alsa -ar 44100 -ac %d -i hw:%d -f mpegts -codec:a mp2 -b:a 32k -muxdelay 0.001 http://%s:%s/hello/640/480/' % (commandArgs.mic_channels, commandArgs.audio_device_number, server, audioPort)
+    audioCommandLine = '/usr/local/bin/ffmpeg -f alsa -ar 44100 -ac %d -i hw:%d -f mpegts -codec:a mp2 -b:a 96k -muxdelay 0.001 http://%s:%s/hello/640/480/' % (commandArgs.mic_channels, commandArgs.audio_device_number, server, audioPort)
     print audioCommandLine
     return subprocess.Popen(shlex.split(audioCommandLine))
 
@@ -179,7 +179,7 @@ def rotationOption():
     if commandArgs.rotate180:
         return "-vf transpose=2,transpose=2"
     else:
-        return ""
+    	return "-vf dynoverlay=overlayfile=/dev/shm/psi.png:check_interval=1000:x=509:y=349,dynoverlay=overlayfile=/dev/shm/logo.png:check_interval=10000:x=0:y=417" 
 
 
 def onCommandToRobot(*args):
