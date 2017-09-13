@@ -159,7 +159,7 @@ def startAudioCaptureLinux():
     audioPort = getAudioPort()
     websocketRelayHost = getWebsocketRelayHost()
     
-    audioCommandLine = '/usr/local/bin/ffmpeg -f alsa -ar 44100 -ac %d -i hw:%d -f mpegts -codec:a mp2 -b:a 96k -muxdelay 0.001 http://%s:%s/hello/640/480/' % (commandArgs.mic_channels, commandArgs.audio_device_number, websocketRelayHost['host'], audioPort, commandArgs.stream_key)
+    audioCommandLine = '/usr/local/bin/ffmpeg -f alsa -ar 44100 -ac %d -i hw:%d -f mpegts -codec:a mp2 -b:a 96k -muxdelay 0.001 http://%s:%s/%s/640/480/' % (commandArgs.mic_channels, commandArgs.audio_device_number, websocketRelayHost['host'], audioPort, commandArgs.stream_key)
     print audioCommandLine
     return subprocess.Popen(shlex.split(audioCommandLine))
 
