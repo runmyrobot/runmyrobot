@@ -195,5 +195,13 @@ Missing something?, you can add it, open source!
 
 For GoPiGo3, you will need to install the gopigo3 python module (which is different than older versions). It will need to be installed with the installation script from Dexter. Also, PYTHONPATH needs to be set to "/home/pi/Dexter/GoPiGo3/Software/Python"
 
+Refer to this:
+https://github.com/DexterInd/GoPiGo3
+```
+sudo git clone http://www.github.com/DexterInd/GoPiGo3.git /home/pi/Dexter/GoPiGo3
+sudo bash /home/pi/Dexter/GoPiGo3/Install/install.sh
+sudo reboot
+```
+
 
 

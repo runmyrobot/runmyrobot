@@ -16,6 +16,7 @@ from shutil import copyfile
 import os.path
 import subprocess
 import sys
+import robot_util
 
 parser = argparse.ArgumentParser(description='start robot control program')
 parser.add_argument('robot_id', help='Robot ID')
@@ -48,6 +49,12 @@ parser.add_argument('--filter-url-tts', dest='filter_url_tts', action='store_tru
 parser.set_defaults(filter_url_tts=False)
 parser.add_argument('--slow-for-low-battery', dest='slow_for_low_battery', action='store_true')
 parser.set_defaults(slow_for_low_battery=False)
+parser.add_argument('--reverse-ssh-key-file', default='/home/pi/reverse_ssh_key1.pem')
+parser.add_argument('--reverse-ssh-host', default='ubuntu@52.52.204.174')
+parser.add_argument('--charge-hours', type=float, default = 3.0)
+parser.add_argument('--discharge-hours', type=float, default = 8.0)
+
+
 commandArgs = parser.parse_args()
 
 mic_on = commandArgs.mic_enabled
@@ -56,8 +63,8 @@ print commandArgs
 
 chargeCheckInterval = 5
 chargeValue = 0.0
-secondsToCharge = 60 * 60 * 3  # value in seconds
-secondsToDischarge = 60 * 60 * 8 # value in seconds
+secondsToCharge = 60.0 * 60.0 * commandArgs.charge_hours
+secondsToDischarge = 60.0 * 60.0 * commandArgs.discharge_hours
 
 
 # watch dog timer
@@ -74,8 +81,11 @@ if commandArgs.tts_volume > 50:
 # tested for USB audio device
 os.system("amixer -c 2 cset numid=3 %d%%" % commandArgs.tts_volume)
 
-server = "runmyrobot.com"
-#server = "52.52.213.92"
+infoServer = "letsrobot.tv"
+#infoServer = "runmyrobot.com"
+#infoServer = "52.52.213.92"
+print "info server:", infoServer
+
 
 tempDir = tempfile.gettempdir()
 print "temporary directory:", tempDir
@@ -355,22 +365,17 @@ armServo = [300, 300, 300]
 #        mh.getMotor(i).run(Adafruit_MotorHAT.FORWARD)
 
 
-
-
-
-
-
-if commandArgs.env == 'dev':
-    print 'DEV MODE ***************'
-    print "using dev port 8122"
-    port = 8122
-elif commandArgs.env == 'prod':
-    print 'PROD MODE *************'
-    print "using prod port 8022"
-    port = 8022
-else:
-    print "invalid environment"
-    sys.exit(0)
+#if commandArgs.env == 'dev':
+#    print 'DEV MODE ***************'
+#    print "using dev port 8122"
+#    port = 8122
+#elif commandArgs.env == 'prod':
+#    print 'PROD MODE *************'
+#    print "using prod port 8022"
+#    port = 8022
+#else:
+#    print "invalid environment"
+#    sys.exit(0)
 
 
 if commandArgs.type == 'serial':
@@ -381,11 +386,20 @@ if commandArgs.type == 'serial':
     ser = serial.Serial(serialDevice, serialBaud, timeout=1)  # open serial
     ser.write("reset\r\n")
 
+
+def getControlHostPort():
+
+    url = 'https://%s/get_control_host_port/%s' % (infoServer, commandArgs.robot_id)
+    response = robot_util.getWithRetry(url)
+    return json.loads(response)
+
     
-    
-print 'using socket io to connect to', server
-socketIO = SocketIO(server, port, LoggingNamespace)
-print 'finished using socket io to connect to', server
+controlHostPort = getControlHostPort()
+
+print "using socket io to connect to", controlHostPort
+
+socketIO = SocketIO(controlHostPort['host'], controlHostPort['port'], LoggingNamespace)
+print 'finished using socket io to connect to', controlHostPort
 
 
 def setServoPulse(channel, pulse):
@@ -428,10 +442,12 @@ def isInternetConnected():
     except urllib2.URLError as err:
         return False
 
+
+
     
 def configWifiLogin(secretKey):
 
-    url = 'https://%s/get_wifi_login/%s' % (server, secretKey)
+    url = 'https://%s/get_wifi_login/%s' % (infoServer, secretKey)
     try:
         print "GET", url
         response = urllib2.urlopen(url).read()
@@ -891,6 +907,10 @@ def handle_command(args):
 
             if commandArgs.type == 'motor_hat':
                 turnOffMotors()
+                if command == 'WALL':
+                    handleLoudCommand()
+                    os.system("aplay -D plughw:2,0 /home/pi/wall.wav")
+                    
             if commandArgs.type == 'l298n':
                 runl298n(command)                                 
             #setMotorsToIdle()
@@ -1045,7 +1065,14 @@ def runPololu(direction):
 def handleStartReverseSshProcess(args):
     print "starting reverse ssh"
     socketIO.emit("reverse_ssh_info", "starting")
-    returnCode = subprocess.call(["/usr/bin/ssh", "-X", "-i", "/home/pi/reverse_ssh_key1.pem", "-N", "-R", "2222:localhost:22", "ubuntu@52.52.204.174"])
+
+    returnCode = subprocess.call(["/usr/bin/ssh",
+                                  "-X",
+                                  "-i", commandArgs.reverse_ssh_key_file,
+                                  "-N",
+                                  "-R", "2222:localhost:22",
+                                  commandArgs.reverse_ssh_host])
+
     socketIO.emit("reverse_ssh_info", "return code: " + str(returnCode))
     print "reverse ssh process has exited with code", str(returnCode)
 
@@ -1263,7 +1290,7 @@ while True:
         if not isCharging():
             if commandArgs.slow_for_low_battery:
                 if chargeValue <= 25:
-                    say("need to charge")                
+                    say("need to charge")
                 
 '''
     

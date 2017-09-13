@@ -1,0 +1,4 @@
+#!/bin/bash
+#pp_machinegun
+python controller.py 7060011 --type serial --serial-device /dev/ttyACM0 --filter-url-tts &
+python send_video.py 56059146 0 --mic-channels 2 --kbps 400 

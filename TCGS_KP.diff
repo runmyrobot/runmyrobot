@@ -1,0 +1,439 @@
+[1mdiff --git a/controller.py b/controller.py[m
+[1mindex 777dc1a..131543f 100644[m
+[1m--- a/controller.py[m
+[1m+++ b/controller.py[m
+[36m@@ -11,10 +11,16 @@[m [mimport getpass[m
+ import sys[m
+ import argparse[m
+ import random[m
+[31m-[m
+[32m+[m[32mfrom multiprocessing import Process[m
+[32m+[m[32mfrom shutil import copyfile[m
+[32m+[m[32mimport os.path[m
+[32m+[m[32mimport subprocess[m
+[32m+[m[32mimport sys[m
+ [m
+ parser = argparse.ArgumentParser(description='start robot control program')[m
+ parser.add_argument('robot_id', help='Robot ID')[m
+[32m+[m[32mparser.add_argument('--no-mic', dest='mic_enabled', action='store_false')[m
+[32m+[m[32mparser.set_defaults(mic_enabled=True)[m
+ parser.add_argument('--env', help="Environment for example dev or prod, prod is default", default='prod')[m
+ parser.add_argument('--type', help="serial or motor_hat or gopigo2 or gopigo3 or l298n or motozero or pololu", default='motor_hat')[m
+ parser.add_argument('--serial-device', help="serial device", default='/dev/ttyACM0')[m
+[36m@@ -23,7 +29,7 @@[m [mparser.add_argument('--female', dest='male', action='store_false')[m
+ parser.add_argument('--voice-number', type=int, default=1)[m
+ parser.add_argument('--led', help="Type of LED for example max7219", default=None)[m
+ parser.add_argument('--ledrotate', help="Rotates the LED matrix. Example: 180", default=None)[m
+[31m-parser.add_argument('--tts-volume', type=int, default=80)[m
+[32m+[m[32mparser.add_argument('--tts-volume', type=int, default=90)[m
+ parser.add_argument('--secret-key', default=None)[m
+ parser.add_argument('--turn-delay', type=float, default=0.4)[m
+ parser.add_argument('--straight-delay', type=float, default=0.5)[m
+[36m@@ -43,6 +49,9 @@[m [mparser.set_defaults(filter_url_tts=False)[m
+ parser.add_argument('--slow-for-low-battery', dest='slow_for_low_battery', action='store_true')[m
+ parser.set_defaults(slow_for_low_battery=False)[m
+ commandArgs = parser.parse_args()[m
+[32m+[m
+[32m+[m[32mmic_on = commandArgs.mic_enabled[m
+[32m+[m
+ print commandArgs[m
+ [m
+ chargeCheckInterval = 5[m
+[36m@@ -91,7 +100,7 @@[m [melif commandArgs.type == 'l298n':[m
+     except ImportError:[m
+         print "You need to install configparser (sudo python -m pip install configparser)\n Ctrl-C to quit"[m
+         while True:[m
+[31m-            pass # Halt program	to avoid error down the line.[m
+[32m+[m[32m            pass # Halt program to avoid error down the line.[m
+ elif commandArgs.type == 'motozero':[m
+     pass[m
+ elif commandArgs.type == 'pololu':[m
+[36m@@ -159,12 +168,12 @@[m [mif commandArgs.type == 'l298n':[m
+     if str(robotID) in gpio_config.sections():[m
+         config_id = str(robotID)[m
+     else:[m
+[31m-        config_id = 'default'		[m
+[32m+[m[32m        config_id = 'default'[m[41m       [m
+     StepPinForward = int(str(gpio_config[config_id]['StepPinForward']).split(',')[0]),int(str(gpio_config[config_id]['StepPinForward']).split(',')[1])[m
+     StepPinBackward = int(str(gpio_config[config_id]['StepPinBackward']).split(',')[0]),int(str(gpio_config[config_id]['StepPinBackward']).split(',')[1])[m
+     StepPinLeft = int(str(gpio_config[config_id]['StepPinLeft']).split(',')[0]),int(str(gpio_config[config_id]['StepPinLeft']).split(',')[1])[m
+     StepPinRight = int(str(gpio_config[config_id]['StepPinRight']).split(',')[0]),int(str(gpio_config[config_id]['StepPinRight']).split(',')[1])[m
+[31m-	[m
+[32m+[m[41m    [m
+     GPIO.setmode(GPIO.BOARD)[m
+     GPIO.setup(StepPinForward, GPIO.OUT)[m
+     GPIO.setup(StepPinBackward, GPIO.OUT)[m
+[36m@@ -173,15 +182,15 @@[m [mif commandArgs.type == 'l298n':[m
+ #Test if user[m
+ if commandArgs.type == "pololu":[m
+     try:[m
+[31m-	from pololu_drv8835_rpi import motors, MAX_SPEED[m
+[32m+[m[32m        from pololu_drv8835_rpi import motors, MAX_SPEED[m
+     except ImportError:[m
+[31m-	print "You need to install drv8835-motor-driver-rpi"[m
+[32m+[m[32m        print "You need to install drv8835-motor-driver-rpi"[m
+         print "Please install drv8835-motor-driver-rpi for python and restart this script."[m
+         print "To install: cd /usr/local/src && sudo git clone https://github.com/pololu/drv8835-motor-driver-rpi"[m
+         print "cd /usr/local/src/drv8835-motor-driver-rpi && sudo python setup.py install"[m
+         print "Running in test mode."[m
+         print "Ctrl-C to quit"[m
+[31m-   [m
+[32m+[m[41m       [m
+ if commandArgs.type == 'motozero':[m
+     GPIO.cleanup()[m
+     GPIO.setmode(GPIO.BCM)[m
+[36m@@ -229,7 +238,7 @@[m [mif commandArgs.type == 'motozero':[m
+     GPIO.setup(Motor4A,GPIO.OUT)[m
+     GPIO.setup(Motor4B,GPIO.OUT)[m
+     GPIO.setup(Motor4Enable,GPIO.OUT)[m
+[31m-	[m
+[32m+[m[41m    [m
+ [m
+ #LED controlling[m
+ if commandArgs.led == 'max7219':[m
+[36m@@ -366,10 +375,11 @@[m [melse:[m
+ [m
+ if commandArgs.type == 'serial':[m
+     # initialize serial connection[m
+[31m-    serialBaud = 9600[m
+[32m+[m[32m    serialBaud = 115200[m
+     print "baud:", serialBaud[m
+     #ser = serial.Serial('/dev/tty.usbmodem12341', 19200, timeout=1)  # open serial[m
+     ser = serial.Serial(serialDevice, serialBaud, timeout=1)  # open serial[m
+[32m+[m[32m    ser.write("reset\r\n")[m
+ [m
+     [m
+     [m
+[36m@@ -458,10 +468,8 @@[m [mdef configWifiLogin(secretKey):[m
+         traceback.print_exc()[m
+ [m
+ [m
+[31m-[m
+ def sendSerialCommand(command):[m
+ [m
+[31m-[m
+     print(ser.name)         # check which port was really used[m
+     ser.nonblocking()[m
+ [m
+[36m@@ -481,6 +489,71 @@[m [mdef sendSerialCommand(command):[m
+ [m
+ [m
+ [m
+[32m+[m[32mdef statusUpdateThread():[m
+[32m+[m[32m    statuscheckcount = 0[m
+[32m+[m[32m    lasttankpressure = 0[m
+[32m+[m[32m    lastfreefired = 0[m
+[32m+[m[32m    lastballsensor = 0[m
+[32m+[m[32m    lastgunstate = 0[m
+[32m+[m[32m    tankpressure = 0[m
+[32m+[m[32m    guntilt = 0[m
+[32m+[m[32m    lastlastfree = 0[m
+[32m+[m[32m    freeready = 0[m
+[32m+[m[32m    shotsfired = 0[m
+[32m+[m[32m    lastfree = 0[m
+[32m+[m[32m    freefired = 0[m
+[32m+[m[32m    lastshotsfired = 0[m
+[32m+[m[41m    [m
+[32m+[m[32m    sourcefolder = "/home/pi/runmyrobot/hud/"[m
+[32m+[m[32m    copyfile(sourcefolder + "logo.png", "/dev/shm/logo.png")[m
+[32m+[m[32m    while True:[m
+[32m+[m[32m        ser.write("status\r\n")[m
+[32m+[m[32m        statusline = ser.readline()[m
+[32m+[m
+[32m+[m[32m        for arg in statusline.split(","):[m
+[32m+[m[32m            if "PSI" in arg:[m
+[32m+[m[32m                tankpressure = int(arg[4:]) -5[m
+[32m+[m[32m            elif "TILT" in arg:[m
+[32m+[m[32m                guntilt = int(arg[5:])[m
+[32m+[m[32m            elif "FREEREADY" in arg:[m
+[32m+[m[32m                freeready = int(arg[10:])[m
+[32m+[m[32m            elif "LASTFREE" in arg:[m
+[32m+[m[32m                lastfree = ( int( arg[9:] ) / 1.2 )[m[41m [m
+[32m+[m[32m            elif "SHOTSFIRED" in arg:[m
+[32m+[m[32m                shotsfired = int(arg[11:])[m
+[32m+[m[32m            elif "FREEFIRED" in arg:[m
+[32m+[m[32m                freefired = int(arg[10:])[m
+[32m+[m[41m        [m
+[32m+[m
+[32m+[m[32m        if lasttankpressure != tankpressure:[m
+[32m+[m[32m            if tankpressure < 80 and os.path.isfile("/dev/shm/psi.png"):[m
+[32m+[m[32m                os.remove( "/dev/shm/psi.png" )[m
+[32m+[m[32m            for x in range(7, 1, -1):[m
+[32m+[m[32m                if tankpressure > ( 85 + ( x - 1 ) * 5 ):[m[41m             [m
+[32m+[m[32m                    copyfile(sourcefolder + "psi0" + str(x) + ".png", "/dev/shm/psi.png")[m
+[32m+[m[32m                    break[m
+[32m+[m[32m        lasttankpressure = tankpressure[m
+[32m+[m[32m        lastguntilt = guntilt[m
+[32m+[m[32m        lastfreeready = freeready[m
+[32m+[m[32m        lastshotsfired = shotsfired[m
+[32m+[m[32m        lastfreefired = freefired[m
+[32m+[m
+[32m+[m[32m        statuscheckcount = statuscheckcount + 1[m
+[32m+[m[32m        if statuscheckcount > 120:[m
+[32m+[m[32m            statuscheckcount = 0[m
+[32m+[m[32m            lasttankpressure = 0[m
+[32m+[m[32m            lastguntilt = 0[m
+[32m+[m[32m            lastfreeready = 0[m
+[32m+[m[32m            lastlastfree = 0[m
+[32m+[m[32m            lastshotsfired = 0[m
+[32m+[m[32m            lastfreefired = 0[m
+[32m+[m
+[32m+[m[32m        time.sleep( .5)[m
+[32m+[m
+[32m+[m[32mp = Process(target=statusUpdateThread)[m
+[32m+[m[32mp.start()[m
+[32m+[m
+[32m+[m
+ [m
+ def incrementArmServo(channel, amount):[m
+ [m
+[36m@@ -554,15 +627,17 @@[m [mdef say(message):[m
+     if commandArgs.festival_tts:[m
+         # festival tts[m
+         os.system('festival --tts < ' + tempFilePath)[m
+[31m-    #os.system('espeak < /tmp/speech.txt')[m
+[32m+[m[32m    #os.system('espeak < /tmp/speech.txt')aplay `ls | shuf -n 1`[m
+ [m
+     else:[m
+         # espeak tts[m
+         for hardwareNumber in (2, 0, 3, 1):[m
+             if commandArgs.male:[m
+[31m-                os.system('cat ' + tempFilePath + ' | espeak --stdout | aplay -D plughw:%d,0' % hardwareNumber)[m
+[32m+[m[32m                subprocess.call('cat ' + tempFilePath + ' | espeak --stdout | aplay -D plughw:%d,0' % hardwareNumber, shell=True )[m
+[32m+[m[32m                #os.system('cat ' + tempFilePath + ' | espeak --stdout | aplay -D plughw:%d,0' % hardwareNumber)[m
+             else:[m
+[31m-                os.system('cat ' + tempFilePath + ' | espeak -ven-us+f%d -s170 --stdout | aplay -D plughw:%d,0' % (commandArgs.voice_number, hardwareNumber))[m
+[32m+[m[41m            [m	[32msubprocess.call('cat ' + tempFilePath + ' | espeak -ven-us+f%d -s170 --stdout | aplay -D plughw:%d,0' % (commandArgs.voice_number, hardwareNumber), shell=True )[m[41m            	[m
+[32m+[m[32m                #os.system('cat ' + tempFilePath + ' | espeak -ven-us+f%d -s170 --stdout | aplay -D plughw:%d,0' % (commandArgs.voice_number, hardwareNumber))[m
+ [m
+     os.remove(tempFilePath)[m
+ [m
+[36m@@ -571,9 +646,17 @@[m [mdef say(message):[m
+ def handle_chat_message(args):[m
+ [m
+     print "chat message received:", args[m
+[32m+[m[41m    [m
+     rawMessage = args['message'][m
+     withoutName = rawMessage.split(']')[1:][m
+     message = "".join(withoutName)[m
+[32m+[m[41m    [m
+[32m+[m[32m    if 'diabeteman' == args['name'] or 'roboempress' == args['name']:[m
+[32m+[m[32m        if 'addfree' in message:[m
+[32m+[m[32m            sendSerialCommand(message.strip())[m
+[32m+[m[32m        if 'forcefire' in message:[m
+[32m+[m[32m            sendSerialCommand(message.strip())[m
+[32m+[m[41m   [m
+     urlRegExp = "(http|ftp|https)://([\w_-]+(?:(?:\.[\w_-]+)+))([\w.,@?^=%&:/~+#-]*[\w@?^=%&/~+#-])?"[m
+     if message[1] == ".":[m
+        exit()[m
+[36m@@ -582,7 +665,7 @@[m [mdef handle_chat_message(args):[m
+     elif commandArgs.filter_url_tts == True and re.search(urlRegExp, message):[m
+        exit()[m
+     else:[m
+[31m-          say(message)[m
+[32m+[m[32m        say(message)[m
+ [m
+ [m
+ [m
+[36m@@ -708,7 +791,8 @@[m [mdef moveGoPiGo3(command):[m
+         [m
+                 [m
+ def handle_command(args):[m
+[31m-        now = datetime.datetime.now()[m
+[32m+[m[32m        # print( args )[m
+[32m+[m	[32mnow = datetime.datetime.now()[m
+         now_time = now.time()[m
+         # if it's late, make the robot slower[m
+         if now_time >= datetime.time(21,30) or now_time <= datetime.time(9,30):[m
+[36m@@ -736,33 +820,29 @@[m [mdef handle_command(args):[m
+         #if 'command' in args:[m
+         #    print "args command:", args['command'][m
+ [m
+[31m-[m
+[32m+[m[41m            [m
+             [m
+         if 'command' in args and 'robot_id' in args and args['robot_id'] == robotID:[m
+[31m-[m
+[31m-            print('got command', args)[m
+[31m-[m
+[32m+[m[41m            [m
+             command = args['command'][m
+[32m+[m[32m            #print('got command', args)[m
+ [m
+             if command == 'LOUD':[m
+[31m-                handleLoudCommand()[m
+[31m-[m
+[31m-            [m
+[32m+[m[32m                handleLoudCommand()[m[41m            [m
+             if commandArgs.type == 'adafruit_pwm':[m
+[31m-                moveAdafruitPWM(command)[m
+[31m-            [m
+[32m+[m[32m                moveAdafruitPWM(command)[m[41m            [m
+             if commandArgs.type == 'gopigo2':[m
+                 moveGoPiGo2(command)[m
+[31m-[m
+             if commandArgs.type == 'gopigo3':[m
+[31m-                moveGoPiGo3(command)[m
+[31m-                [m
+[32m+[m[32m                moveGoPiGo3(command)[m[41m                [m
+             if commandArgs.type == 'owi_arm':[m
+                 owi_arm.handleOwiArm(command)[m
+ [m
+[31m-            [m
+             if commandArgs.type == 'serial':[m
+[31m-                sendSerialCommand(command)[m
+[32m+[m[32m                if args['key_position'] == 'up' or command == 'stop':[m
+[32m+[m[32m                    command = command[m
+[32m+[m[32m                else:[m
+[32m+[m[32m                    sendSerialCommand( command )[m
+ [m
+             if commandArgs.type == 'motor_hat' and motorsEnabled:[m
+                 motorA.setSpeed(drivingSpeed)[m
+[36m@@ -816,8 +896,8 @@[m [mdef handle_command(args):[m
+             #setMotorsToIdle()[m
+             if commandArgs.type == 'motozero':[m
+                 runmotozero(command)[m
+[31m-	        if commandArgs.type == 'pololu':[m
+[31m-		        runPololu(command)[m
+[32m+[m[32m            if commandArgs.type == 'pololu':[m
+[32m+[m[32m                runPololu(command)[m
+             [m
+             if commandArgs.led == 'max7219':[m
+                 if command == 'LED_OFF':[m
+[36m@@ -942,25 +1022,25 @@[m [mdef runmotozero(direction):[m
+         GPIO.output(Motor1B, GPIO.LOW)[m
+         GPIO.output(Motor2A, GPIO.LOW)[m
+         GPIO.output(Motor4A, GPIO.LOW)[m
+[31m-	[m
+[32m+[m[41m    [m
+ def runPololu(direction):[m
+     drivingSpeed = commandArgs.driving_speed[m
+     if direction == 'F':[m
+[31m-	      motors.setSpeeds(drivingSpeed, drivingSpeed)[m
+[31m-	      time.sleep(0.3)[m
+[31m-	      motors.setSpeeds(0, 0)[m
+[32m+[m[32m          motors.setSpeeds(drivingSpeed, drivingSpeed)[m
+[32m+[m[32m          time.sleep(0.3)[m
+[32m+[m[32m          motors.setSpeeds(0, 0)[m
+     if direction == 'B':[m
+[31m-	      motors.setSpeeds(-drivingSpeed, -drivingSpeed)[m
+[31m-	      time.sleep(0.3)[m
+[31m-	      motors.setSpeeds(0, 0)[m
+[32m+[m[32m          motors.setSpeeds(-drivingSpeed, -drivingSpeed)[m
+[32m+[m[32m          time.sleep(0.3)[m
+[32m+[m[32m          motors.setSpeeds(0, 0)[m
+     if direction == 'L':[m
+[31m-	      motors.setSpeeds(-drivingSpeed, drivingSpeed)[m
+[31m-	      time.sleep(0.3)[m
+[31m-	      motors.setSpeeds(0, 0)[m
+[32m+[m[32m          motors.setSpeeds(-drivingSpeed, drivingSpeed)[m
+[32m+[m[32m          time.sleep(0.3)[m
+[32m+[m[32m          motors.setSpeeds(0, 0)[m
+     if direction == 'R':[m
+[31m-	      motors.setSpeeds(drivingSpeed, -drivingSpeed)[m
+[31m-	      time.sleep(0.3)[m
+[31m-	      motors.setSpeeds(0, 0)[m
+[32m+[m[32m          motors.setSpeeds(drivingSpeed, -drivingSpeed)[m
+[32m+[m[32m          time.sleep(0.3)[m
+[32m+[m[32m          motors.setSpeeds(0, 0)[m
+ [m
+ def handleStartReverseSshProcess(args):[m
+     print "starting reverse ssh"[m
+[36m@@ -1039,7 +1119,8 @@[m [mdef isCharging():[m
+     print "is charging current value", chargeValue[m
+     if chargeValue < 99:[m
+         print "charge value is low"[m
+[31m-        return GPIO.input(chargeIONumber) == 1[m
+[32m+[m[32m        #return GPIO.input(chargeIONumber) == 1[m
+[32m+[m[32m        return False[m[41m [m
+     else:[m
+         print "charge value is high"[m
+         return False[m
+[36m@@ -1143,8 +1224,28 @@[m [mlastInternetStatus = False[m
+     [m
+ while True:[m
+     socketIO.wait(seconds=1)[m
+[32m+[m[32m    if (waitCounter % 1000) == 0:[m[41m        [m
+[32m+[m[32m        internetStatus = isInternetConnected()[m
+[32m+[m[32m        if internetStatus != lastInternetStatus:[m
+[32m+[m[32m            if internetStatus:[m
+[32m+[m[32m                say("ok")[m
+[32m+[m[32m            else:[m
+[32m+[m[32m                say("missing internet connection")[m
+[32m+[m[32m        lastInternetStatus = internetStatus[m
+[32m+[m[32m    if (waitCounter % 60) == 0:[m
+ [m
+[31m-    [m
+[32m+[m[32m        # tell the server what robot id is using this connection[m
+[32m+[m[32m        identifyRobotId()[m
+[32m+[m[41m        [m
+[32m+[m[32m        if platform.system() == 'Linux':[m
+[32m+[m[32m            ipInfoUpdate()[m
+[32m+[m[32m    waitCounter += 1[m
+[32m+[m[32m    if (waitCounter % 10) == 0:[m
+[32m+[m[32m        if commandArgs.type == 'serial' and mic_on == True:[m
+[32m+[m[32m            sendSerialCommand( "microphoneon" )[m
+[32m+[m[32m        if commandArgs.type == 'serial' and mic_on == False:[m
+[32m+[m[32m            sendSerialCommand( "microphoneoff" )[m
+[32m+[m[32m'''[m
+     if (waitCounter % chargeCheckInterval) == 0:[m
+         if commandArgs.type == 'motor_hat':[m
+             updateChargeApproximation()[m
+[36m@@ -1164,31 +1265,15 @@[m [mwhile True:[m
+                 if chargeValue <= 25:[m
+                     say("need to charge")                [m
+                 [m
+[31m-            [m
+[31m-    if (waitCounter % 1000) == 0:[m
+[31m-        [m
+[31m-        internetStatus = isInternetConnected()[m
+[31m-        if internetStatus != lastInternetStatus:[m
+[31m-            if internetStatus:[m
+[31m-                say("ok")[m
+[31m-            else:[m
+[31m-                say("missing internet connection")[m
+[31m-        lastInternetStatus = internetStatus[m
+[31m-[m
+[31m-        [m
+[32m+[m[32m'''[m
+[32m+[m[41m    [m
+[32m+[m[32m'''[m
+     if (waitCounter % 10) == 0:[m
+         if commandArgs.auto_wifi:[m
+             if commandArgs.secret_key is not None:[m
+                 configWifiLogin(commandArgs.secret_key)[m
+[31m-[m
+[32m+[m[32m'''[m
+                 [m
+[31m-    if (waitCounter % 60) == 0:[m
+ [m
+[31m-        # tell the server what robot id is using this connection[m
+[31m-        identifyRobotId()[m
+[31m-        [m
+[31m-        if platform.system() == 'Linux':[m
+[31m-            ipInfoUpdate()[m
+ [m
+ [m
+[31m-    waitCounter += 1[m
+[1mdiff --git a/send_video.py b/send_video.py[m
+[1mindex 5a00f27..2fc7a8f 100644[m
+[1m--- a/send_video.py[m
+[1m+++ b/send_video.py[m
+[36m@@ -168,7 +168,7 @@[m [mdef startAudioCaptureLinux():[m
+ [m
+     audioPort = getAudioPort()[m
+     [m
+[31m-    audioCommandLine = '/usr/local/bin/ffmpeg -f alsa -ar 44100 -ac %d -i hw:%d -f mpegts -codec:a mp2 -b:a 32k -muxdelay 0.001 http://%s:%s/hello/640/480/' % (commandArgs.mic_channels, commandArgs.audio_device_number, server, audioPort)[m
+[32m+[m[32m    audioCommandLine = '/usr/local/bin/ffmpeg -f alsa -ar 44100 -ac %d -i hw:%d -f mpegts -codec:a mp2 -b:a 96k -muxdelay 0.001 http://%s:%s/hello/640/480/' % (commandArgs.mic_channels, commandArgs.audio_device_number, server, audioPort)[m
+     print audioCommandLine[m
+     return subprocess.Popen(shlex.split(audioCommandLine))[m
+ [m
+[36m@@ -179,7 +179,7 @@[m [mdef rotationOption():[m
+     if commandArgs.rotate180:[m
+         return "-vf transpose=2,transpose=2"[m
+     else:[m
+[31m-        return ""[m
+[32m+[m[41m    [m	[32mreturn "-vf dynoverlay=overlayfile=/dev/shm/psi.png:check_interval=1000:x=509:y=349,dynoverlay=overlayfile=/dev/shm/logo.png:check_interval=10000:x=0:y=417"[m[41m [m
+ [m
+ [m
+ def onCommandToRobot(*args):[m

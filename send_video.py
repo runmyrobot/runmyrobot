@@ -3,7 +3,6 @@ import shlex
 import re
 import os
 import time
-import urllib2
 import platform
 import json
 import sys
@@ -11,6 +10,7 @@ import base64
 import random
 import datetime
 import traceback
+import robot_util
 
 
 import argparse
@@ -43,6 +43,7 @@ parser.set_defaults(camera_enabled=True)
 parser.add_argument('--dry-run', dest='dry_run', action='store_true')
 parser.add_argument('--mic-channels', type=int, help='microphone channels, typically 1 or 2', default=1)
 parser.add_argument('--audio-input-device', default='Microphone (HD Webcam C270)') # currently, this option is only used for windows screen capture
+parser.add_argument('--stream-key', default='hello')
 
 
 #global numVideoRestarts
@@ -86,31 +87,15 @@ print "port:", port
 socketIO = SocketIO(server, port, LoggingNamespace)
 print "finished initializing socket io"
 
+
 #ffmpeg -f qtkit -i 0 -f mpeg1video -b 400k -r 30 -s 320x240 http://52.8.81.124:8082/hello/320/240/
 
 
 
-def getWithRetry(url):
-
-    for retryNumber in range(2000):
-        try:
-            print "GET", url
-            response = urllib2.urlopen(url).read()
-            break
-        except:
-            print "could not open url ", url
-            time.sleep(2)
-
-    return response
-
-
-
-    
-
 def getVideoPort():
 
     url = 'https://%s/get_video_port/%s' % (server, commandArgs.camera_id)
-    response = getWithRetry(url)
+    response = robot_util.getWithRetry(url)
     return json.loads(response)['mpeg_stream_port']
 
 
@@ -118,14 +103,14 @@ def getVideoPort():
 def getAudioPort():
 
     url = 'https://%s/get_audio_port/%s' % (server, commandArgs.camera_id)
-    response = getWithRetry(url)
+    response = robot_util.getWithRetry(url)
     return json.loads(response)['audio_stream_port']
 
 
 def getRobotID():
 
     url = 'https://%s/get_robot_id/%s' % (server, commandArgs.camera_id)
-    response = getWithRetry(url)
+    response = robot_util.getWithRetry(url)
     return json.loads(response)['robot_id']
 
 
@@ -159,7 +144,7 @@ def startVideoCaptureLinux():
         os.system("v4l2-ctl -c saturation={saturation}".format(saturation=commandArgs.saturation))
 
     
-    videoCommandLine = '/usr/local/bin/ffmpeg -f v4l2 -framerate 25 -video_size 640x480 -i /dev/video{video_device_number} {rotation_option} -f mpegts -codec:v mpeg1video -s {xres}x{yres} -b:v {kbps}k -bf 0 -muxdelay 0.001 http://{server}:{video_port}/hello/{xres}/{yres}/'.format(video_device_number=commandArgs.video_device_number, rotation_option=rotationOption(), kbps=commandArgs.kbps, server=server, video_port=videoPort, xres=commandArgs.xres, yres=commandArgs.yres)
+    videoCommandLine = '/usr/local/bin/ffmpeg -f v4l2 -framerate 25 -video_size 640x480 -i /dev/video{video_device_number} {rotation_option} -f mpegts -codec:v mpeg1video -s {xres}x{yres} -b:v {kbps}k -bf 0 -muxdelay 0.001 http://{server}:{video_port}/{stream_key}/{xres}/{yres}/'.format(video_device_number=commandArgs.video_device_number, rotation_option=rotationOption(), kbps=commandArgs.kbps, server=server, video_port=videoPort, xres=commandArgs.xres, yres=commandArgs.yres, stream_key=commandArgs.stream_key)
     print videoCommandLine
     return subprocess.Popen(shlex.split(videoCommandLine))
     
@@ -168,7 +153,7 @@ def startAudioCaptureLinux():
 
     audioPort = getAudioPort()
     
-    audioCommandLine = '/usr/local/bin/ffmpeg -f alsa -ar 44100 -ac %d -i hw:%d -f mpegts -codec:a mp2 -b:a 96k -muxdelay 0.001 http://%s:%s/hello/640/480/' % (commandArgs.mic_channels, commandArgs.audio_device_number, server, audioPort)
+    audioCommandLine = '/usr/local/bin/ffmpeg -f alsa -ar 44100 -ac %d -i hw:%d -f mpegts -codec:a mp2 -b:a 96k -muxdelay 0.001 http://%s:%s/hello/640/480/' % (commandArgs.mic_channels, commandArgs.audio_device_number, server, audioPort, commandArgs.stream_key)
     print audioCommandLine
     return subprocess.Popen(shlex.split(audioCommandLine))
 
@@ -259,12 +244,14 @@ def main():
         # todo: note about the following ffmpeg_process_exists is not technically true, but need to update
         # server code to check for send_video_process_exists if you want to set it technically accurate
         # because the process doesn't always exist, like when the relay is not started yet.
-
         # send status to server
         socketIO.emit('send_video_status', {'send_video_process_exists': True,
                                             'ffmpeg_process_exists': True,
                                             'camera_id':commandArgs.camera_id})
 
+        
+
+        
         if numVideoRestarts > 100:
             time.sleep(20)
             os.system("sudo reboot")
