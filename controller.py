@@ -388,7 +388,8 @@ controlHostPort = getControlHostPort()
 
 print "using socket io to connect to", controlHostPort
 
-socketIO = SocketIO(controlHostPort['host'], controlHostPort['port'], LoggingNamespace)
+controlSocketIO = SocketIO(controlHostPort['host'], controlHostPort['port'], LoggingNamespace)
+socketIO = SocketIO('letsrobot.tv', 8022, LoggingNamespace)
 print 'finished using socket io to connect to', controlHostPort
 
 
@@ -827,6 +828,10 @@ def handle_command(args):
 
             if commandArgs.type == 'motor_hat':
                 turnOffMotors()
+                if command == 'WALL':
+                    handleLoudCommand()
+                    os.system("aplay -D plughw:2,0 /home/pi/wall.wav")
+                    
             if commandArgs.type == 'l298n':
                 runl298n(command)                                 
             #setMotorsToIdle()
@@ -1009,7 +1014,7 @@ def on_handle_chat_message(*args):
 
    
 #from communication import socketIO
-socketIO.on('command_to_robot', on_handle_command)
+controlSocketIO.on('command_to_robot', on_handle_command)
 socketIO.on('exclusive_control', on_handle_exclusive_control)
 socketIO.on('chat_message_with_name', on_handle_chat_message)
 
@@ -1171,6 +1176,7 @@ lastInternetStatus = False
     
 while True:
     socketIO.wait(seconds=1)
+    controlSocketIO.wait(seconds=1)
 
     
     if (waitCounter % chargeCheckInterval) == 0:
