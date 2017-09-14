@@ -374,7 +374,10 @@ if commandArgs.type == 'serial':
     serialBaud = 9600
     print "baud:", serialBaud
     #ser = serial.Serial('/dev/tty.usbmodem12341', 19200, timeout=1)  # open serial
-    ser = serial.Serial(serialDevice, serialBaud, timeout=1)  # open serial
+    try:
+        ser = serial.Serial(serialDevice, serialBaud, timeout=1)  # open serial
+    except:
+        print "error: could not open serial port"
 
 
 def getControlHostPort():
