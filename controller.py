@@ -374,7 +374,10 @@ if commandArgs.type == 'serial':
     serialBaud = 9600
     print "baud:", serialBaud
     #ser = serial.Serial('/dev/tty.usbmodem12341', 19200, timeout=1)  # open serial
-    ser = serial.Serial(serialDevice, serialBaud, timeout=1)  # open serial
+    try:
+        ser = serial.Serial(serialDevice, serialBaud, timeout=1)  # open serial
+    except:
+        print "error: could not open serial port"
 
 
 def getControlHostPort():
@@ -394,11 +397,11 @@ chatHostPort = getChatHostPort()
 print "using socket io to connect to control", controlHostPort
 print "using socket io to connect to chat", chatHostPort
 
-socketIO = SocketIO(controlHostPort['host'], controlHostPort['port'], LoggingNamespace)
+controlSocketIO = SocketIO(controlHostPort['host'], controlHostPort['port'], LoggingNamespace)
+socketIO = SocketIO('letsrobot.tv', 8022, LoggingNamespace)
 chatSocket = SocketIO(chatHostPort['host'], chatHostPort['port'], LoggingNamespace)
-print 'finished using socket io to connect to control', controlHostPort
-print 'finished using socket io to connect to chat', chatHostPort
-
+print 'finished using socket io to connect to control ', controlHostPort
+print 'finished using socket io to connect to chat ', chatHostPort
 
 def setServoPulse(channel, pulse):
   pulseLength = 1000000                   # 1,000,000 us per second
@@ -582,7 +585,7 @@ def say(message):
 
     else:
         # espeak tts
-        for hardwareNumber in (2, 0, 3, 1):
+        for hardwareNumber in (2, 0, 3, 1, 4):
             if commandArgs.male:
                 os.system('cat ' + tempFilePath + ' | espeak --stdout | aplay -D plughw:%d,0' % hardwareNumber)
             else:
@@ -835,6 +838,10 @@ def handle_command(args):
 
             if commandArgs.type == 'motor_hat':
                 turnOffMotors()
+                if command == 'WALL':
+                    handleLoudCommand()
+                    os.system("aplay -D plughw:2,0 /home/pi/wall.wav")
+
             if commandArgs.type == 'l298n':
                 runl298n(command)                                 
             #setMotorsToIdle()
@@ -1017,7 +1024,7 @@ def on_handle_chat_message(*args):
 
    
 #from communication import socketIO
-socketIO.on('command_to_robot', on_handle_command)
+controlSocketIO.on('command_to_robot', on_handle_command)
 socketIO.on('exclusive_control', on_handle_exclusive_control)
 chatSocket.on('chat_message_with_name', on_handle_chat_message)
 
@@ -1180,6 +1187,7 @@ lastInternetStatus = False
     
 while True:
     socketIO.wait(seconds=1)
+    controlSocketIO.wait(seconds=1)
     chatSocket.wait(seconds=1)
 
     
