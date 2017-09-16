@@ -386,15 +386,22 @@ def getControlHostPort():
     response = robot_util.getWithRetry(url)
     return json.loads(response)
 
-    
-controlHostPort = getControlHostPort()
+def getChatHostPort():
+    url = 'https://%s/get_chat_host_port/%s' % (infoServer, commandArgs.robot_id)
+    response = robot_util.getWithRetry(url)
+    return json.loads(response)
 
-print "using socket io to connect to", controlHostPort
+controlHostPort = getControlHostPort()
+chatHostPort = getChatHostPort()
+
+print "using socket io to connect to control", controlHostPort
+print "using socket io to connect to chat", chatHostPort
 
 controlSocketIO = SocketIO(controlHostPort['host'], controlHostPort['port'], LoggingNamespace)
 socketIO = SocketIO('letsrobot.tv', 8022, LoggingNamespace)
-print 'finished using socket io to connect to', controlHostPort
-
+chatSocket = SocketIO(chatHostPort['host'], chatHostPort['port'], LoggingNamespace)
+print 'finished using socket io to connect to control ', controlHostPort
+print 'finished using socket io to connect to chat ', chatHostPort
 
 def setServoPulse(channel, pulse):
   pulseLength = 1000000                   # 1,000,000 us per second
@@ -834,7 +841,7 @@ def handle_command(args):
                 if command == 'WALL':
                     handleLoudCommand()
                     os.system("aplay -D plughw:2,0 /home/pi/wall.wav")
-                    
+
             if commandArgs.type == 'l298n':
                 runl298n(command)                                 
             #setMotorsToIdle()
@@ -1019,7 +1026,7 @@ def on_handle_chat_message(*args):
 #from communication import socketIO
 controlSocketIO.on('command_to_robot', on_handle_command)
 socketIO.on('exclusive_control', on_handle_exclusive_control)
-socketIO.on('chat_message_with_name', on_handle_chat_message)
+chatSocket.on('chat_message_with_name', on_handle_chat_message)
 
 
 def startReverseSshProcess(*args):
@@ -1095,6 +1102,7 @@ if commandArgs.type == 'motor_hat':
 
 
 def identifyRobotId():
+    chatSocket.emit('identify_robot_id', robotID);
     socketIO.emit('identify_robot_id', robotID);
 
 
@@ -1180,6 +1188,7 @@ lastInternetStatus = False
 while True:
     socketIO.wait(seconds=1)
     controlSocketIO.wait(seconds=1)
+    chatSocket.wait(seconds=1)
 
     
     if (waitCounter % chargeCheckInterval) == 0:
