@@ -398,10 +398,11 @@ print "using socket io to connect to control", controlHostPort
 print "using socket io to connect to chat", chatHostPort
 
 controlSocketIO = SocketIO(controlHostPort['host'], controlHostPort['port'], LoggingNamespace)
-socketIO = SocketIO('letsrobot.tv', 8022, LoggingNamespace)
 chatSocket = SocketIO(chatHostPort['host'], chatHostPort['port'], LoggingNamespace)
 print 'finished using socket io to connect to control ', controlHostPort
 print 'finished using socket io to connect to chat ', chatHostPort
+appServerSocketIO = SocketIO('letsrobot.tv', 8022, LoggingNamespace)
+print 'finished using socket io to connect to', controlHostPort
 
 def setServoPulse(channel, pulse):
   pulseLength = 1000000                   # 1,000,000 us per second
@@ -995,7 +996,7 @@ def runPololu(direction):
 
 def handleStartReverseSshProcess(args):
     print "starting reverse ssh"
-    socketIO.emit("reverse_ssh_info", "starting")
+    appServerSocketIO.emit("reverse_ssh_info", "starting")
 
     returnCode = subprocess.call(["/usr/bin/ssh",
                                   "-X",
@@ -1004,7 +1005,7 @@ def handleStartReverseSshProcess(args):
                                   "-R", "2222:localhost:22",
                                   commandArgs.reverse_ssh_host])
 
-    socketIO.emit("reverse_ssh_info", "return code: " + str(returnCode))
+    appServerSocketIO.emit("reverse_ssh_info", "return code: " + str(returnCode))
     print "reverse ssh process has exited with code", str(returnCode)
 
     
@@ -1025,7 +1026,7 @@ def on_handle_chat_message(*args):
    
 #from communication import socketIO
 controlSocketIO.on('command_to_robot', on_handle_command)
-socketIO.on('exclusive_control', on_handle_exclusive_control)
+appServerSocketIO.on('exclusive_control', on_handle_exclusive_control)
 chatSocket.on('chat_message_with_name', on_handle_chat_message)
 
 
@@ -1035,12 +1036,12 @@ def startReverseSshProcess(*args):
 def endReverseSshProcess(*args):
    thread.start_new_thread(handleEndReverseSshProcess, args)
 
-socketIO.on('reverse_ssh_8872381747239', startReverseSshProcess)
-socketIO.on('end_reverse_ssh_8872381747239', endReverseSshProcess)
+appServerSocketIO.on('reverse_ssh_8872381747239', startReverseSshProcess)
+appServerSocketIO.on('end_reverse_ssh_8872381747239', endReverseSshProcess)
 
-def myWait():
-  socketIO.wait()
-  thread.start_new_thread(myWait, ())
+#def myWait():
+#  socketIO.wait()
+#  thread.start_new_thread(myWait, ())
 
 
 if commandArgs.type == 'motor_hat':
@@ -1068,7 +1069,7 @@ if commandArgs.type == 'motor_hat':
         motorB = mh.getMotor(2)
 
 def ipInfoUpdate():
-    socketIO.emit('ip_information',
+    appServerSocketIO.emit('ip_information',
                   {'ip': subprocess.check_output(["hostname", "-I"]), 'robot_id': robotID})
 
 
@@ -1090,7 +1091,7 @@ def isCharging():
 def sendChargeState():
     charging = isCharging()
     chargeState = {'robot_id': robotID, 'charging': charging}
-    socketIO.emit('charge_state', chargeState)
+    appServerSocketIO.emit('charge_state', chargeState)
     print "charge state:", chargeState
 
 def sendChargeStateCallback(x):
@@ -1103,8 +1104,7 @@ if commandArgs.type == 'motor_hat':
 
 def identifyRobotId():
     chatSocket.emit('identify_robot_id', robotID);
-    socketIO.emit('identify_robot_id', robotID);
-
+    appServerSocketIO.emit('identify_robot_id', robotID);
 
 
 def setSpeedBasedOnCharge():
@@ -1184,12 +1184,35 @@ elif platform.system() == 'Linux':
 
 
 lastInternetStatus = False
-    
-while True:
-    socketIO.wait(seconds=1)
-    controlSocketIO.wait(seconds=1)
-    chatSocket.wait(seconds=1)
 
+
+def waitForAppServer():
+    while True:
+        appServerSocketIO.wait(seconds=1)
+
+def waitForControlServer():
+    while True:
+        controlSocketIO.wait(seconds=1)        
+
+def waitForChatServer():
+    while True:
+        chatSocket.wait(seconds=1)        
+        
+def startListenForAppServer():
+   thread.start_new_thread(waitForAppServer, ())
+
+def startListenForControlServer():
+   thread.start_new_thread(waitForControlServer, ())
+
+def startListenForChatServer():
+   thread.start_new_thread(waitForChatServer, ())
+
+
+startListenForControlServer()
+startListenForAppServer()
+
+while True:
+    time.sleep(1)
     
     if (waitCounter % chargeCheckInterval) == 0:
         if commandArgs.type == 'motor_hat':
