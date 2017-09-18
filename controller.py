@@ -1176,11 +1176,29 @@ elif platform.system() == 'Linux':
 
 
 lastInternetStatus = False
-    
-while True:
-    socketIO.wait(seconds=1)
-    controlSocketIO.wait(seconds=1)
 
+
+def waitForAppServer():
+    while True:
+        socketIO.wait(seconds=1)
+
+def waitForControlServer():
+    while True:
+        controlSocketIO.wait(seconds=1)        
+        
+def startListenForAppServer():
+   thread.start_new_thread(waitForAppServer, ())
+
+def startListenForControlServer():
+   thread.start_new_thread(waitForControlServer, ())
+
+
+startListenForControlServer()
+startListenForAppServer()
+
+while True:
+
+    time.sleep(1)
     
     if (waitCounter % chargeCheckInterval) == 0:
         if commandArgs.type == 'motor_hat':
