@@ -398,8 +398,8 @@ print "using socket io to connect to control", controlHostPort
 print "using socket io to connect to chat", chatHostPort
 
 controlSocketIO = SocketIO(controlHostPort['host'], controlHostPort['port'], LoggingNamespace)
-chatSocket = SocketIO(chatHostPort['host'], chatHostPort['port'], LoggingNamespace)
 print 'finished using socket io to connect to control ', controlHostPort
+chatSocket = SocketIO(chatHostPort['host'], chatHostPort['port'], LoggingNamespace)
 print 'finished using socket io to connect to chat ', chatHostPort
 appServerSocketIO = SocketIO('letsrobot.tv', 8022, LoggingNamespace)
 print 'finished using socket io to connect to', controlHostPort
@@ -1210,6 +1210,7 @@ def startListenForChatServer():
 
 startListenForControlServer()
 startListenForAppServer()
+startListenForChatServer()
 
 while True:
     time.sleep(1)
