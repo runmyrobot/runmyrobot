@@ -11,6 +11,7 @@ import random
 import datetime
 import traceback
 import robot_util
+import thread
 
 
 import argparse
@@ -73,6 +74,9 @@ os.system("sudo modprobe bcm2835-v4l2")
 if commandArgs.env == "dev":
     print "using dev port 8122"
     port = 8122
+if commandArgs.env == "dev2":
+    print "using dev port 8125"
+    port = 8125
 elif commandArgs.env == "prod":
     print "using prod port 8022"
     port = 8022
@@ -84,8 +88,8 @@ else:
 print "initializing socket io"
 print "server:", server
 print "port:", port
-socketIO = SocketIO(server, port, LoggingNamespace)
-print "finished initializing socket io"
+appServerSocketIO = SocketIO(server, port, LoggingNamespace)
+print "finished initializing app server socket io"
 
 
 #ffmpeg -f qtkit -i 0 -f mpeg1video -b 400k -r 30 -s 320x240 http://52.8.81.124:8082/hello/320/240/
@@ -191,19 +195,34 @@ def onCommandToRobot(*args):
 
 
 def onConnection(*args):
-    print('connection:', args)
+    print 'connection:', args
     sys.stdout.flush()
 
 
+def onSet(*args):
+    print '---------------------------------------'
+    print 'set message recieved:', args
+    print '---------------------------------------'
+    sys.stdout.flush()
+    
 
+
+def killallFFMPEGIn30Seconds():
+    time.sleep(30)
+    os.system("killall ffmpeg")
+   
+
+
+    
 def main():
 
     global robotID
     global camera_on
     robotID = getRobotID()    
 
-    socketIO.on('command_to_robot', onCommandToRobot)
-    socketIO.on('connection', onConnection)    
+    appServerSocketIO.on('command_to_robot', onCommandToRobot)
+    appServerSocketIO.on('connection', onConnection)
+    appServerSocketIO.on('set', onSet)
 
 
     print "robot id:", robotID
@@ -219,9 +238,8 @@ def main():
     if mic_on:
         if not commandArgs.dry_run:
             audioProcess = startAudioCaptureLinux()
-            time.sleep(30)
-            os.system("killall ffmpeg")
-            #socketIO.emit('send_video_process_start_event', {'camera_id': commandArgs.camera_id})
+            thread.start_new_thread(killallFFMPEGIn30Seconds, ())
+            #appServerSocketIO.emit('send_video_process_start_event', {'camera_id': commandArgs.camera_id})
         else:
             audioProcess = DummyProcess()
 
@@ -235,17 +253,16 @@ def main():
     # loop forever and monitor status of ffmpeg processes
     while True:
 
-
-        print "------------------------------------------" + str(count) + "-----------------------------------------------------"
+        print "-----------------" + str(count) + "-----------------"
         
-        socketIO.wait(seconds=1)
+        appServerSocketIO.wait(seconds=1)
 
 
         # todo: note about the following ffmpeg_process_exists is not technically true, but need to update
         # server code to check for send_video_process_exists if you want to set it technically accurate
         # because the process doesn't always exist, like when the relay is not started yet.
         # send status to server
-        socketIO.emit('send_video_status', {'send_video_process_exists': True,
+        appServerSocketIO.emit('send_video_status', {'send_video_process_exists': True,
                                             'ffmpeg_process_exists': True,
                                             'camera_id':commandArgs.camera_id})
 
@@ -293,7 +310,7 @@ def main():
                 randomSleep()
                 audioProcess = startAudioCaptureLinux()
                 #time.sleep(30)
-                #socketIO.emit('send_video_process_start_event', {'camera_id': commandArgs.camera_id})               
+                #appServerSocketIO.emit('send_video_process_start_event', {'camera_id': commandArgs.camera_id})               
                 numAudioRestarts += 1
 
         
