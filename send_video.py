@@ -202,7 +202,19 @@ def onConnection(*args):
 def onSet(*args):
     print '---------------------------------------'
     print 'set message recieved:', args
+    entry = args[0]
     print '---------------------------------------'
+
+    robot_util.setConfigEntry(entry['category'], entry['key'], entry['value'])
+
+    if entry['category'] == 'send_video':
+        if entry['key'] == 'mic_enabled':
+            commandArgs.mic_enabled = entry['value']
+            print commandArgs
+            if entry['value'] == False:
+                os.system("killall ffmpeg")
+    
+
     sys.stdout.flush()
     
 
