@@ -54,13 +54,6 @@ parser.add_argument('--stream-key', default='hello')
 
 commandArgs = parser.parse_args()
 
-# True if devices on
-camera_on = commandArgs.camera_enabled
-mic_on = commandArgs.mic_enabled
-
-print "commandArgs", commandArgs
-
-
 server = "runmyrobot.com"
 
 
@@ -173,7 +166,7 @@ def rotationOption():
 
 def onCommandToRobot(*args):
     global robotID
-    global camera_on
+
     if len(args) > 0 and 'robot_id' in args[0] and args[0]['robot_id'] == robotID:
         commandMessage = args[0]
         print('command for this robot received:', commandMessage)
@@ -182,14 +175,14 @@ def onCommandToRobot(*args):
         if command == 'VIDOFF':
             print ('disabling camera capture process')
             print "args", args
-            camera_on = False
+            commandArgs.camera_enabled = False
             os.system("killall ffmpeg")
 
         if command == 'VIDON':
             if commandArgs.camera_enabled:
                 print ('enabling camera capture process')
                 print "args", args
-                camera_on = True
+                commandArgs.camera_enabled = True
         
         sys.stdout.flush()
 
@@ -208,10 +201,13 @@ def onSet(*args):
     robot_util.setConfigEntry(entry['category'], entry['key'], entry['value'])
 
     if entry['category'] == 'send_video':
+        print entry['category'] + "category setting received"
         if entry['key'] == 'mic_enabled':
+            print entry['key'] + "key setting received"
             commandArgs.mic_enabled = entry['value']
             print commandArgs
             if entry['value'] == False:
+                print "killing all ffmpeg"
                 os.system("killall ffmpeg")
     
 
@@ -228,9 +224,14 @@ def killallFFMPEGIn30Seconds():
     
 def main():
 
+    # overrides command line parameters using config file
+    print "args on command line:", commandArgs
+    robot_util.readConfigEntries(commandArgs)
+    print "args after reading config file:", commandArgs
+    
     global robotID
-    global camera_on
-    robotID = getRobotID()    
+
+    robotID = getRobotID()
 
     appServerSocketIO.on('command_to_robot', onCommandToRobot)
     appServerSocketIO.on('connection', onConnection)
@@ -241,13 +242,13 @@ def main():
     sys.stdout.flush()
 
     
-    if camera_on:
+    if commandArgs.camera_enabled:
         if not commandArgs.dry_run:
             videoProcess = startVideoCaptureLinux()
         else:
             videoProcess = DummyProcess()
 
-    if mic_on:
+    if commandArgs.mic_enabled:
         if not commandArgs.dry_run:
             audioProcess = startAudioCaptureLinux()
             thread.start_new_thread(killallFFMPEGIn30Seconds, ())
@@ -302,7 +303,7 @@ def main():
         
         
         
-        if camera_on:
+        if commandArgs.camera_enabled:
         
             print "video process poll", videoProcess.poll(), "pid", videoProcess.pid, "restarts", numVideoRestarts
 
@@ -313,7 +314,7 @@ def main():
                 numVideoRestarts += 1
             
                 
-        if mic_on:
+        if commandArgs.mic_enabled:
 
             print "audio process poll", audioProcess.poll(), "pid", audioProcess.pid, "restarts", numAudioRestarts
 

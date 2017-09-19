@@ -51,7 +51,7 @@ def setConfigEntry(category, key, value):
         json.dump(data, outfile)
 
         
-def getConfigEntry(category, key, value):
+def getConfigEntry(category, key):
 
     if os.path.isfile(ConfigFilename):
         jsonFile = open(ConfigFilename)
@@ -60,3 +60,13 @@ def getConfigEntry(category, key, value):
         jsonFile.close()
     else:
         print "error, missing config file", ConfigFilename
+
+        
+def readConfigEntries(arguments):
+
+    #todo: make this read all config entries
+
+    arguments.mic_enabled = getConfigEntry('send_video', 'mic_enabled')
+
+    
+    
