@@ -67,7 +67,7 @@ os.system("sudo modprobe bcm2835-v4l2")
 if commandArgs.env == "dev":
     print "using dev port 8122"
     port = 8122
-if commandArgs.env == "dev2":
+elif commandArgs.env == "dev2":
     print "using dev port 8125"
     port = 8125
 elif commandArgs.env == "prod":
