@@ -12,9 +12,9 @@ import datetime
 import traceback
 import robot_util
 import thread
-
-
+import copy
 import argparse
+
 
 class DummyProcess:
     def poll(self):
@@ -53,7 +53,7 @@ parser.add_argument('--stream-key', default='hello')
 #numAudioRestarts = 0
 
 commandArgs = parser.parse_args()
-
+robotSettings = None
 server = "runmyrobot.com"
 
 
@@ -111,6 +111,17 @@ def getRobotID():
     return json.loads(response)['robot_id']
 
 
+def getOnlineRobotSettings(robotID):
+
+    # https://api.letsrobot.tv/api/v1/robots/90073095
+
+    url = 'https://api.letsrobot.tv/api/v1/robots/%s' % (robotID)
+    response = robot_util.getWithRetry(url)
+    return json.loads(response)
+        
+
+    
+
 
 def randomSleep():
     """A short wait is good for quick recovery, but sometimes a longer delay is needed or it will just keep trying and failing short intervals, like because the system thinks the port is still in use and every retry makes the system think it's still in use. So, this has a high likelihood of picking a short interval, but will pick a long one sometimes."""
@@ -118,7 +129,7 @@ def randomSleep():
     timeToWait = random.choice((0.25, 0.25, 0.25, 0.25, 0.25, 0.25, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 5))
     print "sleeping", timeToWait
     time.sleep(timeToWait)
-                   
+
 
 
 def startVideoCaptureLinux():
@@ -126,22 +137,22 @@ def startVideoCaptureLinux():
     videoPort = getVideoPort()
 
     # set brightness
-    if (commandArgs.brightness is not None):
+    if (robotSettings.brightness is not None):
         print "brightness"
-        os.system("v4l2-ctl -c brightness={brightness}".format(brightness=commandArgs.brightness))
+        os.system("v4l2-ctl -c brightness={brightness}".format(brightness=robotSettings.brightness))
 
     # set contrast
-    if (commandArgs.contrast is not None):
+    if (robotSettings.contrast is not None):
         print "contrast"
-        os.system("v4l2-ctl -c contrast={contrast}".format(contrast=commandArgs.contrast))
+        os.system("v4l2-ctl -c contrast={contrast}".format(contrast=robotSettings.contrast))
 
     # set saturation
-    if (commandArgs.saturation is not None):
+    if (robotSettings.saturation is not None):
         print "saturation"
-        os.system("v4l2-ctl -c saturation={saturation}".format(saturation=commandArgs.saturation))
+        os.system("v4l2-ctl -c saturation={saturation}".format(saturation=robotSettings.saturation))
 
     
-    videoCommandLine = '/usr/local/bin/ffmpeg -f v4l2 -framerate 25 -video_size 640x480 -i /dev/video{video_device_number} {rotation_option} -f mpegts -codec:v mpeg1video -s {xres}x{yres} -b:v {kbps}k -bf 0 -muxdelay 0.001 http://{server}:{video_port}/{stream_key}/{xres}/{yres}/'.format(video_device_number=commandArgs.video_device_number, rotation_option=rotationOption(), kbps=commandArgs.kbps, server=server, video_port=videoPort, xres=commandArgs.xres, yres=commandArgs.yres, stream_key=commandArgs.stream_key)
+    videoCommandLine = '/usr/local/bin/ffmpeg -f v4l2 -framerate 25 -video_size 640x480 -i /dev/video{video_device_number} {rotation_option} -f mpegts -codec:v mpeg1video -s {xres}x{yres} -b:v {kbps}k -bf 0 -muxdelay 0.001 http://{server}:{video_port}/{stream_key}/{xres}/{yres}/'.format(video_device_number=robotSettings.video_device_number, rotation_option=rotationOption(), kbps=robotSettings.kbps, server=server, video_port=videoPort, xres=robotSettings.xres, yres=robotSettings.yres, stream_key=robotSettings.stream_key)
     print videoCommandLine
     return subprocess.Popen(shlex.split(videoCommandLine))
     
@@ -150,7 +161,7 @@ def startAudioCaptureLinux():
 
     audioPort = getAudioPort()
     
-    audioCommandLine = '/usr/local/bin/ffmpeg -f alsa -ar 44100 -ac %d -i hw:%d -f mpegts -codec:a mp2 -b:a 32k -muxdelay 0.001 http://%s:%s/%s/640/480/' % (commandArgs.mic_channels, commandArgs.audio_device_number, server, audioPort, commandArgs.stream_key)
+    audioCommandLine = '/usr/local/bin/ffmpeg -f alsa -ar 44100 -ac %d -i hw:%d -f mpegts -codec:a mp2 -b:a 32k -muxdelay 0.001 http://%s:%s/%s/640/480/' % (robotSettings.mic_channels, robotSettings.audio_device_number, server, audioPort, robotSettings.stream_key)
     print audioCommandLine
     return subprocess.Popen(shlex.split(audioCommandLine))
 
@@ -158,7 +169,7 @@ def startAudioCaptureLinux():
 
 def rotationOption():
 
-    if commandArgs.rotate180:
+    if robotSettings.rotate180:
         return "-vf transpose=2,transpose=2"
     else:
         return ""
@@ -175,14 +186,14 @@ def onCommandToRobot(*args):
         if command == 'VIDOFF':
             print ('disabling camera capture process')
             print "args", args
-            commandArgs.camera_enabled = False
+            robotSettings.camera_enabled = False
             os.system("killall ffmpeg")
 
         if command == 'VIDON':
-            if commandArgs.camera_enabled:
+            if robotSettings.camera_enabled:
                 print ('enabling camera capture process')
                 print "args", args
-                commandArgs.camera_enabled = True
+                robotSettings.camera_enabled = True
         
         sys.stdout.flush()
 
@@ -204,8 +215,8 @@ def onSet(*args):
         print entry['category'] + "category setting received"
         if entry['key'] == 'mic_enabled':
             print entry['key'] + "key setting received"
-            commandArgs.mic_enabled = entry['value']
-            print commandArgs
+            robotSettings.mic_enabled = entry['value']
+            print robotSettings
             if entry['value'] == False:
                 print "killing all ffmpeg"
                 os.system("killall ffmpeg")
@@ -218,37 +229,56 @@ def onSet(*args):
 def killallFFMPEGIn30Seconds():
     time.sleep(30)
     os.system("killall ffmpeg")
-   
+
+    
+
+#todo, this needs to work differently. likely the configuration will be json and pull in stuff from command line rather than the other way around.
+def overrideSettings(commandArgs, onlineSettings):
+
+    c = copy.deepcopy(commandArgs)
+    print "onlineSettings:", onlineSettings
+    c.mic_enabled = onlineSettings['mic_enabled']
+    print "onlineSettings['mic_enabled']:", onlineSettings['mic_enabled']
+    return c
 
 
     
 def main():
 
+    global robotSettings 
+    global robotID
+    
     # overrides command line parameters using config file
     print "args on command line:", commandArgs
-    robot_util.readConfigEntries(commandArgs)
-    print "args after reading config file:", commandArgs
-    
-    global robotID
+
 
     robotID = getRobotID()
 
+    print "robot id:", robotID
+    
+    onlineSettings = getOnlineRobotSettings(robotID)
+    robotSettings = overrideSettings(commandArgs, onlineSettings)
+
+    print "args after loading from server:", robotSettings
+    
     appServerSocketIO.on('command_to_robot', onCommandToRobot)
     appServerSocketIO.on('connection', onConnection)
     appServerSocketIO.on('set', onSet)
 
 
-    print "robot id:", robotID
+
+
+
     sys.stdout.flush()
 
     
-    if commandArgs.camera_enabled:
+    if robotSettings.camera_enabled:
         if not commandArgs.dry_run:
             videoProcess = startVideoCaptureLinux()
         else:
             videoProcess = DummyProcess()
 
-    if commandArgs.mic_enabled:
+    if robotSettings.mic_enabled:
         if not commandArgs.dry_run:
             audioProcess = startAudioCaptureLinux()
             thread.start_new_thread(killallFFMPEGIn30Seconds, ())
@@ -303,7 +333,7 @@ def main():
         
         
         
-        if commandArgs.camera_enabled:
+        if robotSettings.camera_enabled:
         
             print "video process poll", videoProcess.poll(), "pid", videoProcess.pid, "restarts", numVideoRestarts
 
@@ -314,7 +344,7 @@ def main():
                 numVideoRestarts += 1
             
                 
-        if commandArgs.mic_enabled:
+        if robotSettings.mic_enabled:
 
             print "audio process poll", audioProcess.poll(), "pid", audioProcess.pid, "restarts", numAudioRestarts
 
