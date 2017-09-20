@@ -214,7 +214,7 @@ def onConnection(*args):
     sys.stdout.flush()
 
 
-def onRobotSettingChanged(*args):
+def onRobotSettingsChanged(*args):
     print '---------------------------------------'
     print 'set message recieved:', args
     refreshFromOnlineSettings()
@@ -276,7 +276,7 @@ def main():
     
     appServerSocketIO.on('command_to_robot', onCommandToRobot)
     appServerSocketIO.on('connection', onConnection)
-    appServerSocketIO.on('robot_setting_changed', onRobotSettingChanged)
+    appServerSocketIO.on('robot_settings_changed', onRobotSettingsChanged)
 
 
 
