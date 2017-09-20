@@ -56,6 +56,8 @@ commandArgs = parser.parse_args()
 robotSettings = None
 server = "runmyrobot.com"
 
+audioProcess = None
+videoProcess = None
 
 
 from socketIO_client import SocketIO, LoggingNamespace
@@ -212,26 +214,10 @@ def onConnection(*args):
     sys.stdout.flush()
 
 
-def onSet(*args):
+def onRobotSettingChanged(*args):
     print '---------------------------------------'
     print 'set message recieved:', args
-    entry = args[0]
-    print '---------------------------------------'
-
-    robot_util.setConfigEntry(entry['category'], entry['key'], entry['value'])
-
-    if entry['category'] == 'send_video':
-        print entry['category'] + "category setting received"
-        if entry['key'] == 'mic_enabled':
-            print entry['key'] + "key setting received"
-            robotSettings.mic_enabled = entry['value']
-            print robotSettings
-            if entry['value'] == False:
-                print "killing all ffmpeg"
-                os.system("killall ffmpeg")
-    
-
-    sys.stdout.flush()
+    refreshFromOnlineSettings()
     
 
 
@@ -251,11 +237,30 @@ def overrideSettings(commandArgs, onlineSettings):
     return c
 
 
+def refreshFromOnlineSettings():
+    global robotSettings
+    print "refreshing from online settings"
+    onlineSettings = getOnlineRobotSettings(robotID)
+    robotSettings = overrideSettings(commandArgs, onlineSettings)
+
+    if not robotSettings.mic_enabled:
+        print "KILING**********************"
+        #todo: just kill the audio, not both
+        if audioProcess is not None:
+            print "KILING**********************2"            
+            audioProcess.kill()
+
+    else:
+        print "NOT KILLING***********************"
+
+    
     
 def main():
 
-    global robotSettings 
     global robotID
+    global audioProcess
+    global videoProcess
+
     
     # overrides command line parameters using config file
     print "args on command line:", commandArgs
@@ -264,15 +269,14 @@ def main():
     robotID = getRobotID()
 
     print "robot id:", robotID
-    
-    onlineSettings = getOnlineRobotSettings(robotID)
-    robotSettings = overrideSettings(commandArgs, onlineSettings)
+
+    refreshFromOnlineSettings()
 
     print "args after loading from server:", robotSettings
     
     appServerSocketIO.on('command_to_robot', onCommandToRobot)
     appServerSocketIO.on('connection', onConnection)
-    appServerSocketIO.on('set', onSet)
+    appServerSocketIO.on('robot_setting_changed', onRobotSettingChanged)
 
 
 
@@ -355,10 +359,13 @@ def main():
                 
         if robotSettings.mic_enabled:
 
-            print "audio process poll", audioProcess.poll(), "pid", audioProcess.pid, "restarts", numAudioRestarts
+            if audioProcess is None:
+                print "no audio process"
+            else:
+                print "audio process poll", audioProcess.poll(), "pid", audioProcess.pid, "restarts", numAudioRestarts
 
             # restart audio if needed
-            if audioProcess.poll() != None:
+            if (audioProcess is None) or (audioProcess.poll() != None):
                 randomSleep()
                 audioProcess = startAudioCaptureLinux()
                 #time.sleep(30)
