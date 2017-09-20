@@ -110,6 +110,10 @@ def getRobotID():
     response = robot_util.getWithRetry(url)
     return json.loads(response)['robot_id']
 
+def getWebsocketRelayHost():
+    url = 'https://%s/get_websocket_relay_host/%s' % (server, commandArgs.camera_id)
+    response = robot_util.getWithRetry(url)
+    return json.loads(response)
 
 def getOnlineRobotSettings(robotID):
 
@@ -135,6 +139,7 @@ def randomSleep():
 def startVideoCaptureLinux():
 
     videoPort = getVideoPort()
+    websocketRelayHost = getWebsocketRelayHost()
 
     # set brightness
     if (robotSettings.brightness is not None):
@@ -153,6 +158,7 @@ def startVideoCaptureLinux():
 
     
     videoCommandLine = '/usr/local/bin/ffmpeg -f v4l2 -framerate 25 -video_size 640x480 -i /dev/video{video_device_number} {rotation_option} -f mpegts -codec:v mpeg1video -s {xres}x{yres} -b:v {kbps}k -bf 0 -muxdelay 0.001 http://{server}:{video_port}/{stream_key}/{xres}/{yres}/'.format(video_device_number=robotSettings.video_device_number, rotation_option=rotationOption(), kbps=robotSettings.kbps, server=server, video_port=videoPort, xres=robotSettings.xres, yres=robotSettings.yres, stream_key=robotSettings.stream_key)
+
     print videoCommandLine
     return subprocess.Popen(shlex.split(videoCommandLine))
     
@@ -160,8 +166,11 @@ def startVideoCaptureLinux():
 def startAudioCaptureLinux():
 
     audioPort = getAudioPort()
+    websocketRelayHost = getWebsocketRelayHost()
     
+
     audioCommandLine = '/usr/local/bin/ffmpeg -f alsa -ar 44100 -ac %d -i hw:%d -f mpegts -codec:a mp2 -b:a 32k -muxdelay 0.001 http://%s:%s/%s/640/480/' % (robotSettings.mic_channels, robotSettings.audio_device_number, server, audioPort, robotSettings.stream_key)
+
     print audioCommandLine
     return subprocess.Popen(shlex.split(audioCommandLine))
 
