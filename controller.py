@@ -114,13 +114,8 @@ elif commandArgs.type == 'owi_arm':
 else:
     print "invalid --type in command line"
     exit(0)
-    
-#serialDevice = '/dev/tty.usbmodem12341'
-#serialDevice = '/dev/ttyUSB0'
 
 serialDevice = commandArgs.serial_device
-
-
 
 if commandArgs.type == 'motor_hat':
     try:
@@ -375,6 +370,24 @@ if commandArgs.type == 'serial':
         ser = serial.Serial(serialDevice, serialBaud, timeout=1)  # open serial
     except:
         print "error: could not open serial port"
+        try:
+            ser = serial.Serial('/dev/ttyACM0', serialBaud, timeout=1)  # open serial
+        except:
+            print "error: could not open serial port /dev/ttyACM0"
+            try:
+                ser = serial.Serial('/dev/ttyUSB0', serialBaud, timeout=1)  # open serial
+            except:
+                print "error: could not open serial port /dev/ttyUSB0"
+                try:
+                    ser = serial.Serial('/dev/ttyUSB1', serialBaud, timeout=1)  # open serial
+                except:
+                    print "error: could not open serial port /dev/ttyUSB1"
+                    try:
+                        ser = serial.Serial('/dev/ttyUSB2', serialBaud, timeout=1)  # open serial
+                    except:
+                        print "error: could not open serial port /dev/ttyUSB2"
+
+
 
 
 def getControlHostPort():
