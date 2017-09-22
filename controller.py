@@ -72,11 +72,8 @@ if commandArgs.tts_volume > 50:
 # tested for USB audio device
 os.system("amixer -c 2 cset numid=3 %d%%" % commandArgs.tts_volume)
 
-infoServer = "letsrobot.tv"
-#infoServer = "runmyrobot.com"
-#infoServer = "52.52.213.92"
+infoServer = "letsrobot.tv:3100" if commandArgs.env == 'dev' else "letsrobot.tv"
 print "info server:", infoServer
-
 
 tempDir = tempfile.gettempdir()
 print "temporary directory:", tempDir

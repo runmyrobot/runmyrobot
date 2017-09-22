@@ -125,7 +125,8 @@ def getOnlineRobotSettings(robotID):
     response = robot_util.getWithRetry(url)
     return json.loads(response)
         
-
+def identifyRobotId():
+    appServerSocketIO.emit('identify_robot_id', robotID);
     
 
 
@@ -267,6 +268,7 @@ def main():
 
 
     robotID = getRobotID()
+    identifyRobotId()
 
     print "robot id:", robotID
 
@@ -342,9 +344,8 @@ def main():
                 traceback.print_exc()
                 sys.stdout.flush()
                 
-                
-        
-        
+        if (count % 60) == 0:
+            identifyRobotId()
         
         if robotSettings.camera_enabled:
         
