@@ -72,11 +72,8 @@ if commandArgs.tts_volume > 50:
 # tested for USB audio device
 os.system("amixer -c 2 cset numid=3 %d%%" % commandArgs.tts_volume)
 
-infoServer = "letsrobot.tv"
-#infoServer = "runmyrobot.com"
-#infoServer = "52.52.213.92"
+infoServer = "letsrobot.tv:3100" if commandArgs.env == 'dev' else "letsrobot.tv"
 print "info server:", infoServer
-
 
 tempDir = tempfile.gettempdir()
 print "temporary directory:", tempDir
@@ -117,13 +114,8 @@ elif commandArgs.type == 'owi_arm':
 else:
     print "invalid --type in command line"
     exit(0)
-    
-#serialDevice = '/dev/tty.usbmodem12341'
-#serialDevice = '/dev/ttyUSB0'
 
 serialDevice = commandArgs.serial_device
-
-
 
 if commandArgs.type == 'motor_hat':
     try:
@@ -378,6 +370,24 @@ if commandArgs.type == 'serial':
         ser = serial.Serial(serialDevice, serialBaud, timeout=1)  # open serial
     except:
         print "error: could not open serial port"
+        try:
+            ser = serial.Serial('/dev/ttyACM0', serialBaud, timeout=1)  # open serial
+        except:
+            print "error: could not open serial port /dev/ttyACM0"
+            try:
+                ser = serial.Serial('/dev/ttyUSB0', serialBaud, timeout=1)  # open serial
+            except:
+                print "error: could not open serial port /dev/ttyUSB0"
+                try:
+                    ser = serial.Serial('/dev/ttyUSB1', serialBaud, timeout=1)  # open serial
+                except:
+                    print "error: could not open serial port /dev/ttyUSB1"
+                    try:
+                        ser = serial.Serial('/dev/ttyUSB2', serialBaud, timeout=1)  # open serial
+                    except:
+                        print "error: could not open serial port /dev/ttyUSB2"
+
+
 
 
 def getControlHostPort():
@@ -386,18 +396,29 @@ def getControlHostPort():
     response = robot_util.getWithRetry(url)
     return json.loads(response)
 
-    
+def getChatHostPort():
+    url = 'https://%s/get_chat_host_port/%s' % (infoServer, commandArgs.robot_id)
+    response = robot_util.getWithRetry(url)
+    return json.loads(response)
+
 controlHostPort = getControlHostPort()
+chatHostPort = getChatHostPort()
 
-print "using socket io to connect to", controlHostPort
+print "using socket io to connect to control", controlHostPort
+print "using socket io to connect to chat", chatHostPort
 
+print "connecting to control socket.io"
 controlSocketIO = SocketIO(controlHostPort['host'], controlHostPort['port'], LoggingNamespace)
-print "finished using socket io to connect to", controlHostPort
+print "finished using socket io to connect to control host port", controlHostPort
 
-print "connecting to app server"
+
+print "connecting to chat socket.io"
+chatSocket = SocketIO(chatHostPort['host'], chatHostPort['port'], LoggingNamespace)
+print 'finished using socket io to connect to chat ', chatHostPort
+
+print "connecting to app server socket.io"
 appServerSocketIO = SocketIO('letsrobot.tv', 8022, LoggingNamespace)
 print "finished connecting to app server"
-
 
 def setServoPulse(channel, pulse):
   pulseLength = 1000000                   # 1,000,000 us per second
@@ -837,7 +858,7 @@ def handle_command(args):
                 if command == 'WALL':
                     handleLoudCommand()
                     os.system("aplay -D plughw:2,0 /home/pi/wall.wav")
-                    
+
             if commandArgs.type == 'l298n':
                 runl298n(command)                                 
             #setMotorsToIdle()
@@ -1022,7 +1043,7 @@ def on_handle_chat_message(*args):
 #from communication import socketIO
 controlSocketIO.on('command_to_robot', on_handle_command)
 appServerSocketIO.on('exclusive_control', on_handle_exclusive_control)
-appServerSocketIO.on('chat_message_with_name', on_handle_chat_message)
+chatSocket.on('chat_message_with_name', on_handle_chat_message)
 
 
 def startReverseSshProcess(*args):
@@ -1098,8 +1119,8 @@ if commandArgs.type == 'motor_hat':
 
 
 def identifyRobotId():
+    chatSocket.emit('identify_robot_id', robotID);
     appServerSocketIO.emit('identify_robot_id', robotID);
-
 
 
 def setSpeedBasedOnCharge():
@@ -1188,6 +1209,10 @@ def waitForAppServer():
 def waitForControlServer():
     while True:
         controlSocketIO.wait(seconds=1)        
+
+def waitForChatServer():
+    while True:
+        chatSocket.wait(seconds=1)        
         
 def startListenForAppServer():
    thread.start_new_thread(waitForAppServer, ())
@@ -1195,12 +1220,15 @@ def startListenForAppServer():
 def startListenForControlServer():
    thread.start_new_thread(waitForControlServer, ())
 
+def startListenForChatServer():
+   thread.start_new_thread(waitForChatServer, ())
+
 
 startListenForControlServer()
 startListenForAppServer()
+startListenForChatServer()
 
 while True:
-
     time.sleep(1)
     
     if (waitCounter % chargeCheckInterval) == 0:

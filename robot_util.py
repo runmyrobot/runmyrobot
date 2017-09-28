@@ -1,6 +1,13 @@
+import os
 import time
 import traceback
 import urllib2
+import getpass
+import json
+
+
+
+ConfigFilename = "/home/pi/config_" + getpass.getuser() + ".json"
 
 
 def getWithRetry(url):
@@ -16,3 +23,6 @@ def getWithRetry(url):
             time.sleep(2)
 
     return response
+
+
+
