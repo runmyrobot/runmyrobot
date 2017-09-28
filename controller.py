@@ -392,8 +392,11 @@ controlHostPort = getControlHostPort()
 print "using socket io to connect to", controlHostPort
 
 controlSocketIO = SocketIO(controlHostPort['host'], controlHostPort['port'], LoggingNamespace)
+print "finished using socket io to connect to", controlHostPort
+
+print "connecting to app server"
 appServerSocketIO = SocketIO('letsrobot.tv', 8022, LoggingNamespace)
-print 'finished using socket io to connect to', controlHostPort
+print "finished connecting to app server"
 
 
 def setServoPulse(channel, pulse):
