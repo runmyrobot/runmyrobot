@@ -356,12 +356,15 @@ def main():
                 randomSleep()
                 videoProcess = startVideoCaptureLinux()
                 numVideoRestarts += 1
+        else:
+            print "video process poll: camera_enabled is false"
             
+
                 
         if robotSettings.mic_enabled:
 
             if audioProcess is None:
-                print "no audio process"
+                print "audio process poll: audioProcess object is None"
             else:
                 print "audio process poll", audioProcess.poll(), "pid", audioProcess.pid, "restarts", numAudioRestarts
 
@@ -372,6 +375,8 @@ def main():
                 #time.sleep(30)
                 #appServerSocketIO.emit('send_video_process_start_event', {'camera_id': commandArgs.camera_id})               
                 numAudioRestarts += 1
+        else:
+            print "audio process poll: mic_enabled is false"
 
         
         count += 1
