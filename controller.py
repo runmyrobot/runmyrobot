@@ -11,6 +11,7 @@ import getpass
 import sys
 import argparse
 import random
+import telly
 import robot_util
 
 
@@ -47,6 +48,12 @@ parser.add_argument('--reverse-ssh-key-file', default='/home/pi/reverse_ssh_key1
 parser.add_argument('--reverse-ssh-host', default='ubuntu@52.52.204.174')
 parser.add_argument('--charge-hours', type=float, default = 3.0)
 parser.add_argument('--discharge-hours', type=float, default = 8.0)
+parser.add_argument('--right-wheel-forward-speed', type=int)
+parser.add_argument('--right-wheel-backward-speed', type=int)
+parser.add_argument('--left-wheel-forward-speed', type=int)
+parser.add_argument('--left-wheel-backward-speed', type=int)
+parser.add_argument('--led-max-brightness', type=int)
+
 
 
 commandArgs = parser.parse_args()
@@ -366,6 +373,7 @@ if commandArgs.type == 'serial':
     serialBaud = 9600
     print "baud:", serialBaud
     #ser = serial.Serial('/dev/tty.usbmodem12341', 19200, timeout=1)  # open serial
+    ser = None
     try:
         ser = serial.Serial(serialDevice, serialBaud, timeout=1)  # open serial
     except:
@@ -386,6 +394,11 @@ if commandArgs.type == 'serial':
                         ser = serial.Serial('/dev/ttyUSB2', serialBaud, timeout=1)  # open serial
                     except:
                         print "error: could not open serial port /dev/ttyUSB2"
+
+    if ser is None:
+        print "error: could not find any valid serial port"
+    else:
+        telly.sendSettings(ser, commandArgs)
 
 
 
@@ -502,25 +515,6 @@ def configWifiLogin(secretKey):
         traceback.print_exc()
 
 
-
-def sendSerialCommand(command):
-
-
-    print(ser.name)         # check which port was really used
-    ser.nonblocking()
-
-    # loop to collect input
-    #s = "f"
-    #print "string:", s
-    print str(command.lower())
-    ser.write(command.lower() + "\r\n")     # write a string
-    #ser.write(s)
-    ser.flush()
-
-    #while ser.in_waiting > 0:
-    #    print "read:", ser.read()
-
-    #ser.close()
 
 
 
@@ -806,7 +800,7 @@ def handle_command(args):
 
             
             if commandArgs.type == 'serial':
-                sendSerialCommand(command)
+                robo_util.sendSerialCommand(command)
 
             if commandArgs.type == 'motor_hat' and motorsEnabled:
                 motorA.setSpeed(drivingSpeed)
