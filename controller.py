@@ -798,9 +798,8 @@ def handle_command(args):
             if commandArgs.type == 'owi_arm':
                 owi_arm.handleOwiArm(command)
 
-            
             if commandArgs.type == 'serial':
-                robo_util.sendSerialCommand(command)
+                robot_util.sendSerialCommand(ser, command)
 
             if commandArgs.type == 'motor_hat' and motorsEnabled:
                 motorA.setSpeed(drivingSpeed)
