@@ -17,10 +17,10 @@ def sendSettings(ser, args):
         robot_util.sendSerialCommand(ser, "lwbs " + str(args.left_wheel_backward_speed))
 
     if args.straight_delay is not None:
-        robot_util.sendSerialCommand(ser, "straight-distance " + str(int(args.straight_delay)))
+        robot_util.sendSerialCommand(ser, "straight-distance " + str(int(args.straight_delay * 255)))
 
     if args.turn_delay is not None:
-        robot_util.sendSerialCommand(ser, "turn-distance " + str(int(args.turn_delay)))
+        robot_util.sendSerialCommand(ser, "turn-distance " + str(int(args.turn_delay * 255)))
         
     if args.led_max_brightness is not None:
         robot_util.sendSerialCommand(ser, "led-max-brightness " + str(args.led_max_brightness))
