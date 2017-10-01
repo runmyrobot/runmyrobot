@@ -11,6 +11,7 @@ import getpass
 import sys
 import argparse
 import random
+import telly
 import robot_util
 
 
@@ -47,6 +48,12 @@ parser.add_argument('--reverse-ssh-key-file', default='/home/pi/reverse_ssh_key1
 parser.add_argument('--reverse-ssh-host', default='ubuntu@52.52.204.174')
 parser.add_argument('--charge-hours', type=float, default = 3.0)
 parser.add_argument('--discharge-hours', type=float, default = 8.0)
+parser.add_argument('--right-wheel-forward-speed', type=int)
+parser.add_argument('--right-wheel-backward-speed', type=int)
+parser.add_argument('--left-wheel-forward-speed', type=int)
+parser.add_argument('--left-wheel-backward-speed', type=int)
+parser.add_argument('--led-max-brightness', type=int)
+
 
 
 commandArgs = parser.parse_args()
@@ -77,8 +84,9 @@ infoServer = commandArgs.info_server
 #infoServer = "letsrobot.tv"
 #infoServer = "runmyrobot.com"
 #infoServer = "52.52.213.92"
-print "info server:", infoServer
+#infoServer = "letsrobot.tv:3100"
 
+print "info server:", infoServer
 
 tempDir = tempfile.gettempdir()
 print "temporary directory:", tempDir
@@ -119,13 +127,8 @@ elif commandArgs.type == 'owi_arm':
 else:
     print "invalid --type in command line"
     exit(0)
-    
-#serialDevice = '/dev/tty.usbmodem12341'
-#serialDevice = '/dev/ttyUSB0'
 
 serialDevice = commandArgs.serial_device
-
-
 
 if commandArgs.type == 'motor_hat':
     try:
@@ -376,10 +379,34 @@ if commandArgs.type == 'serial':
     serialBaud = 9600
     print "baud:", serialBaud
     #ser = serial.Serial('/dev/tty.usbmodem12341', 19200, timeout=1)  # open serial
+    ser = None
     try:
         ser = serial.Serial(serialDevice, serialBaud, timeout=1)  # open serial
     except:
         print "error: could not open serial port"
+        try:
+            ser = serial.Serial('/dev/ttyACM0', serialBaud, timeout=1)  # open serial
+        except:
+            print "error: could not open serial port /dev/ttyACM0"
+            try:
+                ser = serial.Serial('/dev/ttyUSB0', serialBaud, timeout=1)  # open serial
+            except:
+                print "error: could not open serial port /dev/ttyUSB0"
+                try:
+                    ser = serial.Serial('/dev/ttyUSB1', serialBaud, timeout=1)  # open serial
+                except:
+                    print "error: could not open serial port /dev/ttyUSB1"
+                    try:
+                        ser = serial.Serial('/dev/ttyUSB2', serialBaud, timeout=1)  # open serial
+                    except:
+                        print "error: could not open serial port /dev/ttyUSB2"
+
+    if ser is None:
+        print "error: could not find any valid serial port"
+    else:
+        telly.sendSettings(ser, commandArgs)
+
+
 
 
 def getControlHostPort():
@@ -399,12 +426,18 @@ chatHostPort = getChatHostPort()
 print "using socket io to connect to control", controlHostPort
 print "using socket io to connect to chat", chatHostPort
 
+print "connecting to control socket.io"
 controlSocketIO = SocketIO(controlHostPort['host'], controlHostPort['port'], LoggingNamespace)
-print 'finished using socket io to connect to control ', controlHostPort
+print "finished using socket io to connect to control host port", controlHostPort
+
+
+print "connecting to chat socket.io"
 chatSocket = SocketIO(chatHostPort['host'], chatHostPort['port'], LoggingNamespace)
 print 'finished using socket io to connect to chat ', chatHostPort
+
+print "connecting to app server socket.io"
 appServerSocketIO = SocketIO('letsrobot.tv', 8022, LoggingNamespace)
-print 'finished using socket io to connect to', controlHostPort
+print "finished connecting to app server"
 
 def setServoPulse(channel, pulse):
   pulseLength = 1000000                   # 1,000,000 us per second
@@ -488,25 +521,6 @@ def configWifiLogin(secretKey):
         traceback.print_exc()
 
 
-
-def sendSerialCommand(command):
-
-
-    print(ser.name)         # check which port was really used
-    ser.nonblocking()
-
-    # loop to collect input
-    #s = "f"
-    #print "string:", s
-    print str(command.lower())
-    ser.write(command.lower() + "\r\n")     # write a string
-    #ser.write(s)
-    ser.flush()
-
-    #while ser.in_waiting > 0:
-    #    print "read:", ser.read()
-
-    #ser.close()
 
 
 
@@ -790,9 +804,8 @@ def handle_command(args):
             if commandArgs.type == 'owi_arm':
                 owi_arm.handleOwiArm(command)
 
-            
             if commandArgs.type == 'serial':
-                sendSerialCommand(command)
+                robot_util.sendSerialCommand(ser, command)
 
             if commandArgs.type == 'motor_hat' and motorsEnabled:
                 motorA.setSpeed(drivingSpeed)

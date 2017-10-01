@@ -5,6 +5,9 @@ nohup.out
 npm-debug.log
 gpio.conf
 
+#ignore jetbrains files
+.idea/
+
 #ignore (open?) files with ~ in name:
 *~
 *.pyc

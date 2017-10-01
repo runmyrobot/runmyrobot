@@ -125,7 +125,8 @@ def getOnlineRobotSettings(robotID):
     response = robot_util.getWithRetry(url)
     return json.loads(response)
         
-
+def identifyRobotId():
+    appServerSocketIO.emit('identify_robot_id', robotID);
     
 
 
@@ -267,6 +268,7 @@ def main():
 
 
     robotID = getRobotID()
+    identifyRobotId()
 
     print "robot id:", robotID
 
@@ -342,9 +344,8 @@ def main():
                 traceback.print_exc()
                 sys.stdout.flush()
                 
-                
-        
-        
+        if (count % 60) == 0:
+            identifyRobotId()
         
         if robotSettings.camera_enabled:
         
@@ -355,12 +356,15 @@ def main():
                 randomSleep()
                 videoProcess = startVideoCaptureLinux()
                 numVideoRestarts += 1
+        else:
+            print "video process poll: camera_enabled is false"
             
+
                 
         if robotSettings.mic_enabled:
 
             if audioProcess is None:
-                print "no audio process"
+                print "audio process poll: audioProcess object is None"
             else:
                 print "audio process poll", audioProcess.poll(), "pid", audioProcess.pid, "restarts", numAudioRestarts
 
@@ -371,6 +375,8 @@ def main():
                 #time.sleep(30)
                 #appServerSocketIO.emit('send_video_process_start_event', {'camera_id': commandArgs.camera_id})               
                 numAudioRestarts += 1
+        else:
+            print "audio process poll: mic_enabled is false"
 
         
         count += 1
