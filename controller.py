@@ -16,9 +16,9 @@ import robot_util
 
 parser = argparse.ArgumentParser(description='start robot control program')
 parser.add_argument('robot_id', help='Robot ID')
-parser.add_argument('--env', help="Environment for example dev or prod, prod is default", default='prod')
-parser.add_argument('--type', help="serial or motor_hat or gopigo2 or gopigo3 or l298n or motozero or pololu", default='motor_hat')
-parser.add_argument('--serial-device', help="serial device", default='/dev/ttyACM0')
+parser.add_argument('--info-server', help="Server that robot will connect to for information about servers and things", default='letsrobot.tv')
+parser.add_argument('--type', help="Serial or motor_hat or gopigo2 or gopigo3 or l298n or motozero or pololu", default='motor_hat')
+parser.add_argument('--serial-device', help="Serial device", default='/dev/ttyACM0')
 parser.add_argument('--male', dest='male', action='store_true')
 parser.add_argument('--female', dest='male', action='store_false')
 parser.add_argument('--voice-number', type=int, default=1)
@@ -72,7 +72,9 @@ if commandArgs.tts_volume > 50:
 # tested for USB audio device
 os.system("amixer -c 2 cset numid=3 %d%%" % commandArgs.tts_volume)
 
-infoServer = "letsrobot.tv"
+
+infoServer = commandArgs.info_server
+#infoServer = "letsrobot.tv"
 #infoServer = "runmyrobot.com"
 #infoServer = "52.52.213.92"
 print "info server:", infoServer
