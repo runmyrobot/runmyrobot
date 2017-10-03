@@ -432,7 +432,8 @@ print "finished using socket io to connect to control host port", controlHostPor
 
 
 print "connecting to chat socket.io"
-chatSocket = SocketIO(chatHostPort['host'], chatHostPort['port'], LoggingNamespace)
+#chatSocket = SocketIO(chatHostPort['host'], chatHostPort['port'], LoggingNamespace)
+chatSocket = None
 print 'finished using socket io to connect to chat ', chatHostPort
 
 print "connecting to app server socket.io"
@@ -1042,7 +1043,8 @@ def on_handle_chat_message(*args):
 #from communication import socketIO
 controlSocketIO.on('command_to_robot', on_handle_command)
 appServerSocketIO.on('exclusive_control', on_handle_exclusive_control)
-chatSocket.on('chat_message_with_name', on_handle_chat_message)
+if chatSocket is not None:
+    chatSocket.on('chat_message_with_name', on_handle_chat_message)
 
 
 def startReverseSshProcess(*args):
@@ -1118,7 +1120,8 @@ if commandArgs.type == 'motor_hat':
 
 
 def identifyRobotId():
-    chatSocket.emit('identify_robot_id', robotID);
+    if chatSocket is not None:
+        chatSocket.emit('identify_robot_id', robotID);
     appServerSocketIO.emit('identify_robot_id', robotID);
 
 
@@ -1211,7 +1214,8 @@ def waitForControlServer():
 
 def waitForChatServer():
     while True:
-        chatSocket.wait(seconds=1)        
+        if chatSocket is not None:
+            chatSocket.wait(seconds=1)        
         
 def startListenForAppServer():
    thread.start_new_thread(waitForAppServer, ())
