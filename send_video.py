@@ -223,8 +223,16 @@ def killallFFMPEGIn30Seconds():
 
 #todo, this needs to work differently. likely the configuration will be json and pull in stuff from command line rather than the other way around.
 def overrideSettings(commandArgs, onlineSettings):
-    onlineSettings.update(commandArgs)
-    return onlineSettings
+    c = copy.deepcopy(commandArgs)
+    print "onlineSettings:", onlineSettings
+    if 'mic_enabled' in onlineSettings:
+        c.mic_enabled = onlineSettings['mic_enabled']
+    if 'xres' in onlineSettings:
+        c.xres = onlineSettings['xres']
+    if 'yres' in onlineSettings:
+        c.yres = onlineSettings['yres']
+    print "onlineSettings['mic_enabled']:", onlineSettings['mic_enabled']
+    return c
 
 
 def refreshFromOnlineSettings():
