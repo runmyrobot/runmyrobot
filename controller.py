@@ -349,12 +349,6 @@ SetLED_Off()
 steeringSpeed = 90
 steeringHoldingSpeed = 90
 
-global drivingSpeed
-
-# drivingSpeed = 90
-drivingSpeed = robotSettings.driving_speed
-handlingCommand = False
-
 # Marvin
 turningSpeedActuallyUsed = 250
 dayTimeDrivingSpeedActuallyUsed = commandArgs.day_speed
@@ -452,7 +446,7 @@ chatSocket = SocketIO(chatHostPort['host'], chatHostPort['port'], LoggingNamespa
 print 'finished using socket io to connect to chat ', chatHostPort
 
 print "connecting to api socket.io"
-apiServerSocketIO = SocketIO('api.letsrobot.tv', 8022, LoggingNamespace)
+apiServerSocketIO = SocketIO('api.letsrobot.tv', 8122, LoggingNamespace)
 print 'finished using socket io to connect to api '
 
 print "connecting to app server socket.io"
@@ -1199,9 +1193,6 @@ def updateChargeApproximation():
 
 waitCounter = 0
 
-identifyRobotId()
-refreshFromOnlineSettings()
-
 if platform.system() == 'Darwin':
     pass
     # ipInfoUpdate()
@@ -1252,6 +1243,13 @@ def main():
     startListenForAppServer()
     startListenForChatServer()
     apiServerSocketIO.on('robot_settings_changed', onRobotSettingsChanged)
+    identifyRobotId()
+    refreshFromOnlineSettings()
+    global drivingSpeed
+    
+    # drivingSpeed = 90
+    drivingSpeed = robotSettings.driving_speed
+    handlingCommand = False
 
     while True:
         time.sleep(1)
@@ -1298,3 +1296,6 @@ def main():
                 ipInfoUpdate()
 
         waitCounter += 1
+
+
+main()
