@@ -423,17 +423,16 @@ def getChatHostPort():
 controlHostPort = getControlHostPort()
 chatHostPort = getChatHostPort()
 
-print "using socket io to connect to control", controlHostPort
-print "using socket io to connect to chat", chatHostPort
 
-print "connecting to control socket.io"
+
+print "connecting to control socket.io", controlHostPort
 controlSocketIO = SocketIO(controlHostPort['host'], controlHostPort['port'], LoggingNamespace)
 print "finished using socket io to connect to control host port", controlHostPort
 
 
-print "connecting to chat socket.io"
-#chatSocket = SocketIO(chatHostPort['host'], chatHostPort['port'], LoggingNamespace)
-chatSocket = None
+print "connecting to chat socket.io", chatHostPort
+chatSocket = SocketIO(chatHostPort['host'], chatHostPort['port'], LoggingNamespace)
+#chatSocket = None
 print 'finished using socket io to connect to chat ', chatHostPort
 
 print "connecting to app server socket.io"
@@ -1213,9 +1212,10 @@ def waitForControlServer():
         controlSocketIO.wait(seconds=1)        
 
 def waitForChatServer():
-    while True:
-        if chatSocket is not None:
-            chatSocket.wait(seconds=1)        
+    pass
+    #while True:
+    #    if chatSocket is not None:
+    #        chatSocket.wait(seconds=1)        
         
 def startListenForAppServer():
    thread.start_new_thread(waitForAppServer, ())
