@@ -50,6 +50,7 @@ parser.add_argument('--stream-key', default='hello')
 
 commandArgs = parser.parse_args()
 robotSettings = None
+resolutionChanged = False
 server = commandArgs.info_server
 apiServer = commandArgs.api_server
 
@@ -218,13 +219,19 @@ def killallFFMPEGIn30Seconds():
 
 #todo, this needs to work differently. likely the configuration will be json and pull in stuff from command line rather than the other way around.
 def overrideSettings(commandArgs, onlineSettings):
+    global resolutionChanged
+    resolutionChanged = False
     c = copy.deepcopy(commandArgs)
     print "onlineSettings:", onlineSettings
     if 'mic_enabled' in onlineSettings:
         c.mic_enabled = onlineSettings['mic_enabled']
     if 'xres' in onlineSettings:
+        if c.xres != onlineSettings['xres']
+            resolutionChanged = True
         c.xres = onlineSettings['xres']
     if 'yres' in onlineSettings:
+        if c.yres != onlineSettings['yres']
+            resolutionChanged = True
         c.yres = onlineSettings['yres']
     print "onlineSettings['mic_enabled']:", onlineSettings['mic_enabled']
     return c
@@ -232,16 +239,22 @@ def overrideSettings(commandArgs, onlineSettings):
 
 def refreshFromOnlineSettings():
     global robotSettings
+    global resolutionChanged
     print "refreshing from online settings"
     onlineSettings = getOnlineRobotSettings(robotID)
     robotSettings = overrideSettings(commandArgs, onlineSettings)
 
     if not robotSettings.mic_enabled:
         print "KILLING**********************"
-        #todo: just kill the audio, not both
         if audioProcess is not None:
-            print "KILLING**********************2"
+            print "KILLING**********************"
             audioProcess.kill()
+
+    if resolutionChanged:
+        print "KILLING VIDEO DUE TO RESOLUTION CHANGE**********************"
+        if videoProcess is not None:
+            print "KILLING**********************"
+            videoProcess.kill()
 
     else:
         print "NOT KILLING***********************"
