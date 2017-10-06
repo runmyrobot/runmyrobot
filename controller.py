@@ -40,6 +40,8 @@ parser.add_argument('--auto-wifi', dest='auto_wifi', action='store_true')
 parser.set_defaults(auto_wifi=False)
 parser.add_argument('--no-anon-tts', dest='anon_tts', action='store_false')
 parser.set_defaults(anon_tts=True)
+parser.add_argument('--no-chat-server-connection', dest='enable_chat_server_connection', action='store_false')
+parser.set_defaults(enable_chat_server_connection=True)
 parser.add_argument('--filter-url-tts', dest='filter_url_tts', action='store_true')
 parser.set_defaults(filter_url_tts=False)
 parser.add_argument('--slow-for-low-battery', dest='slow_for_low_battery', action='store_true')
@@ -429,11 +431,12 @@ print "connecting to control socket.io", controlHostPort
 controlSocketIO = SocketIO(controlHostPort['host'], controlHostPort['port'], LoggingNamespace)
 print "finished using socket io to connect to control host port", controlHostPort
 
-
-print "connecting to chat socket.io", chatHostPort
-chatSocket = SocketIO(chatHostPort['host'], chatHostPort['port'], LoggingNamespace)
-#chatSocket = None
-print 'finished using socket io to connect to chat ', chatHostPort
+if commandArgs.enable_chat_server_connection:
+    print "connecting to chat socket.io", chatHostPort
+    chatSocket = SocketIO(chatHostPort['host'], chatHostPort['port'], LoggingNamespace)
+    print 'finished using socket io to connect to chat ', chatHostPort
+else:
+    print "chat server connection disabled"
 
 print "connecting to app server socket.io"
 appServerSocketIO = SocketIO('letsrobot.tv', 8022, LoggingNamespace)
@@ -1042,7 +1045,7 @@ def on_handle_chat_message(*args):
 #from communication import socketIO
 controlSocketIO.on('command_to_robot', on_handle_command)
 appServerSocketIO.on('exclusive_control', on_handle_exclusive_control)
-if chatSocket is not None:
+if commandArgs.enable_chat_server_connection:
     chatSocket.on('chat_message_with_name', on_handle_chat_message)
 
 
@@ -1119,7 +1122,7 @@ if commandArgs.type == 'motor_hat':
 
 
 def identifyRobotId():
-    if chatSocket is not None:
+    if commandArgs.enable_chat_server_connection:
         chatSocket.emit('identify_robot_id', robotID);
     appServerSocketIO.emit('identify_robot_id', robotID);
 
@@ -1212,10 +1215,8 @@ def waitForControlServer():
         controlSocketIO.wait(seconds=1)        
 
 def waitForChatServer():
-    pass
-    #while True:
-    #    if chatSocket is not None:
-    #        chatSocket.wait(seconds=1)        
+    while True:
+        chatSocket.wait(seconds=1)        
         
 def startListenForAppServer():
    thread.start_new_thread(waitForAppServer, ())
@@ -1229,7 +1230,9 @@ def startListenForChatServer():
 
 startListenForControlServer()
 startListenForAppServer()
-startListenForChatServer()
+
+if commandArgs.enable_chat_server_connection:
+    startListenForChatServer()
 
 while True:
     time.sleep(1)

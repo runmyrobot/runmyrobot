@@ -25,6 +25,7 @@ class DummyProcess:
 
 parser = argparse.ArgumentParser(description='robot control')
 parser.add_argument('camera_id')
+parser.add_argument('--info-server', help="Server that robot will connect to for information about servers and things and reporting status", default='runmyrobot.com')
 parser.add_argument('--xres', type=int, default=640)
 parser.add_argument('--yres', type=int, default=480)
 parser.add_argument('video_device_number', default=0, type=int)
@@ -54,7 +55,7 @@ parser.add_argument('--stream-key', default='hello')
 
 commandArgs = parser.parse_args()
 robotSettings = None
-server = "runmyrobot.com"
+server = commandArgs.info_server
 
 audioProcess = None
 videoProcess = None
