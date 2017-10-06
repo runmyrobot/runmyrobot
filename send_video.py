@@ -85,7 +85,6 @@ apiServerSocketIO = SocketIO(apiServer, port, LoggingNamespace)
 print "finished initializing api server socket io"
 
 def getVideoPort():
-
     url = 'https://%s/get_video_port/%s' % (server, commandArgs.camera_id)
     response = robot_util.getWithRetry(url)
     return json.loads(response)['mpeg_stream_port']
@@ -93,7 +92,6 @@ def getVideoPort():
 
 
 def getAudioPort():
-
     url = 'https://%s/get_audio_port/%s' % (server, commandArgs.camera_id)
     response = robot_util.getWithRetry(url)
     return json.loads(response)['audio_stream_port']
@@ -111,10 +109,7 @@ def getWebsocketRelayHost():
     return json.loads(response)
 
 def getOnlineRobotSettings(robotID):
-
-    # https://api.letsrobot.tv/api/v1/robots/90073095
-
-    url = 'https://api.letsrobot.tv/api/v1/robots/%s' % (robotID)
+    url = 'https://%s/api/v1/robots/%s' % (apiServer, robotID)
     response = robot_util.getWithRetry(url)
     return json.loads(response)
         
