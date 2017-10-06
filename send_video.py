@@ -26,6 +26,7 @@ class DummyProcess:
 parser = argparse.ArgumentParser(description='robot control')
 parser.add_argument('camera_id')
 parser.add_argument('--info-server', help="Server that robot will connect to for information about servers and things and reporting status", default='runmyrobot.com')
+parser.add_argument('--api-server', help="Server that robot will connect to listen for API update events", default='api.letsrobot.tv')
 parser.add_argument('--xres', type=int, default=640)
 parser.add_argument('--yres', type=int, default=480)
 parser.add_argument('video_device_number', default=0, type=int)
@@ -47,19 +48,13 @@ parser.add_argument('--mic-channels', type=int, help='microphone channels, typic
 parser.add_argument('--audio-input-device', default='Microphone (HD Webcam C270)') # currently, this option is only used for windows screen capture
 parser.add_argument('--stream-key', default='hello')
 
-
-#global numVideoRestarts
-#numVideoRestarts = 0
-#global numAudioRestarts
-#numAudioRestarts = 0
-
 commandArgs = parser.parse_args()
 robotSettings = None
 server = commandArgs.info_server
+apiServer = commandArgs.api_server
 
 audioProcess = None
 videoProcess = None
-
 
 from socketIO_client import SocketIO, LoggingNamespace
 
@@ -86,11 +81,8 @@ print "server:", server
 print "port:", port
 appServerSocketIO = SocketIO(server, port, LoggingNamespace)
 print "finished initializing app server socket io"
-
-
-#ffmpeg -f qtkit -i 0 -f mpeg1video -b 400k -r 30 -s 320x240 http://52.8.81.124:8082/hello/320/240/
-
-
+apiServerSocketIO = SocketIO(apiServer, port, LoggingNamespace)
+print "finished initializing api server socket io"
 
 def getVideoPort():
 
@@ -231,14 +223,8 @@ def killallFFMPEGIn30Seconds():
 
 #todo, this needs to work differently. likely the configuration will be json and pull in stuff from command line rather than the other way around.
 def overrideSettings(commandArgs, onlineSettings):
-
-    c = copy.deepcopy(commandArgs)
-    print "onlineSettings:", onlineSettings
-    c.mic_enabled = onlineSettings['mic_enabled']
-    c.xres = onlineSettings['xres']
-    c.yres = onlineSettings['yres']
-    print "onlineSettings['mic_enabled']:", onlineSettings['mic_enabled']
-    return c
+    onlineSettings.update(commandArgs)
+    return onlineSettings
 
 
 def refreshFromOnlineSettings():
@@ -248,10 +234,10 @@ def refreshFromOnlineSettings():
     robotSettings = overrideSettings(commandArgs, onlineSettings)
 
     if not robotSettings.mic_enabled:
-        print "KILING**********************"
+        print "KILLING**********************"
         #todo: just kill the audio, not both
         if audioProcess is not None:
-            print "KILING**********************2"            
+            print "KILLING**********************2"
             audioProcess.kill()
 
     else:
@@ -282,6 +268,8 @@ def main():
     appServerSocketIO.on('command_to_robot', onCommandToRobot)
     appServerSocketIO.on('connection', onConnection)
     appServerSocketIO.on('robot_settings_changed', onRobotSettingsChanged)
+    apiServerSocketIO.on('robot_settings_changed', onRobotSettingsChanged)
+
 
 
 
@@ -317,6 +305,8 @@ def main():
         print "-----------------" + str(count) + "-----------------"
         
         appServerSocketIO.wait(seconds=1)
+        apiServerSocketIO.wait(seconds=1)
+
 
 
         # todo: note about the following ffmpeg_process_exists is not technically true, but need to update
