@@ -26,8 +26,9 @@ class DummyProcess:
 parser = argparse.ArgumentParser(description='robot control')
 parser.add_argument('camera_id')
 parser.add_argument('--info-server', help="Server that robot will connect to for information about servers and things and reporting status", default='runmyrobot.com')
-parser.add_argument('--xres', type=int, default=640)
-parser.add_argument('--yres', type=int, default=480)
+parser.add_argument('--api-server', help="Server that robot will connect to listen for API update events", default='api.letsrobot.tv')
+parser.add_argument('--xres', type=int, default=768)
+parser.add_argument('--yres', type=int, default=432)
 parser.add_argument('video_device_number', default=0, type=int)
 parser.add_argument('--audio-device-number', default=1, type=int)
 parser.add_argument('--kbps', default=350, type=int)
@@ -47,20 +48,15 @@ parser.add_argument('--mic-channels', type=int, help='microphone channels, typic
 parser.add_argument('--audio-input-device', default='Microphone (HD Webcam C270)') # currently, this option is only used for windows screen capture
 parser.add_argument('--stream-key', default='hello')
 
-
-#global numVideoRestarts
-#numVideoRestarts = 0
-#global numAudioRestarts
-#numAudioRestarts = 0
-
 commandArgs = parser.parse_args()
 robotSettings = None
+resolutionChanged = False
 server = 'runmyrobot.com'
 infoServer = commandArgs.info_server
+apiServer = commandArgs.api_server
 
 audioProcess = None
 videoProcess = None
-
 
 from socketIO_client import SocketIO, LoggingNamespace
 
@@ -87,11 +83,8 @@ print "server:", server
 print "port:", port
 appServerSocketIO = SocketIO(infoServer, port, LoggingNamespace)
 print "finished initializing app server socket io"
-
-
-#ffmpeg -f qtkit -i 0 -f mpeg1video -b 400k -r 30 -s 320x240 http://52.8.81.124:8082/hello/320/240/
-
-
+apiServerSocketIO = SocketIO(apiServer, port, LoggingNamespace)
+print "finished initializing api server socket io"
 
 def getVideoPort():
 
@@ -120,16 +113,14 @@ def getWebsocketRelayHost():
     return json.loads(response)
 
 def getOnlineRobotSettings(robotID):
-
-    # https://api.letsrobot.tv/api/v1/robots/90073095
-
-    url = 'https://api.letsrobot.tv/api/v1/robots/%s' % (robotID)
+    url = 'https://%s/api/v1/robots/%s' % (apiServer, robotID)
     response = robot_util.getWithRetry(url)
     return json.loads(response)
         
 def identifyRobotId():
     appServerSocketIO.emit('identify_robot_id', robotID);
-    
+    apiServerSocketIO.emit('identify_robot_id', robotID);
+
 
 
 def randomSleep():
@@ -162,7 +153,7 @@ def startVideoCaptureLinux():
         os.system("v4l2-ctl -c saturation={saturation}".format(saturation=robotSettings.saturation))
 
     
-    videoCommandLine = '/usr/local/bin/ffmpeg -f v4l2 -framerate 25 -video_size 640x480 -i /dev/video{video_device_number} {rotation_option} -f mpegts -codec:v mpeg1video -s {xres}x{yres} -b:v {kbps}k -bf 0 -muxdelay 0.001 http://{server}:{video_port}/{stream_key}/{xres}/{yres}/'.format(video_device_number=robotSettings.video_device_number, rotation_option=rotationOption(), kbps=robotSettings.kbps, server=server, video_port=videoPort, xres=robotSettings.xres, yres=robotSettings.yres, stream_key=robotSettings.stream_key)
+    videoCommandLine = '/usr/local/bin/ffmpeg -f v4l2 -framerate 25 -video_size {xres}x{yres} -r 25 -i /dev/video{video_device_number} {rotation_option} -f mpegts -codec:v mpeg1video -s {xres}x{yres} -b:v {kbps}k -bf 0 -muxdelay 0.001 http://{server}:{video_port}/{stream_key}/{xres}/{yres}/'.format(video_device_number=robotSettings.video_device_number, rotation_option=rotationOption(), kbps=robotSettings.kbps, server=server, video_port=videoPort, xres=robotSettings.xres, yres=robotSettings.yres, stream_key=robotSettings.stream_key)
 
     print videoCommandLine
     return subprocess.Popen(shlex.split(videoCommandLine))
@@ -232,26 +223,42 @@ def killallFFMPEGIn30Seconds():
 
 #todo, this needs to work differently. likely the configuration will be json and pull in stuff from command line rather than the other way around.
 def overrideSettings(commandArgs, onlineSettings):
-
+    global resolutionChanged
+    resolutionChanged = False
     c = copy.deepcopy(commandArgs)
     print "onlineSettings:", onlineSettings
-    c.mic_enabled = onlineSettings['mic_enabled']
+    if 'mic_enabled' in onlineSettings:
+        c.mic_enabled = onlineSettings['mic_enabled']
+    if 'xres' in onlineSettings:
+        if c.xres != onlineSettings['xres']:
+            resolutionChanged = True
+        c.xres = onlineSettings['xres']
+    if 'yres' in onlineSettings:
+        if c.yres != onlineSettings['yres']:
+            resolutionChanged = True
+        c.yres = onlineSettings['yres']
     print "onlineSettings['mic_enabled']:", onlineSettings['mic_enabled']
     return c
 
 
 def refreshFromOnlineSettings():
     global robotSettings
+    global resolutionChanged
     print "refreshing from online settings"
     onlineSettings = getOnlineRobotSettings(robotID)
     robotSettings = overrideSettings(commandArgs, onlineSettings)
 
     if not robotSettings.mic_enabled:
-        print "KILING**********************"
-        #todo: just kill the audio, not both
+        print "KILLING**********************"
         if audioProcess is not None:
-            print "KILING**********************2"            
+            print "KILLING**********************"
             audioProcess.kill()
+
+    if resolutionChanged:
+        print "KILLING VIDEO DUE TO RESOLUTION CHANGE**********************"
+        if videoProcess is not None:
+            print "KILLING**********************"
+            videoProcess.kill()
 
     else:
         print "NOT KILLING***********************"
@@ -281,6 +288,8 @@ def main():
     appServerSocketIO.on('command_to_robot', onCommandToRobot)
     appServerSocketIO.on('connection', onConnection)
     appServerSocketIO.on('robot_settings_changed', onRobotSettingsChanged)
+    apiServerSocketIO.on('robot_settings_changed', onRobotSettingsChanged)
+
 
 
 
@@ -316,6 +325,8 @@ def main():
         print "-----------------" + str(count) + "-----------------"
         
         appServerSocketIO.wait(seconds=1)
+        apiServerSocketIO.wait(seconds=1)
+
 
 
         # todo: note about the following ffmpeg_process_exists is not technically true, but need to update
