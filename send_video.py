@@ -51,7 +51,8 @@ parser.add_argument('--stream-key', default='hello')
 commandArgs = parser.parse_args()
 robotSettings = None
 resolutionChanged = False
-server = commandArgs.info_server
+server = 'runmyrobot.com'
+infoServer = commandArgs.info_server
 apiServer = commandArgs.api_server
 
 audioProcess = None
@@ -80,32 +81,34 @@ else:
 print "initializing socket io"
 print "server:", server
 print "port:", port
-appServerSocketIO = SocketIO(server, port, LoggingNamespace)
+appServerSocketIO = SocketIO(infoServer, port, LoggingNamespace)
 print "finished initializing app server socket io"
 apiServerSocketIO = SocketIO(apiServer, port, LoggingNamespace)
 print "finished initializing api server socket io"
 
 def getVideoPort():
-    url = 'https://%s/get_video_port/%s' % (server, commandArgs.camera_id)
+
+    url = 'https://%s/get_video_port/%s' % (infoServer, commandArgs.camera_id)
     response = robot_util.getWithRetry(url)
     return json.loads(response)['mpeg_stream_port']
 
 
 
 def getAudioPort():
-    url = 'https://%s/get_audio_port/%s' % (server, commandArgs.camera_id)
+
+    url = 'https://%s/get_audio_port/%s' % (infoServer, commandArgs.camera_id)
     response = robot_util.getWithRetry(url)
     return json.loads(response)['audio_stream_port']
 
 
 def getRobotID():
 
-    url = 'https://%s/get_robot_id/%s' % (server, commandArgs.camera_id)
+    url = 'https://%s/get_robot_id/%s' % (infoServer, commandArgs.camera_id)
     response = robot_util.getWithRetry(url)
     return json.loads(response)['robot_id']
 
 def getWebsocketRelayHost():
-    url = 'https://%s/get_websocket_relay_host/%s' % (server, commandArgs.camera_id)
+    url = 'https://%s/get_websocket_relay_host/%s' % (infoServer, commandArgs.camera_id)
     response = robot_util.getWithRetry(url)
     return json.loads(response)
 
@@ -117,7 +120,7 @@ def getOnlineRobotSettings(robotID):
 def identifyRobotId():
     appServerSocketIO.emit('identify_robot_id', robotID);
     apiServerSocketIO.emit('identify_robot_id', robotID);
-    
+
 
 
 def randomSleep():
