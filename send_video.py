@@ -83,8 +83,6 @@ print "server:", server
 print "port:", port
 appServerSocketIO = SocketIO(infoServer, port, LoggingNamespace)
 print "finished initializing app server socket io"
-apiServerSocketIO = SocketIO(apiServer, port, LoggingNamespace)
-print "finished initializing api server socket io"
 
 def getVideoPort():
 
@@ -119,7 +117,6 @@ def getOnlineRobotSettings(robotID):
         
 def identifyRobotId():
     appServerSocketIO.emit('identify_robot_id', robotID);
-    apiServerSocketIO.emit('identify_robot_id', robotID);
 
 
 
@@ -288,7 +285,6 @@ def main():
     appServerSocketIO.on('command_to_robot', onCommandToRobot)
     appServerSocketIO.on('connection', onConnection)
     appServerSocketIO.on('robot_settings_changed', onRobotSettingsChanged)
-    apiServerSocketIO.on('robot_settings_changed', onRobotSettingsChanged)
 
 
 
@@ -325,7 +321,6 @@ def main():
         print "-----------------" + str(count) + "-----------------"
         
         appServerSocketIO.wait(seconds=1)
-        apiServerSocketIO.wait(seconds=1)
 
 
 
