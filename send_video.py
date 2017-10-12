@@ -25,7 +25,10 @@ class DummyProcess:
 
 parser = argparse.ArgumentParser(description='robot control')
 parser.add_argument('camera_id')
-parser.add_argument('--info-server', help="Server that robot will connect to for information about servers and things and reporting status", default='runmyrobot.com')
+parser.add_argument('--info-server', help="handles things such as rest API requests about ports, for example 1.1.1.1:8082", default='runmyrobot.com')
+parser.add_argument('--info-server-protocol', default="https", help="either https or http")
+parser.add_argument('--app-server-socketio-host', default="letsrobot.tv", help="wherever app is running")
+parser.add_argument('--app-server-socketio-port', default=8022, help="typically use 8022 for prod, 8122 for dev, and 8125 for dev2")
 parser.add_argument('--api-server', help="Server that robot will connect to listen for API update events", default='api.letsrobot.tv')
 parser.add_argument('--xres', type=int, default=768)
 parser.add_argument('--yres', type=int, default=432)
@@ -64,31 +67,31 @@ from socketIO_client import SocketIO, LoggingNamespace
 os.system("sudo modprobe bcm2835-v4l2")
 
 
-if commandArgs.env == "dev":
-    print "using dev port 8122"
-    port = 8122
-elif commandArgs.env == "dev2":
-    print "using dev port 8125"
-    port = 8125
-elif commandArgs.env == "prod":
-    print "using prod port 8022"
-    port = 8022
-else:
-    print "invalid environment"
-    sys.exit(0)
+#if commandArgs.env == "dev":
+#    print "using dev port 8122"
+#    port = 8122
+#elif commandArgs.env == "dev2":
+#    print "using dev port 8125"
+#    port = 8125
+#elif commandArgs.env == "prod":
+#    print "using prod port 8022"
+#    port = 8022
+#else:
+#    print "invalid environment"
+#    sys.exit(0)
 
 
 print "initializing socket io"
 print "server:", server
-print "port:", port
+#print "port:", port
 
 
 
-testServer = "54.183.155.61"
-testPort = 8125
-infoServerProtocol = "http"
-print "trying to connect to", testServer, testPort
-appServerSocketIO = SocketIO(testServer, testPort, LoggingNamespace)
+
+infoServerProtocol = commandArgs.info_server_protocol
+
+print "trying to connect to app server socket io", commandArgs.app_server_socketio_host, commandArgs.app_server_socketio_port
+appServerSocketIO = SocketIO(commandArgs.app_server_socketio_host, commandArgs.app_server_socketio_port, LoggingNamespace)
 print "finished initializing app server socket io"
 
 def getVideoPort():
@@ -141,7 +144,11 @@ def startVideoCaptureLinux():
     videoPort = getVideoPort()
     print "getting websocket relay host for video"
     websocketRelayHost = getWebsocketRelayHost()
+
     print "websocket relay host for video:", websocketRelayHost
+
+    videoHost = websocketRelayHost['host']
+
 
     # set brightness
     if (robotSettings.brightness is not None):
@@ -159,7 +166,7 @@ def startVideoCaptureLinux():
         os.system("v4l2-ctl -c saturation={saturation}".format(saturation=robotSettings.saturation))
 
     
-    videoCommandLine = '/usr/local/bin/ffmpeg -f v4l2 -framerate 25 -video_size {xres}x{yres} -r 25 -i /dev/video{video_device_number} {rotation_option} -f mpegts -codec:v mpeg1video -s {xres}x{yres} -b:v {kbps}k -bf 0 -muxdelay 0.001 http://{server}:{video_port}/{stream_key}/{xres}/{yres}/'.format(video_device_number=robotSettings.video_device_number, rotation_option=rotationOption(), kbps=robotSettings.kbps, server=server, video_port=videoPort, xres=robotSettings.xres, yres=robotSettings.yres, stream_key=robotSettings.stream_key)
+    videoCommandLine = '/usr/local/bin/ffmpeg -f v4l2 -framerate 25 -video_size {xres}x{yres} -r 25 -i /dev/video{video_device_number} {rotation_option} -f mpegts -codec:v mpeg1video -s {xres}x{yres} -b:v {kbps}k -bf 0 -muxdelay 0.001 http://{video_host}:{video_port}/{stream_key}/{xres}/{yres}/'.format(video_device_number=robotSettings.video_device_number, rotation_option=rotationOption(), kbps=robotSettings.kbps, video_host=videoHost, video_port=videoPort, xres=robotSettings.xres, yres=robotSettings.yres, stream_key=robotSettings.stream_key)
 
     print videoCommandLine
     return subprocess.Popen(shlex.split(videoCommandLine))
@@ -169,9 +176,9 @@ def startAudioCaptureLinux():
 
     audioPort = getAudioPort()
     websocketRelayHost = getWebsocketRelayHost()
-    
+    audioHost = websocketRelayHost['host']
 
-    audioCommandLine = '/usr/local/bin/ffmpeg -f alsa -ar 44100 -ac %d -i hw:%d -f mpegts -codec:a mp2 -b:a 32k -muxdelay 0.001 http://%s:%s/%s/640/480/' % (robotSettings.mic_channels, robotSettings.audio_device_number, server, audioPort, robotSettings.stream_key)
+    audioCommandLine = '/usr/local/bin/ffmpeg -f alsa -ar 44100 -ac %d -i hw:%d -f mpegts -codec:a mp2 -b:a 32k -muxdelay 0.001 http://%s:%s/%s/640/480/' % (robotSettings.mic_channels, robotSettings.audio_device_number, audioHost, audioPort, robotSettings.stream_key)
 
     print audioCommandLine
     return subprocess.Popen(shlex.split(audioCommandLine))
