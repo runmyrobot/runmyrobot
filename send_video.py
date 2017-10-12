@@ -81,12 +81,19 @@ else:
 print "initializing socket io"
 print "server:", server
 print "port:", port
-appServerSocketIO = SocketIO(infoServer, port, LoggingNamespace)
+
+
+
+testServer = "54.183.155.61"
+testPort = 8125
+infoServerProtocol = "http"
+print "trying to connect to", testServer, testPort
+appServerSocketIO = SocketIO(testServer, testPort, LoggingNamespace)
 print "finished initializing app server socket io"
 
 def getVideoPort():
 
-    url = 'https://%s/get_video_port/%s' % (infoServer, commandArgs.camera_id)
+    url = '%s://%s/get_video_port/%s' % (infoServerProtocol, infoServer, commandArgs.camera_id)
     response = robot_util.getWithRetry(url)
     return json.loads(response)['mpeg_stream_port']
 
@@ -94,19 +101,19 @@ def getVideoPort():
 
 def getAudioPort():
 
-    url = 'https://%s/get_audio_port/%s' % (infoServer, commandArgs.camera_id)
+    url = '%s://%s/get_audio_port/%s' % (infoServerProtocol, infoServer, commandArgs.camera_id)
     response = robot_util.getWithRetry(url)
     return json.loads(response)['audio_stream_port']
 
 
 def getRobotID():
 
-    url = 'https://%s/get_robot_id/%s' % (infoServer, commandArgs.camera_id)
+    url = '%s://%s/get_robot_id/%s' % (infoServerProtocol, infoServer, commandArgs.camera_id)
     response = robot_util.getWithRetry(url)
     return json.loads(response)['robot_id']
 
 def getWebsocketRelayHost():
-    url = 'https://%s/get_websocket_relay_host/%s' % (infoServer, commandArgs.camera_id)
+    url = '%s://%s/get_websocket_relay_host/%s' % (infoServerProtocol, infoServer, commandArgs.camera_id)
     response = robot_util.getWithRetry(url)
     return json.loads(response)
 
@@ -132,7 +139,9 @@ def randomSleep():
 def startVideoCaptureLinux():
 
     videoPort = getVideoPort()
+    print "getting websocket relay host for video"
     websocketRelayHost = getWebsocketRelayHost()
+    print "websocket relay host for video:", websocketRelayHost
 
     # set brightness
     if (robotSettings.brightness is not None):
