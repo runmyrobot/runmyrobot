@@ -831,8 +831,6 @@ def handle_command(args):
         else:
             drivingSpeedActuallyUsed = dayTimeDrivingSpeedActuallyUsed
 
-        if maxSpeedEnabled:
-            drivingSpeedActuallyUsed = 10000
                 
 
         global drivingSpeed
