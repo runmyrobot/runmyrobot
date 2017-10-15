@@ -945,7 +945,7 @@ def handle_command(args):
                     handleLoudCommand(25)
                     os.system("aplay -D plughw:2,0 /home/pi/wall.wav")
                 if command == 'SOUND2':
-                    handleLoudCommand(4*60)
+                    handleLoudCommand(25)
                     os.system("aplay -D plughw:2,0 /home/pi/sound2.wav")
 
                     
