@@ -715,17 +715,17 @@ def moveGoPiGo2(command):
 
 
         
-def changeVolumeHighThenNormal():
+def changeVolumeHighThenNormal(seconds):
 
     os.system("amixer -c 2 cset numid=3 %d%%" % 100)
-    time.sleep(25)
+    time.sleep(seconds)
     os.system("amixer -c 2 cset numid=3 %d%%" % commandArgs.tts_volume)
 
 
     
-def handleLoudCommand():
+def handleLoudCommand(seconds):
 
-    thread.start_new_thread(changeVolumeHighThenNormal, ())
+    thread.start_new_thread(changeVolumeHighThenNormal, (seconds,))
 
 
 
@@ -795,7 +795,7 @@ def handle_command(args):
                 handlingCommand = True
             
             if command == 'LOUD':
-                handleLoudCommand()
+                handleLoudCommand(25)
 
             
             if commandArgs.type == 'adafruit_pwm':
@@ -861,10 +861,10 @@ def handle_command(args):
             if commandArgs.type == 'motor_hat':
                 turnOffMotors()
                 if command == 'WALL':
-                    handleLoudCommand()
+                    handleLoudCommand(25)
                     os.system("aplay -D plughw:2,0 /home/pi/wall.wav")
                 if command == 'SOUND2':
-                    handleLoudCommand()
+                    handleLoudCommand(4*60)
                     os.system("aplay -D plughw:2,0 /home/pi/sound2.wav")
 
                     
