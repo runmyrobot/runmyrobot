@@ -65,6 +65,7 @@ chargeValue = 0.0
 secondsToCharge = 60.0 * 60.0 * commandArgs.charge_hours
 secondsToDischarge = 60.0 * 60.0 * commandArgs.discharge_hours
 
+maxSpeedEnabled = False
 
 # watch dog timer
 os.system("sudo modprobe bcm2835_wdt")
@@ -772,11 +773,27 @@ def changeVolumeHighThenNormal():
     os.system("amixer -c 2 cset numid=3 %d%%" % commandArgs.tts_volume)
 
 
+def maxSpeedThenNormal():
+
+    global maxSpeedEnabled
+    
+    maxSpeedEnabled = True
+    print "max speed"
+    time.sleep(120)
+    maxSpeedEnabled = False
+    print "normal speed"
+    
+
     
 def handleLoudCommand():
 
     thread.start_new_thread(changeVolumeHighThenNormal, ())
 
+
+def handleMaxSpeedCommand():
+
+    thread.start_new_thread(maxSpeedThenNormal, ())
+    
 
 
 def moveGoPiGo3(command):
@@ -815,7 +832,7 @@ def handle_command(args):
             drivingSpeedActuallyUsed = dayTimeDrivingSpeedActuallyUsed
 
         if maxSpeedEnabled:
-            drivingSpeedActuallyUsed = 255
+            drivingSpeedActuallyUsed = 10000
                 
 
         global drivingSpeed
@@ -849,10 +866,20 @@ def handle_command(args):
                 handlingCommand = True
             
             if command == 'LOUD':
-			    handleLoudCommand()
+                handleLoudCommand()
 
+            if command == 'MAXSPEED':
+                handleMaxSpeedCommand()
+                            
             if commandArgs.type == 'mdd10':
-                moveMDD10(command, int(float(drivingSpeedActuallyUsed) / 2.55))
+                if maxSpeedEnabled:
+                    print "AT MAX....................."
+                    print maxSpeedEnabled
+                    moveMDD10(command, 100)
+                else:
+                    print "NORMAL................."
+                    print maxSpeedEnabled
+                    moveMDD10(command, int(float(drivingSpeedActuallyUsed) / 2.55))                
 			
             if commandArgs.type == 'adafruit_pwm':
                 moveAdafruitPWM(command)
