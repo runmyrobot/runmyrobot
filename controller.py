@@ -14,11 +14,10 @@ import random
 import telly
 import robot_util
 
-
 parser = argparse.ArgumentParser(description='start robot control program')
 parser.add_argument('robot_id', help='Robot ID')
 parser.add_argument('--info-server', help="Server that robot will connect to for information about servers and things", default='letsrobot.tv')
-parser.add_argument('--type', help="Serial or motor_hat or gopigo2 or gopigo3 or l298n or motozero or pololu", default='motor_hat')
+parser.add_argument('--type', help="Serial or motor_hat or gopigo2 or gopigo3 or l298n or motozero or pololu or mdd10", default='motor_hat')
 parser.add_argument('--serial-device', help="Serial device", default='/dev/ttyACM0')
 parser.add_argument('--male', dest='male', action='store_true')
 parser.add_argument('--female', dest='male', action='store_false')
@@ -66,6 +65,7 @@ chargeValue = 0.0
 secondsToCharge = 60.0 * 60.0 * commandArgs.charge_hours
 secondsToDischarge = 60.0 * 60.0 * commandArgs.discharge_hours
 
+maxSpeedEnabled = False
 
 # watch dog timer
 os.system("sudo modprobe bcm2835_wdt")
@@ -126,6 +126,8 @@ elif commandArgs.led == 'max7219':
     import spidev
 elif commandArgs.type == 'owi_arm':
     import owi_arm
+elif commandArgs.type == 'mdd10':
+    pass
 else:
     print "invalid --type in command line"
     exit(0)
@@ -246,8 +248,24 @@ if commandArgs.type == 'motozero':
     GPIO.setup(Motor4A,GPIO.OUT)
     GPIO.setup(Motor4B,GPIO.OUT)
     GPIO.setup(Motor4Enable,GPIO.OUT)
-	
-
+#Cytron MDD10 GPIO setup
+if commandArgs.type == 'mdd10' :
+# pwm.setPWMFreq(60)
+  import RPi.GPIO as GPIO
+  GPIO.setmode(GPIO.BCM)
+  GPIO.setwarnings(False)
+  AN2 = 13
+  AN1 = 12
+  DIG2 = 24
+  DIG1 = 26
+  GPIO.setup(AN2, GPIO.OUT)
+  GPIO.setup(AN1, GPIO.OUT)
+  GPIO.setup(DIG2, GPIO.OUT)
+  GPIO.setup(DIG1, GPIO.OUT)
+  time.sleep(1)
+  p1 = GPIO.PWM(AN1, 100)
+  p2 = GPIO.PWM(AN2, 100)
+  
 #LED controlling
 if commandArgs.led == 'max7219':
     spi = spidev.SpiDev()
@@ -631,7 +649,40 @@ def handle_chat_message(args):
     else:
           say(message)
 
-
+#MDD10 speed and movement controls
+def moveMDD10(command, speedPercent):
+    if command == 'F':
+	   GPIO.output(DIG1, GPIO.LOW)
+	   GPIO.output(DIG2, GPIO.LOW)
+	   p1.start(speedPercent)  # set speed for M1 
+	   p2.start(speedPercent)  # set speed for M2 
+	   time.sleep(straightDelay)
+	   p1.start(0)
+	   p2.start(0)
+    if command == 'B':
+	   GPIO.output(DIG1, GPIO.HIGH)
+	   GPIO.output(DIG2, GPIO.HIGH)
+	   p1.start(speedPercent)
+	   p2.start(speedPercent)
+	   time.sleep(straightDelay)
+	   p1.start(0)
+	   p2.start(0)
+    if command == 'L':
+	   GPIO.output(DIG1, GPIO.LOW)
+	   GPIO.output(DIG2, GPIO.HIGH)
+	   p1.start(speedPercent)
+	   p2.start(speedPercent)
+	   time.sleep(turnDelay)
+	   p1.start(0)
+	   p2.start(0)
+    if command == 'R':
+	   GPIO.output(DIG1, GPIO.HIGH)
+	   GPIO.output(DIG2, GPIO.LOW)
+	   p1.start(speedPercent)
+	   p2.start(speedPercent)
+	   time.sleep(turnDelay)
+	   p1.start(0)
+	   p2.start(0)
 
 def moveAdafruitPWM(command):
     print "move adafruit pwm command", command
@@ -722,11 +773,27 @@ def changeVolumeHighThenNormal(seconds):
     os.system("amixer -c 2 cset numid=3 %d%%" % commandArgs.tts_volume)
 
 
+def maxSpeedThenNormal():
+
+    global maxSpeedEnabled
+    
+    maxSpeedEnabled = True
+    print "max speed"
+    time.sleep(120)
+    maxSpeedEnabled = False
+    print "normal speed"
+    
+
     
 def handleLoudCommand(seconds):
 
     thread.start_new_thread(changeVolumeHighThenNormal, (seconds,))
 
+
+def handleMaxSpeedCommand():
+
+    thread.start_new_thread(maxSpeedThenNormal, ())
+    
 
 
 def moveGoPiGo3(command):
@@ -764,6 +831,8 @@ def handle_command(args):
         else:
             drivingSpeedActuallyUsed = dayTimeDrivingSpeedActuallyUsed
 
+                
+
         global drivingSpeed
         global handlingCommand
 
@@ -797,7 +866,19 @@ def handle_command(args):
             if command == 'LOUD':
                 handleLoudCommand(25)
 
-            
+            if command == 'MAXSPEED':
+                handleMaxSpeedCommand()
+                            
+            if commandArgs.type == 'mdd10':
+                if maxSpeedEnabled:
+                    print "AT MAX....................."
+                    print maxSpeedEnabled
+                    moveMDD10(command, 100)
+                else:
+                    print "NORMAL................."
+                    print maxSpeedEnabled
+                    moveMDD10(command, int(float(drivingSpeedActuallyUsed) / 2.55))                
+			
             if commandArgs.type == 'adafruit_pwm':
                 moveAdafruitPWM(command)
             
@@ -902,6 +983,7 @@ def handle_command(args):
                     SetLED_E_Suprised()
         handlingCommand = False
 
+	   
 def runl298n(direction):
     if direction == 'F':
         GPIO.output(StepPinForward, GPIO.HIGH)
