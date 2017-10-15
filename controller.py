@@ -829,7 +829,7 @@ def handle_command(args):
         if handlingCommand:
             return
 
-        handlingCommand = True
+
 
         #if 'robot_id' in args:
         #    print "args robot id:", args['robot_id']
@@ -845,6 +845,9 @@ def handle_command(args):
 
             command = args['command']
 
+            if command not in ("SOUND2", "WALL", "LOUD"):
+                handlingCommand = True
+            
             if command == 'LOUD':
 			    handleLoudCommand()
 
@@ -916,7 +919,11 @@ def handle_command(args):
                 if command == 'WALL':
                     handleLoudCommand()
                     os.system("aplay -D plughw:2,0 /home/pi/wall.wav")
+                if command == 'SOUND2':
+                    handleLoudCommand()
+                    os.system("aplay -D plughw:2,0 /home/pi/sound2.wav")
 
+                    
             if commandArgs.type == 'l298n':
                 runl298n(command)                                 
             #setMotorsToIdle()
