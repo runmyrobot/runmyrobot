@@ -14,6 +14,10 @@ import random
 import telly
 import robot_util
 
+import runmyrobot
+import runmyrobot.debugtools
+
+
 parser = argparse.ArgumentParser(description='start robot control program')
 parser.add_argument('robot_id', help='Robot ID')
 parser.add_argument('--info-server', help="Server that robot will connect to for information about servers and things", default='letsrobot.tv')
@@ -427,38 +431,21 @@ if commandArgs.type == 'serial':
         telly.sendSettings(ser, commandArgs)
 
 
+class Robot(runmyrobot.Robot):
+    def handle_command(self, args):
+        on_handle_command(args)
 
+    def handle_chat_message(self, args):
+        on_handle_chat_message(args)
 
-def getControlHostPort():
+    def handle_exclusive_control(self, args):
+        on_handle_exclusive_control(args)
 
-    url = 'https://%s/get_control_host_port/%s' % (infoServer, commandArgs.robot_id)
-    response = robot_util.getWithRetry(url)
-    return json.loads(response)
+robot = Robot(commandArgs.robot_id)
 
-def getChatHostPort():
-    url = 'https://%s/get_chat_host_port/%s' % (infoServer, commandArgs.robot_id)
-    response = robot_util.getWithRetry(url)
-    return json.loads(response)
-
-controlHostPort = getControlHostPort()
-chatHostPort = getChatHostPort()
-
-
-
-print "connecting to control socket.io", controlHostPort
-controlSocketIO = SocketIO(controlHostPort['host'], controlHostPort['port'], LoggingNamespace)
-print "finished using socket io to connect to control host port", controlHostPort
-
-if commandArgs.enable_chat_server_connection:
-    print "connecting to chat socket.io", chatHostPort
-    chatSocket = SocketIO(chatHostPort['host'], chatHostPort['port'], LoggingNamespace)
-    print 'finished using socket io to connect to chat ', chatHostPort
-else:
-    print "chat server connection disabled"
-
-print "connecting to app server socket.io"
-appServerSocketIO = SocketIO('letsrobot.tv', 8022, LoggingNamespace)
-print "finished connecting to app server"
+has_chat = commandArgs.enable_chat_server_connection
+rmr_client = runmyrobot.Client(robot, chat_enabled=has_chat)
+rmr_client.connect()
 
 def setServoPulse(channel, pulse):
   pulseLength = 1000000                   # 1,000,000 us per second
@@ -944,11 +931,7 @@ def handle_command(args):
                 if command == 'WALL':
                     handleLoudCommand(25)
                     os.system("aplay -D plughw:2,0 /home/pi/wall.wav")
-                if command == 'SOUND2':
-                    handleLoudCommand(25)
-                    os.system("aplay -D plughw:2,0 /home/pi/sound2.wav")
 
-                    
             if commandArgs.type == 'l298n':
                 runl298n(command)                                 
             #setMotorsToIdle()
@@ -983,7 +966,6 @@ def handle_command(args):
                     SetLED_E_Suprised()
         handlingCommand = False
 
-	   
 def runl298n(direction):
     if direction == 'F':
         GPIO.output(StepPinForward, GPIO.HIGH)
@@ -1101,26 +1083,6 @@ def runPololu(direction):
 	      time.sleep(0.3)
 	      motors.setSpeeds(0, 0)
 
-def handleStartReverseSshProcess(args):
-    print "starting reverse ssh"
-    appServerSocketIO.emit("reverse_ssh_info", "starting")
-
-    returnCode = subprocess.call(["/usr/bin/ssh",
-                                  "-X",
-                                  "-i", commandArgs.reverse_ssh_key_file,
-                                  "-N",
-                                  "-R", "2222:localhost:22",
-                                  commandArgs.reverse_ssh_host])
-
-    appServerSocketIO.emit("reverse_ssh_info", "return code: " + str(returnCode))
-    print "reverse ssh process has exited with code", str(returnCode)
-
-    
-def handleEndReverseSshProcess(args):
-    print "handling end reverse ssh process"
-    resultCode = subprocess.call(["killall", "ssh"])
-    print "result code of killall ssh:", resultCode
-
 def on_handle_command(*args):
    thread.start_new_thread(handle_command, args)
 
@@ -1129,23 +1091,6 @@ def on_handle_exclusive_control(*args):
 
 def on_handle_chat_message(*args):
    thread.start_new_thread(handle_chat_message, args)
-
-   
-#from communication import socketIO
-controlSocketIO.on('command_to_robot', on_handle_command)
-appServerSocketIO.on('exclusive_control', on_handle_exclusive_control)
-if commandArgs.enable_chat_server_connection:
-    chatSocket.on('chat_message_with_name', on_handle_chat_message)
-
-
-def startReverseSshProcess(*args):
-   thread.start_new_thread(handleStartReverseSshProcess, args)
-
-def endReverseSshProcess(*args):
-   thread.start_new_thread(handleEndReverseSshProcess, args)
-
-appServerSocketIO.on('reverse_ssh_8872381747239', startReverseSshProcess)
-appServerSocketIO.on('end_reverse_ssh_8872381747239', endReverseSshProcess)
 
 #def myWait():
 #  socketIO.wait()
@@ -1176,10 +1121,6 @@ if commandArgs.type == 'motor_hat':
         motorA = mh.getMotor(1)
         motorB = mh.getMotor(2)
 
-def ipInfoUpdate():
-    appServerSocketIO.emit('ip_information',
-                  {'ip': subprocess.check_output(["hostname", "-I"]), 'robot_id': robotID})
-
 
 # true if it's on the charger and it needs to be charging
 def isCharging():
@@ -1194,26 +1135,14 @@ def isCharging():
 
     return False
 
-        
-    
-def sendChargeState():
-    charging = isCharging()
-    chargeState = {'robot_id': robotID, 'charging': charging}
-    appServerSocketIO.emit('charge_state', chargeState)
-    print "charge state:", chargeState
+  
 
 def sendChargeStateCallback(x):
-    sendChargeState()
+    rmr_client.send_charge_info(isCharging())
 
 if commandArgs.type == 'motor_hat':
     GPIO.add_event_detect(chargeIONumber, GPIO.BOTH)
     GPIO.add_event_callback(chargeIONumber, sendChargeStateCallback)
-
-
-def identifyRobotId():
-    if commandArgs.enable_chat_server_connection:
-        chatSocket.emit('identify_robot_id', robotID);
-    appServerSocketIO.emit('identify_robot_id', robotID);
 
 
 def setSpeedBasedOnCharge():
@@ -1281,47 +1210,17 @@ def updateChargeApproximation():
 waitCounter = 0
 
 
-identifyRobotId()
-
-
+rmr_client.identify_robot()
 
 if platform.system() == 'Darwin':
     pass
-    #ipInfoUpdate()
 elif platform.system() == 'Linux':
-    ipInfoUpdate()
+    rmr_client.update_ip_info()
 
 
 lastInternetStatus = False
 
-
-def waitForAppServer():
-    while True:
-        appServerSocketIO.wait(seconds=1)
-
-def waitForControlServer():
-    while True:
-        controlSocketIO.wait(seconds=1)        
-
-def waitForChatServer():
-    while True:
-        chatSocket.wait(seconds=1)        
-        
-def startListenForAppServer():
-   thread.start_new_thread(waitForAppServer, ())
-
-def startListenForControlServer():
-   thread.start_new_thread(waitForControlServer, ())
-
-def startListenForChatServer():
-   thread.start_new_thread(waitForChatServer, ())
-
-
-startListenForControlServer()
-startListenForAppServer()
-
-if commandArgs.enable_chat_server_connection:
-    startListenForChatServer()
+rmr_client.run()
 
 while True:
     time.sleep(1)
@@ -1329,7 +1228,7 @@ while True:
     if (waitCounter % chargeCheckInterval) == 0:
         if commandArgs.type == 'motor_hat':
             updateChargeApproximation()
-            sendChargeState()
+            rmr_client.send_charge_info(isCharging())
             if commandArgs.slow_for_low_battery:
                 setSpeedBasedOnCharge()
 
@@ -1366,10 +1265,10 @@ while True:
     if (waitCounter % 60) == 0:
 
         # tell the server what robot id is using this connection
-        identifyRobotId()
+        rmr_client.identify_robot()
         
         if platform.system() == 'Linux':
-            ipInfoUpdate()
+            rmr_client.update_ip_info()
 
 
     waitCounter += 1
