@@ -171,7 +171,7 @@ We use ffmpeg to stream audio and socket.io to send control messages.
 
 <h2>Get a LED Matrix to work</h2>
 
-<h3>Using max7219<h3>
+<h3>Using max7219</h3>
 You need to install Python-Pip:
 
 ```
