@@ -169,6 +169,49 @@ That's it!
 
 We use ffmpeg to stream audio and socket.io to send control messages.
 
+<h2>Get a LED Matrix to work</h2>
+
+<h3>Using max7219<h3>
+You need to install Python-Pip:
+
+```
+sudo apt-get install python-pip 
+```
+
+After installing Python-Pip you need the spidev library:
+
+```
+sudo pip install https://codeload.github.com/doceme/py-spidev/zip/master
+```
+
+Be sure to connect your LED-Matrix correct:
+
+For max7219:
+
+```
+    #VCC -> RPi Pin 2
+    #GND -> RPi Pin 6
+    #DIN -> RPi Pin 19
+    #CLK -> RPi Pin 23
+    #CS -> RPi Pin 24
+```
+
+That's it! Now you can use the following function to control your panel:
+
+```
+SetLED_On
+SetLED_Off
+SetLED_E_Smiley
+SetLED_E_Sad
+SetLED_E_Tongue
+SetLED_E_Suprised
+SetLED_Low
+SetLED_Med
+SetLED_Full
+```
+
+You always can add new emotes to it. Be sure to check out the register address table: https://datasheets.maximintegrated.com/en/ds/MAX7219-MAX7221.pdf 
+
 <h2> How to contribute </h2>
 
 The is a community project. Making your own bot? Adding your own control stuff? Cool! We'd like to hear from you.
@@ -185,6 +228,8 @@ GoPiGo
 L298N
 
 MotoZero
+
+max7219 (spidev required)
 
 Missing something?, you can add it, open source!
 
