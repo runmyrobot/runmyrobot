@@ -1,2 +1,2 @@
 socketIO-client==0.6.5
-
+configparser==3.5.0

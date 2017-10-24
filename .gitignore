@@ -3,7 +3,15 @@ single_frame_image.jpg
 robotoutput.txt
 nohup.out
 npm-debug.log
+gpio.conf
+
+#ignore jetbrains files
+.idea/
 
 #ignore (open?) files with ~ in name:
 *~
 *.pyc
+
+#ignore emacs temporary files
+\#*\#
+.\#*
