@@ -1253,7 +1253,9 @@ if commandArgs.type == 'motor_hat':
     GPIO.add_event_callback(chargeIONumber, sendChargeStateCallback)
 
 
+    
 def identifyRobotID():
+    """tells the server which robot is using the connection"""
     print "sending identify robot id messages"
     if commandArgs.enable_chat_server_connection:
         chatSocket.emit('identify_robot_id', robotID);
@@ -1319,13 +1321,7 @@ def updateChargeApproximation():
 #setMotorsToIdle()
 
 
-
-
-
 waitCounter = 0
-
-
-#identifyRobotID()
 
 
 
@@ -1408,10 +1404,6 @@ while True:
 
                 
     if (waitCounter % 60) == 0:
-
-        # tell the server what robot id is using this connection
-        identifyRobotID()
-        
         if platform.system() == 'Linux':
             ipInfoUpdate()
 
