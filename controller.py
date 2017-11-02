@@ -1132,13 +1132,31 @@ def onHandleExclusiveControl(*args):
 def onHandleChatMessage(*args):
    thread.start_new_thread(handle_chat_message, args)
 
-def onHandleChatConnect(*args):
+
+   
+def onHandleAppServerConnect(*args):
     print
     print "chat socket.io connect"
     print
     identifyRobotID()
 
-def onHandleAppServerConnect(*args):
+
+def onHandleAppServerReconnect(*args):
+    print
+    print "app server socket.io reconnect"
+    print
+    identifyRobotID()    
+    
+
+def onHandleAppServerDisconnect(*args):
+    print
+    print "app server socket.io disconnect"
+    print
+
+
+
+   
+def onHandleChatConnect(*args):
     print
     print "chat socket.io connect"
     print
@@ -1150,21 +1168,11 @@ def onHandleChatReconnect(*args):
     print
     identifyRobotID()
     
-def onHandleAppServerReconnect(*args):
-    print
-    print "app server socket.io reconnect"
-    print
-    identifyRobotID()    
-
 def onHandleChatDisconnect(*args):
     print
     print "chat socket.io disconnect"
     print
 
-def onHandleAppServerDisconnect(*args):
-    print
-    print "app server socket.io disconnect"
-    print
 
 
     
