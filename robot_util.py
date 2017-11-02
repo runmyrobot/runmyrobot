@@ -1,6 +1,7 @@
 import os
 import time
 import traceback
+import ssl
 import urllib2
 import getpass
 import json
@@ -10,12 +11,18 @@ import json
 ConfigFilename = "/home/pi/config_" + getpass.getuser() + ".json"
 
 
-def getWithRetry(url):
+def getWithRetry(url, secure=True):
 
     for retryNumber in range(2000):
         try:
             print "GET", url
-            response = urllib2.urlopen(url).read()
+            if secure:
+                response = urllib2.urlopen(url).read()
+            else:
+                ctx = ssl.create_default_context()
+                ctx.check_hostname = False
+                ctx.verify_mode = ssl.CERT_NONE
+                response = urllib2.urlopen(url, context=ctx).read()
             break
         except:
             print "could not open url", url

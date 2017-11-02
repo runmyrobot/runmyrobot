@@ -41,6 +41,8 @@ parser.add_argument('--no-anon-tts', dest='anon_tts', action='store_false')
 parser.set_defaults(anon_tts=True)
 parser.add_argument('--no-chat-server-connection', dest='enable_chat_server_connection', action='store_false')
 parser.set_defaults(enable_chat_server_connection=True)
+parser.add_argument('--no-secure-cert', dest='secure_cert', action='store_false')
+parser.set_defaults(secure_cert=True)
 parser.add_argument('--filter-url-tts', dest='filter_url_tts', action='store_true')
 parser.set_defaults(filter_url_tts=False)
 parser.add_argument('--slow-for-low-battery', dest='slow_for_low_battery', action='store_true')
@@ -432,12 +434,12 @@ if commandArgs.type == 'serial':
 def getControlHostPort():
 
     url = 'https://%s/get_control_host_port/%s' % (infoServer, commandArgs.robot_id)
-    response = robot_util.getWithRetry(url)
+    response = robot_util.getWithRetry(url, secure=commandArgs.secure_cert)
     return json.loads(response)
 
 def getChatHostPort():
     url = 'https://%s/get_chat_host_port/%s' % (infoServer, commandArgs.robot_id)
-    response = robot_util.getWithRetry(url)
+    response = robot_util.getWithRetry(url, secure=commandArgs.secure_cert)
     return json.loads(response)
 
 controlHostPort = getControlHostPort()
