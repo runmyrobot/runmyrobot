@@ -341,6 +341,7 @@ def main():
         print "-----------------" + str(count) + "-----------------"
         
         appServerSocketIO.wait(seconds=1)
+        apiServerSocketIO.wait(seconds=1)
 
 
 
