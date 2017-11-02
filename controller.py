@@ -768,7 +768,7 @@ def moveGoPiGo2(command):
         
 def changeVolumeHighThenNormal(seconds):
 
-    os.system("amixer -c 2 cset numid=3 %d%%" % 100)
+    os.system("amixer -c 2 cset numid=3 %d%%" % 50)
     time.sleep(seconds)
     os.system("amixer -c 2 cset numid=3 %d%%" % commandArgs.tts_volume)
 
@@ -1121,22 +1121,65 @@ def handleEndReverseSshProcess(args):
     resultCode = subprocess.call(["killall", "ssh"])
     print "result code of killall ssh:", resultCode
 
-def on_handle_command(*args):
+def onHandleCommand(*args):
    thread.start_new_thread(handle_command, args)
 
-def on_handle_exclusive_control(*args):
+def onHandleExclusiveControl(*args):
    thread.start_new_thread(handle_exclusive_control, args)
 
-def on_handle_chat_message(*args):
+def onHandleChatMessage(*args):
    thread.start_new_thread(handle_chat_message, args)
 
-   
-#from communication import socketIO
-controlSocketIO.on('command_to_robot', on_handle_command)
-appServerSocketIO.on('exclusive_control', on_handle_exclusive_control)
-if commandArgs.enable_chat_server_connection:
-    chatSocket.on('chat_message_with_name', on_handle_chat_message)
+def onHandleChatConnect(*args):
+    print
+    print "chat socket.io connect"
+    print
+    identifyRobotID()
 
+def onHandleAppServerConnect(*args):
+    print
+    print "chat socket.io connect"
+    print
+    identifyRobotID()
+
+def onHandleChatReconnect(*args):
+    print
+    print "chat socket.io reconnect"
+    print
+    identifyRobotID()
+    
+def onHandleAppServerReconnect(*args):
+    print
+    print "app server socket.io reconnect"
+    print
+    identifyRobotID()    
+
+def onHandleChatDisconnect(*args):
+    print
+    print "chat socket.io disconnect"
+    print
+
+def onHandleAppServerDisconnect(*args):
+    print
+    print "app server socket.io disconnect"
+    print
+
+
+    
+#from communication import socketIO
+controlSocketIO.on('command_to_robot', onHandleCommand)
+appServerSocketIO.on('exclusive_control', onHandleExclusiveControl)
+appServerSocketIO.on('connect', onHandleAppServerConnect)
+appServerSocketIO.on('reconnect', onHandleAppServerReconnect)
+appServerSocketIO.on('disconnect', onHandleAppServerDisconnect)
+
+
+if commandArgs.enable_chat_server_connection:
+    chatSocket.on('chat_message_with_name', onHandleChatMessage)
+    chatSocket.on('connect', onHandleChatConnect)
+    chatSocket.on('reconnect', onHandleChatReconnect)    
+    chatSocket.on('disconnect', onHandleChatDisconnect)
+    
 
 def startReverseSshProcess(*args):
    thread.start_new_thread(handleStartReverseSshProcess, args)
@@ -1210,7 +1253,8 @@ if commandArgs.type == 'motor_hat':
     GPIO.add_event_callback(chargeIONumber, sendChargeStateCallback)
 
 
-def identifyRobotId():
+def identifyRobotID():
+    print "sending identify robot id messages"
     if commandArgs.enable_chat_server_connection:
         chatSocket.emit('identify_robot_id', robotID);
     appServerSocketIO.emit('identify_robot_id', robotID);
@@ -1281,7 +1325,7 @@ def updateChargeApproximation():
 waitCounter = 0
 
 
-identifyRobotId()
+#identifyRobotID()
 
 
 
@@ -1366,7 +1410,7 @@ while True:
     if (waitCounter % 60) == 0:
 
         # tell the server what robot id is using this connection
-        identifyRobotId()
+        identifyRobotID()
         
         if platform.system() == 'Linux':
             ipInfoUpdate()
