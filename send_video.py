@@ -25,11 +25,12 @@ class DummyProcess:
 
 parser = argparse.ArgumentParser(description='robot control')
 parser.add_argument('camera_id')
-parser.add_argument('--info-server', help="handles things such as rest API requests about ports, for example 1.1.1.1:8082", default='runmyrobot.com')
+parser.add_argument('--info-server', help="handles things such as rest API requests about ports, for example 1.1.1.1:8082", default='api.letsrobot.tv')
 parser.add_argument('--info-server-protocol', default="https", help="either https or http")
 parser.add_argument('--app-server-socketio-host', default="letsrobot.tv", help="wherever app is running")
 parser.add_argument('--app-server-socketio-port', default=8022, help="typically use 8022 for prod, 8122 for dev, and 8125 for dev2")
-parser.add_argument('--api-server', help="Server that robot will connect to listen for API update events", default='api.letsrobot.tv')
+parser.add_argument('--api-server-socketio-host', default="api.letsrobot.tv", help="wherever app is running")
+parser.add_argument('--api-server-socketio-port', default=8022, help="typically use 8022 for prod, 8122 for dev, and 8125 for dev2")
 parser.add_argument('--xres', type=int, default=768)
 parser.add_argument('--yres', type=int, default=432)
 parser.add_argument('video_device_number', default=0, type=int)
@@ -56,7 +57,6 @@ robotSettings = None
 resolutionChanged = False
 server = 'runmyrobot.com'
 infoServer = commandArgs.info_server
-apiServer = commandArgs.api_server
 
 audioProcess = None
 videoProcess = None
@@ -93,6 +93,8 @@ infoServerProtocol = commandArgs.info_server_protocol
 print "trying to connect to app server socket io", commandArgs.app_server_socketio_host, commandArgs.app_server_socketio_port
 appServerSocketIO = SocketIO(commandArgs.app_server_socketio_host, commandArgs.app_server_socketio_port, LoggingNamespace)
 print "finished initializing app server socket io"
+apiServerSocketIO = SocketIO(commandArgs.api_server_socketio_host, commandArgs.api_server_socketio_port, LoggingNamespace)
+print "finished initializing api server socket io"
 
 def getVideoPort():
 
@@ -121,12 +123,13 @@ def getWebsocketRelayHost():
     return json.loads(response)
 
 def getOnlineRobotSettings(robotID):
-    url = 'https://%s/api/v1/robots/%s' % (apiServer, robotID)
+    url = 'https://%s/api/v1/robots/%s' % (infoServer, robotID)
     response = robot_util.getWithRetry(url)
     return json.loads(response)
         
 def identifyRobotId():
     appServerSocketIO.emit('identify_robot_id', robotID);
+    apiServerSocketIO.emit('identify_robot_id', robotID);
 
 
 
@@ -301,6 +304,7 @@ def main():
     appServerSocketIO.on('command_to_robot', onCommandToRobot)
     appServerSocketIO.on('connection', onConnection)
     appServerSocketIO.on('robot_settings_changed', onRobotSettingsChanged)
+    apiServerSocketIO.on('robot_settings_changed', onRobotSettingsChanged)
 
 
 
