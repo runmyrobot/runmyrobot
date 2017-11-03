@@ -46,6 +46,7 @@ echo '# suggested use for this:' >> ~/start_robot
 echo '# (1) Put in the ids for your robot, YOURROBOTID and YOURCAMERAID' >> ~/start_robot
 echo '# (2) use sudo to create a crontab entry: @reboot /bin/bash /home/pi/start_robot' >> ~/start_robot
 echo 'cd /home/pi/runmyrobot' >> ~/start_robot
+echo "nohup scripts/repeat_start python reverse_ssh.py ${input_robot} &> /dev/null &" >> ~/start_robot
 echo "nohup scripts/repeat_start python controller.py ${input_robot} &> /dev/null &" >> ~/start_robot
 echo "nohup scripts/repeat_start python send_video.py ${input_camera} 0 &> /dev/null &" >> ~/start_robot
 

@@ -41,6 +41,8 @@ parser.add_argument('--no-anon-tts', dest='anon_tts', action='store_false')
 parser.set_defaults(anon_tts=True)
 parser.add_argument('--no-chat-server-connection', dest='enable_chat_server_connection', action='store_false')
 parser.set_defaults(enable_chat_server_connection=True)
+parser.add_argument('--no-secure-cert', dest='secure_cert', action='store_false')
+parser.set_defaults(secure_cert=True)
 parser.add_argument('--filter-url-tts', dest='filter_url_tts', action='store_true')
 parser.set_defaults(filter_url_tts=False)
 parser.add_argument('--slow-for-low-battery', dest='slow_for_low_battery', action='store_true')
@@ -432,12 +434,12 @@ if commandArgs.type == 'serial':
 def getControlHostPort():
 
     url = 'https://%s/get_control_host_port/%s' % (infoServer, commandArgs.robot_id)
-    response = robot_util.getWithRetry(url)
+    response = robot_util.getWithRetry(url, secure=commandArgs.secure_cert)
     return json.loads(response)
 
 def getChatHostPort():
     url = 'https://%s/get_chat_host_port/%s' % (infoServer, commandArgs.robot_id)
-    response = robot_util.getWithRetry(url)
+    response = robot_util.getWithRetry(url, secure=commandArgs.secure_cert)
     return json.loads(response)
 
 controlHostPort = getControlHostPort()
@@ -759,10 +761,10 @@ def moveGoPiGo2(command):
 
 
         
-def changeVolumeHighThenNormal():
+def changeVolumeHighThenNormal(seconds):
 
-    os.system("amixer -c 2 cset numid=3 %d%%" % 100)
-    time.sleep(25)
+    os.system("amixer -c 2 cset numid=3 %d%%" % 50)
+    time.sleep(seconds)
     os.system("amixer -c 2 cset numid=3 %d%%" % commandArgs.tts_volume)
 
 
@@ -778,9 +780,9 @@ def maxSpeedThenNormal():
     
 
     
-def handleLoudCommand():
+def handleLoudCommand(seconds):
 
-    thread.start_new_thread(changeVolumeHighThenNormal, ())
+    thread.start_new_thread(changeVolumeHighThenNormal, (seconds,))
 
 
 def handleMaxSpeedCommand():
@@ -860,7 +862,7 @@ def handle_command(args):
                 handlingCommand = True
             
             if command == 'LOUD':
-                handleLoudCommand()
+                handleLoudCommand(25)
 
             if command == 'MAXSPEED':
                 handleMaxSpeedCommand()
@@ -940,10 +942,10 @@ def handle_command(args):
             if commandArgs.type == 'motor_hat':
                 turnOffMotors()
                 if command == 'WALL':
-                    handleLoudCommand()
+                    handleLoudCommand(25)
                     os.system("aplay -D plughw:2,0 /home/pi/wall.wav")
                 if command == 'SOUND2':
-                    handleLoudCommand()
+                    handleLoudCommand(25)
                     os.system("aplay -D plughw:2,0 /home/pi/sound2.wav")
 
                     
@@ -1119,22 +1121,73 @@ def handleEndReverseSshProcess(args):
     resultCode = subprocess.call(["killall", "ssh"])
     print "result code of killall ssh:", resultCode
 
-def on_handle_command(*args):
+def onHandleCommand(*args):
    thread.start_new_thread(handle_command, args)
 
-def on_handle_exclusive_control(*args):
+def onHandleExclusiveControl(*args):
    thread.start_new_thread(handle_exclusive_control, args)
 
-def on_handle_chat_message(*args):
+def onHandleChatMessage(*args):
    thread.start_new_thread(handle_chat_message, args)
 
-   
-#from communication import socketIO
-controlSocketIO.on('command_to_robot', on_handle_command)
-appServerSocketIO.on('exclusive_control', on_handle_exclusive_control)
-if commandArgs.enable_chat_server_connection:
-    chatSocket.on('chat_message_with_name', on_handle_chat_message)
 
+   
+def onHandleAppServerConnect(*args):
+    print
+    print "chat socket.io connect"
+    print
+    identifyRobotID()
+
+
+def onHandleAppServerReconnect(*args):
+    print
+    print "app server socket.io reconnect"
+    print
+    identifyRobotID()    
+    
+
+def onHandleAppServerDisconnect(*args):
+    print
+    print "app server socket.io disconnect"
+    print
+
+
+
+   
+def onHandleChatConnect(*args):
+    print
+    print "chat socket.io connect"
+    print
+    identifyRobotID()
+
+def onHandleChatReconnect(*args):
+    print
+    print "chat socket.io reconnect"
+    print
+    identifyRobotID()
+    
+def onHandleChatDisconnect(*args):
+    print
+    print "chat socket.io disconnect"
+    print
+
+
+
+    
+#from communication import socketIO
+controlSocketIO.on('command_to_robot', onHandleCommand)
+appServerSocketIO.on('exclusive_control', onHandleExclusiveControl)
+appServerSocketIO.on('connect', onHandleAppServerConnect)
+appServerSocketIO.on('reconnect', onHandleAppServerReconnect)
+appServerSocketIO.on('disconnect', onHandleAppServerDisconnect)
+
+
+if commandArgs.enable_chat_server_connection:
+    chatSocket.on('chat_message_with_name', onHandleChatMessage)
+    chatSocket.on('connect', onHandleChatConnect)
+    chatSocket.on('reconnect', onHandleChatReconnect)    
+    chatSocket.on('disconnect', onHandleChatDisconnect)
+    
 
 def startReverseSshProcess(*args):
    thread.start_new_thread(handleStartReverseSshProcess, args)
@@ -1212,7 +1265,10 @@ if commandArgs.type == 'motor_hat':
     GPIO.add_event_callback(chargeIONumber, sendChargeStateCallback)
 
 
-def identifyRobotId():
+    
+def identifyRobotID():
+    """tells the server which robot is using the connection"""
+    print "sending identify robot id messages"
     if commandArgs.enable_chat_server_connection:
         chatSocket.emit('identify_robot_id', robotID);
     appServerSocketIO.emit('identify_robot_id', robotID);
@@ -1277,13 +1333,7 @@ def updateChargeApproximation():
 #setMotorsToIdle()
 
 
-
-
-
 waitCounter = 0
-
-
-identifyRobotId()
 
 
 
@@ -1366,10 +1416,6 @@ while True:
 
                 
     if (waitCounter % 60) == 0:
-
-        # tell the server what robot id is using this connection
-        identifyRobotId()
-        
         if platform.system() == 'Linux':
             ipInfoUpdate()
 
