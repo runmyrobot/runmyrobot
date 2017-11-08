@@ -77,8 +77,9 @@ os.system("sudo /usr/sbin/service watchdog start")
 # set volume level
 
 # tested for 3.5mm audio jack
-if commandArgs.tts_volume > 50:
-    os.system("amixer set PCM -- -100")
+os.system("amixer set PCM -- 100%d%%" % commandArgs.tts_volume)
+#if commandArgs.tts_volume > 50:
+    #os.system("amixer set PCM -- -100")
 
 # tested for USB audio device
 os.system("amixer -c 2 cset numid=3 %d%%" % commandArgs.tts_volume)
@@ -626,6 +627,7 @@ def say(message):
     else:
         # espeak tts
         for hardwareNumber in (2, 0, 3, 1, 4):
+            print 'plughw:%d,0' % hardwareNumber
             if commandArgs.male:
                 os.system('cat ' + tempFilePath + ' | espeak --stdout | aplay -D plughw:%d,0' % hardwareNumber)
             else:
