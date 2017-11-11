@@ -56,6 +56,8 @@ parser.add_argument('--stream-key', default='hello')
 commandArgs = parser.parse_args()
 robotSettings = None
 resolutionChanged = False
+currentXres = None
+currentYres = None
 server = 'runmyrobot.com'
 infoServer = commandArgs.info_server
 apiServer = commandArgs.api_server
@@ -242,19 +244,23 @@ def killallFFMPEGIn30Seconds():
 #todo, this needs to work differently. likely the configuration will be json and pull in stuff from command line rather than the other way around.
 def overrideSettings(commandArgs, onlineSettings):
     global resolutionChanged
+    global currentXres
+    global currentYres
     resolutionChanged = False
     c = copy.deepcopy(commandArgs)
     print "onlineSettings:", onlineSettings
     if 'mic_enabled' in onlineSettings:
         c.mic_enabled = onlineSettings['mic_enabled']
     if 'xres' in onlineSettings:
-        if c.xres != onlineSettings['xres']:
+        if currentXres != onlineSettings['xres']:
             resolutionChanged = True
         c.xres = onlineSettings['xres']
+        currentXres = onlineSettings['xres']
     if 'yres' in onlineSettings:
-        if c.yres != onlineSettings['yres']:
+        if currentYres != onlineSettings['yres']:
             resolutionChanged = True
         c.yres = onlineSettings['yres']
+        currentYres = onlineSettings['yres']
     print "onlineSettings['mic_enabled']:", onlineSettings['mic_enabled']
     return c
 
