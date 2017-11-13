@@ -77,8 +77,9 @@ os.system("sudo /usr/sbin/service watchdog start")
 # set volume level
 
 # tested for 3.5mm audio jack
-if commandArgs.tts_volume > 50:
-    os.system("amixer set PCM -- -100")
+os.system("amixer set PCM -- 100%d%%" % commandArgs.tts_volume)
+#if commandArgs.tts_volume > 50:
+    #os.system("amixer set PCM -- -100")
 
 # tested for USB audio device
 os.system("amixer -c 2 cset numid=3 %d%%" % commandArgs.tts_volume)
@@ -626,6 +627,7 @@ def say(message):
     else:
         # espeak tts
         for hardwareNumber in (2, 0, 3, 1, 4):
+            print 'plughw:%d,0' % hardwareNumber
             if commandArgs.male:
                 os.system('cat ' + tempFilePath + ' | espeak --stdout | aplay -D plughw:%d,0' % hardwareNumber)
             else:
@@ -659,32 +661,25 @@ def moveMDD10(command, speedPercent):
 	   p1.start(speedPercent)  # set speed for M1 
 	   p2.start(speedPercent)  # set speed for M2 
 	   time.sleep(straightDelay)
-	   p1.start(0)
-	   p2.start(0)
     if command == 'B':
 	   GPIO.output(DIG1, GPIO.HIGH)
 	   GPIO.output(DIG2, GPIO.HIGH)
 	   p1.start(speedPercent)
 	   p2.start(speedPercent)
 	   time.sleep(straightDelay)
-	   p1.start(0)
-	   p2.start(0)
     if command == 'L':
 	   GPIO.output(DIG1, GPIO.LOW)
 	   GPIO.output(DIG2, GPIO.HIGH)
 	   p1.start(speedPercent)
 	   p2.start(speedPercent)
 	   time.sleep(turnDelay)
-	   p1.start(0)
-	   p2.start(0)
     if command == 'R':
 	   GPIO.output(DIG1, GPIO.HIGH)
 	   GPIO.output(DIG2, GPIO.LOW)
 	   p1.start(speedPercent)
 	   p2.start(speedPercent)
 	   time.sleep(turnDelay)
-	   p1.start(0)
-	   p2.start(0)
+
 
 def moveAdafruitPWM(command):
     print "move adafruit pwm command", command
@@ -862,7 +857,10 @@ def handle_command(args):
 
             command = args['command']
 
-            if command not in ("SOUND2", "WALL", "LOUD"):
+            # don't turn set handlingCommand true for
+            # commands that persist for a while and are not exclusive
+            # so others are allowed to run
+            if command not in ("SOUND2", "WALL", "LOUD", "MAXSPEED"):
                 handlingCommand = True
             
             if command == 'LOUD':
@@ -940,7 +938,9 @@ def handle_command(args):
                     incrementArmServo(2, 10)
                     time.sleep(0.05)
 
-
+            if commandArgs.type == 'mdd10':
+                turnOffMotorsMDD10()
+                    
             if commandArgs.type == 'motor_hat':
                 turnOffMotors()
                 if command == 'WALL':
@@ -1223,14 +1223,18 @@ if commandArgs.type == 'motor_hat':
     
 
 def turnOffMotors():
+    # pi hat motors
     mh.getMotor(1).run(Adafruit_MotorHAT.RELEASE)
     mh.getMotor(2).run(Adafruit_MotorHAT.RELEASE)
     mh.getMotor(3).run(Adafruit_MotorHAT.RELEASE)
     mh.getMotor(4).run(Adafruit_MotorHAT.RELEASE)
-    #mhArm.getMotor(1).run(Adafruit_MotorHAT.RELEASE)
-    #mhArm.getMotor(2).run(Adafruit_MotorHAT.RELEASE)
-    #mhArm.getMotor(3).run(Adafruit_MotorHAT.RELEASE)
-    #mhArm.getMotor(4).run(Adafruit_MotorHAT.RELEASE)
+
+    
+def turnOffMotorsMDD10():    
+    # mdd10 motors
+    p1.start(0)
+    p2.start(0)    
+
   
 
 if commandArgs.type == 'motor_hat':
