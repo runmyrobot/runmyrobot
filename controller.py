@@ -443,14 +443,52 @@ def getChatHostPort():
     response = robot_util.getWithRetry(url, secure=commandArgs.secure_cert)
     return json.loads(response)
 
-controlHostPort = getControlHostPort()
+
+def onHandleCommand(*args):
+   thread.start_new_thread(handle_command, args)
+
+
+def onHandleControlDisconnect(*args):
+    print
+    print "control socket.io disconnect, reinitializing"
+    initControlSocketIOConnection()
+    print
+    
+
+
+def waitForControlServer():
+    while True:
+        controlSocketIO.wait(seconds=1)        
+    
+
+def startListenForControlServer():
+   thread.start_new_thread(waitForControlServer, ())
+
+
+    
+def initControlSocketIOConnection():
+
+    global controlHostPort
+    global controlSocketIO
+    
+    controlHostPort = getControlHostPort()
+    print "connecting to control socket.io", controlHostPort
+    controlSocketIO = SocketIO(controlHostPort['host'], controlHostPort['port'], LoggingNamespace)
+    print "finished using socket io to connect to control host port", controlHostPort
+    controlSocketIO.on('command_to_robot', onHandleCommand)
+    controlSocketIO.on('disconnect', onHandleControlDisconnect)
+
+    startListenForControlServer()    
+
+
+initControlSocketIOConnection()
+
 chatHostPort = getChatHostPort()
 
 
 
-print "connecting to control socket.io", controlHostPort
-controlSocketIO = SocketIO(controlHostPort['host'], controlHostPort['port'], LoggingNamespace)
-print "finished using socket io to connect to control host port", controlHostPort
+
+
 
 if commandArgs.enable_chat_server_connection:
     print "connecting to chat socket.io", chatHostPort
@@ -1123,8 +1161,6 @@ def handleEndReverseSshProcess(args):
     resultCode = subprocess.call(["killall", "ssh"])
     print "result code of killall ssh:", resultCode
 
-def onHandleCommand(*args):
-   thread.start_new_thread(handle_command, args)
 
 def onHandleExclusiveControl(*args):
    thread.start_new_thread(handle_exclusive_control, args)
@@ -1176,17 +1212,12 @@ def onHandleChatDisconnect(*args):
 
 
     
-def onHandleControlDisconnect(*args):
-    print
-    print "control socket.io disconnect"
-    print
+
     
 
 
     
 #from communication import socketIO
-controlSocketIO.on('command_to_robot', onHandleCommand)
-controlSocketIO.on('disconnect', onHandleControlDisconnect)
 
 appServerSocketIO.on('exclusive_control', onHandleExclusiveControl)
 appServerSocketIO.on('connect', onHandleAppServerConnect)
@@ -1363,9 +1394,6 @@ def waitForAppServer():
     while True:
         appServerSocketIO.wait(seconds=1)
 
-def waitForControlServer():
-    while True:
-        controlSocketIO.wait(seconds=1)        
 
 def waitForChatServer():
     while True:
@@ -1374,8 +1402,6 @@ def waitForChatServer():
 def startListenForAppServer():
    thread.start_new_thread(waitForAppServer, ())
 
-def startListenForControlServer():
-   thread.start_new_thread(waitForControlServer, ())
 
 def startListenForChatServer():
    thread.start_new_thread(waitForChatServer, ())
