@@ -1176,8 +1176,18 @@ def onHandleChatDisconnect(*args):
 
 
     
+def onHandleControlDisconnect(*args):
+    print
+    print "control socket.io disconnect"
+    print
+    
+
+
+    
 #from communication import socketIO
 controlSocketIO.on('command_to_robot', onHandleCommand)
+controlSocketIO.on('disconnect', onHandleControlDisconnect)
+
 appServerSocketIO.on('exclusive_control', onHandleExclusiveControl)
 appServerSocketIO.on('connect', onHandleAppServerConnect)
 appServerSocketIO.on('reconnect', onHandleAppServerReconnect)
