@@ -481,6 +481,185 @@ def initControlSocketIOConnection():
     startListenForControlServer()    
 
 
+
+
+
+
+
+def handle_command(args):
+        now = datetime.datetime.now()
+        now_time = now.time()
+        # if it's late, make the robot slower
+        if now_time >= datetime.time(21,30) or now_time <= datetime.time(9,30):
+            #print "within the late time interval"
+            drivingSpeedActuallyUsed = nightTimeDrivingSpeedActuallyUsed
+        else:
+            drivingSpeedActuallyUsed = dayTimeDrivingSpeedActuallyUsed
+
+                
+
+        global drivingSpeed
+        global handlingCommand
+
+        if 'robot_id' in args and args['robot_id'] == robotID: print "received message:", args
+        # Note: If you are adding features to your bot,
+        # you can get direct access to incomming commands right here.
+
+
+        if handlingCommand:
+            return
+
+
+
+        #if 'robot_id' in args:
+        #    print "args robot id:", args['robot_id']
+
+        #if 'command' in args:
+        #    print "args command:", args['command']
+
+
+            
+        if 'command' in args and 'robot_id' in args and args['robot_id'] == robotID:
+
+            print('got command', args)
+
+            command = args['command']
+
+            # don't turn set handlingCommand true for
+            # commands that persist for a while and are not exclusive
+            # so others are allowed to run
+            if command not in ("SOUND2", "WALL", "LOUD", "MAXSPEED"):
+                handlingCommand = True
+            
+            if command == 'LOUD':
+                handleLoudCommand(25)
+
+            if command == 'MAXSPEED':
+                handleMaxSpeedCommand()
+                            
+            if commandArgs.type == 'mdd10':
+                if maxSpeedEnabled:
+                    print "AT MAX....................."
+                    print maxSpeedEnabled
+                    moveMDD10(command, 100)
+                else:
+                    print "NORMAL................."
+                    print maxSpeedEnabled
+                    moveMDD10(command, int(float(drivingSpeedActuallyUsed) / 2.55))                
+			
+            if commandArgs.type == 'adafruit_pwm':
+                moveAdafruitPWM(command)
+            
+            if commandArgs.type == 'gopigo2':
+                moveGoPiGo2(command)
+
+            if commandArgs.type == 'gopigo3':
+                moveGoPiGo3(command)
+                
+            if commandArgs.type == 'owi_arm':
+                owi_arm.handleOwiArm(command)
+
+            if commandArgs.type == 'serial':
+                robot_util.sendSerialCommand(ser, command)
+
+            if commandArgs.type == 'motor_hat' and motorsEnabled:
+                motorA.setSpeed(drivingSpeed)
+                motorB.setSpeed(drivingSpeed)
+                if command == 'F':
+                    drivingSpeed = drivingSpeedActuallyUsed
+                    for motorIndex in range(4):
+                        runMotor(motorIndex, forward[motorIndex])
+                    time.sleep(straightDelay)
+                if command == 'B':
+                    drivingSpeed = drivingSpeedActuallyUsed
+                    for motorIndex in range(4):
+                        runMotor(motorIndex, backward[motorIndex])
+                    time.sleep(straightDelay)
+                if command == 'L':
+                    drivingSpeed = turningSpeedActuallyUsed
+                    for motorIndex in range(4):
+                        runMotor(motorIndex, left[motorIndex])
+                    time.sleep(turnDelay)
+                if command == 'R':
+                    drivingSpeed = turningSpeedActuallyUsed
+                    for motorIndex in range(4):
+                        runMotor(motorIndex, right[motorIndex])
+                    time.sleep(turnDelay)
+                if command == 'U':
+                    #mhArm.getMotor(1).setSpeed(127)
+                    #mhArm.getMotor(1).run(Adafruit_MotorHAT.BACKWARD)
+                    incrementArmServo(1, 10)
+                    time.sleep(0.05)
+                if command == 'D':
+                    #mhArm.getMotor(1).setSpeed(127)
+                    #mhArm.getMotor(1).run(Adafruit_MotorHAT.FORWARD)
+                    incrementArmServo(1, -10)
+                    time.sleep(0.05)
+                if command == 'O':
+                    #mhArm.getMotor(2).setSpeed(127)
+                    #mhArm.getMotor(2).run(Adafruit_MotorHAT.BACKWARD)
+                    incrementArmServo(2, -10)
+                    time.sleep(0.05)
+                if command == 'C':
+                    #mhArm.getMotor(2).setSpeed(127)
+                    #mhArm.getMotor(2).run(Adafruit_MotorHAT.FORWARD)
+                    incrementArmServo(2, 10)
+                    time.sleep(0.05)
+
+            if commandArgs.type == 'mdd10':
+                turnOffMotorsMDD10()
+                    
+            if commandArgs.type == 'motor_hat':
+                turnOffMotors()
+                if command == 'WALL':
+                    handleLoudCommand(25)
+                    os.system("aplay -D plughw:2,0 /home/pi/wall.wav")
+                if command == 'SOUND2':
+                    handleLoudCommand(25)
+                    os.system("aplay -D plughw:2,0 /home/pi/sound2.wav")
+
+                    
+            if commandArgs.type == 'l298n':
+                runl298n(command)                                 
+            #setMotorsToIdle()
+            if commandArgs.type == 'motozero':
+                runmotozero(command)
+	        if commandArgs.type == 'pololu':
+		        runPololu(command)
+            
+            if commandArgs.led == 'max7219':
+                if command == 'LED_OFF':
+                    SetLED_Off()
+                if command == 'LED_FULL':
+                    SetLED_On()
+                    SetLED_Full()
+                if command == 'LED_MED':
+                    SetLED_On()
+                    SetLED_Med()
+                if command == 'LED_LOW':
+                    SetLED_On()
+                    SetLED_Low()
+                if command == 'LED_E_SMILEY':
+                    SetLED_On()
+                    SetLED_E_Smiley()
+                if command == 'LED_E_SAD':
+                    SetLED_On()
+                    SetLED_E_Sad()
+                if command == 'LED_E_TONGUE':
+                    SetLED_On()
+                    SetLED_E_Tongue()
+                if command == 'LED_E_SUPRISED':
+                    SetLED_On()
+                    SetLED_E_Suprised()
+        handlingCommand = False
+
+
+
+
+
+
+    
+
 initControlSocketIOConnection()
 
 chatHostPort = getChatHostPort()
@@ -856,172 +1035,6 @@ def moveGoPiGo3(command):
     
         
                 
-def handle_command(args):
-        now = datetime.datetime.now()
-        now_time = now.time()
-        # if it's late, make the robot slower
-        if now_time >= datetime.time(21,30) or now_time <= datetime.time(9,30):
-            #print "within the late time interval"
-            drivingSpeedActuallyUsed = nightTimeDrivingSpeedActuallyUsed
-        else:
-            drivingSpeedActuallyUsed = dayTimeDrivingSpeedActuallyUsed
-
-                
-
-        global drivingSpeed
-        global handlingCommand
-
-        if 'robot_id' in args and args['robot_id'] == robotID: print "received message:", args
-        # Note: If you are adding features to your bot,
-        # you can get direct access to incomming commands right here.
-
-
-        if handlingCommand:
-            return
-
-
-
-        #if 'robot_id' in args:
-        #    print "args robot id:", args['robot_id']
-
-        #if 'command' in args:
-        #    print "args command:", args['command']
-
-
-            
-        if 'command' in args and 'robot_id' in args and args['robot_id'] == robotID:
-
-            print('got command', args)
-
-            command = args['command']
-
-            # don't turn set handlingCommand true for
-            # commands that persist for a while and are not exclusive
-            # so others are allowed to run
-            if command not in ("SOUND2", "WALL", "LOUD", "MAXSPEED"):
-                handlingCommand = True
-            
-            if command == 'LOUD':
-                handleLoudCommand(25)
-
-            if command == 'MAXSPEED':
-                handleMaxSpeedCommand()
-                            
-            if commandArgs.type == 'mdd10':
-                if maxSpeedEnabled:
-                    print "AT MAX....................."
-                    print maxSpeedEnabled
-                    moveMDD10(command, 100)
-                else:
-                    print "NORMAL................."
-                    print maxSpeedEnabled
-                    moveMDD10(command, int(float(drivingSpeedActuallyUsed) / 2.55))                
-			
-            if commandArgs.type == 'adafruit_pwm':
-                moveAdafruitPWM(command)
-            
-            if commandArgs.type == 'gopigo2':
-                moveGoPiGo2(command)
-
-            if commandArgs.type == 'gopigo3':
-                moveGoPiGo3(command)
-                
-            if commandArgs.type == 'owi_arm':
-                owi_arm.handleOwiArm(command)
-
-            if commandArgs.type == 'serial':
-                robot_util.sendSerialCommand(ser, command)
-
-            if commandArgs.type == 'motor_hat' and motorsEnabled:
-                motorA.setSpeed(drivingSpeed)
-                motorB.setSpeed(drivingSpeed)
-                if command == 'F':
-                    drivingSpeed = drivingSpeedActuallyUsed
-                    for motorIndex in range(4):
-                        runMotor(motorIndex, forward[motorIndex])
-                    time.sleep(straightDelay)
-                if command == 'B':
-                    drivingSpeed = drivingSpeedActuallyUsed
-                    for motorIndex in range(4):
-                        runMotor(motorIndex, backward[motorIndex])
-                    time.sleep(straightDelay)
-                if command == 'L':
-                    drivingSpeed = turningSpeedActuallyUsed
-                    for motorIndex in range(4):
-                        runMotor(motorIndex, left[motorIndex])
-                    time.sleep(turnDelay)
-                if command == 'R':
-                    drivingSpeed = turningSpeedActuallyUsed
-                    for motorIndex in range(4):
-                        runMotor(motorIndex, right[motorIndex])
-                    time.sleep(turnDelay)
-                if command == 'U':
-                    #mhArm.getMotor(1).setSpeed(127)
-                    #mhArm.getMotor(1).run(Adafruit_MotorHAT.BACKWARD)
-                    incrementArmServo(1, 10)
-                    time.sleep(0.05)
-                if command == 'D':
-                    #mhArm.getMotor(1).setSpeed(127)
-                    #mhArm.getMotor(1).run(Adafruit_MotorHAT.FORWARD)
-                    incrementArmServo(1, -10)
-                    time.sleep(0.05)
-                if command == 'O':
-                    #mhArm.getMotor(2).setSpeed(127)
-                    #mhArm.getMotor(2).run(Adafruit_MotorHAT.BACKWARD)
-                    incrementArmServo(2, -10)
-                    time.sleep(0.05)
-                if command == 'C':
-                    #mhArm.getMotor(2).setSpeed(127)
-                    #mhArm.getMotor(2).run(Adafruit_MotorHAT.FORWARD)
-                    incrementArmServo(2, 10)
-                    time.sleep(0.05)
-
-            if commandArgs.type == 'mdd10':
-                turnOffMotorsMDD10()
-                    
-            if commandArgs.type == 'motor_hat':
-                turnOffMotors()
-                if command == 'WALL':
-                    handleLoudCommand(25)
-                    os.system("aplay -D plughw:2,0 /home/pi/wall.wav")
-                if command == 'SOUND2':
-                    handleLoudCommand(25)
-                    os.system("aplay -D plughw:2,0 /home/pi/sound2.wav")
-
-                    
-            if commandArgs.type == 'l298n':
-                runl298n(command)                                 
-            #setMotorsToIdle()
-            if commandArgs.type == 'motozero':
-                runmotozero(command)
-	        if commandArgs.type == 'pololu':
-		        runPololu(command)
-            
-            if commandArgs.led == 'max7219':
-                if command == 'LED_OFF':
-                    SetLED_Off()
-                if command == 'LED_FULL':
-                    SetLED_On()
-                    SetLED_Full()
-                if command == 'LED_MED':
-                    SetLED_On()
-                    SetLED_Med()
-                if command == 'LED_LOW':
-                    SetLED_On()
-                    SetLED_Low()
-                if command == 'LED_E_SMILEY':
-                    SetLED_On()
-                    SetLED_E_Smiley()
-                if command == 'LED_E_SAD':
-                    SetLED_On()
-                    SetLED_E_Sad()
-                if command == 'LED_E_TONGUE':
-                    SetLED_On()
-                    SetLED_E_Tongue()
-                if command == 'LED_E_SUPRISED':
-                    SetLED_On()
-                    SetLED_E_Suprised()
-        handlingCommand = False
 
 	   
 def runl298n(direction):
