@@ -460,7 +460,7 @@ else:
     print "chat server connection disabled"
 
 print "connecting to app server socket.io"
-appServerSocketIO = SocketIO('letsrobot.tv', 8022, LoggingNamespace)
+appServerSocketIO = SocketIO(infoServer, 8022, LoggingNamespace)
 print "finished connecting to app server"
 
 def setServoPulse(channel, pulse):
