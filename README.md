@@ -228,16 +228,16 @@ Configuration updates from the web client (partially implemented)
 <h2>Detailed Description: </h2>
 The robot client connects to four external services: API Service, Chat Service, Video/Audio Service, and the Control Service.
 
-<h5>API Service</h5>
+<h4>API Service</h4>
 Provides information about which host and port to connect to for the chat service, video/audio service, and control service
 
-<h5>Chat Service</h5>
+<h4>Chat Service</h4>
 Relays chat messages sent from the web clients to the robot
 
-<h5>Video/Audio Service</h5>
+<h4>Video/Audio Service</h4>
 The robot client streams ffmpeg output to the video/audio service
 
-<h5>Control Service</h5>
+<h4>Control Service</h4>
 Relays control messages sent from the web clients to the robot
 
 
