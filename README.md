@@ -205,3 +205,22 @@ sudo reboot
 
 
 
+<h1> High Level Overview </h1>
+![robot client topology](https://github.com/runmyrobot/runmyrobot/blob/master/documentation/RobotClientTopology.png)
+
+The robot client connects via websockets to the API service to retrieve configuration information, to the chat to receive chat messages, the video/audio relays to send its camera and microphone capture, and to the control service to receive user commands.
+
+<h2>Interfaces: </h2>
+Control server via socket.io
+Application server via socket.io and HTTP
+Chat server via socket.io
+Sends video stream via websockets
+Sends audio stream via websockets
+
+<h2>Responsibilities: </h2>
+Capturing Audio and Video
+Relays commands to robot hardware
+Text to Speech
+Supports remote login for diagnostics and updates
+Configuration updates from the web client (partially implemented)
+
