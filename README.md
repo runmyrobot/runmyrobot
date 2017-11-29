@@ -207,6 +207,7 @@ sudo reboot
 
 <h1> High Level Overview </h1>
 ![robot client topology](https://raw.githubusercontent.com/runmyrobot/runmyrobot/master/documentation/RobotClientTopology.png)
+![Image of Yaktocat](https://octodex.github.com/images/yaktocat.png)
 
 The robot client connects via websockets to the API service to retrieve configuration information, to the chat to receive chat messages, the video/audio relays to send its camera and microphone capture, and to the control service to receive user commands.
 
