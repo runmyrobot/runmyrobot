@@ -26,8 +26,7 @@ class DummyProcess:
 
 parser = argparse.ArgumentParser(description='robot control')
 parser.add_argument('camera_id')
-parser.add_argument('--info-server', help="handles things such as rest API requests about ports, for example 1.1.1.1:8082", default='runmyrobot.com')
-parser.add_argument('--info-server-protocol', default="https", help="either https or http")
+parser.add_argument('--api-server-protocol', default="https", help="either https or http")
 parser.add_argument('--app-server-socketio-host', default="letsrobot.tv", help="wherever app is running")
 parser.add_argument('--app-server-socketio-port', default=8022, help="typically use 8022 for prod, 8122 for dev, and 8125 for dev2")
 parser.add_argument('--api-server', help="Server that robot will connect to listen for API update events", default='api.letsrobot.tv')
@@ -59,7 +58,6 @@ resolutionChanged = False
 currentXres = None
 currentYres = None
 server = 'runmyrobot.com'
-infoServer = commandArgs.info_server
 apiServer = commandArgs.api_server
 
 audioProcess = None
@@ -89,10 +87,7 @@ print "initializing socket io"
 print "server:", server
 #print "port:", port
 
-
-
-
-infoServerProtocol = commandArgs.info_server_protocol
+apiServerProtocol = commandArgs.api_server_protocol
 
 print "trying to connect to app server socket io", commandArgs.app_server_socketio_host, commandArgs.app_server_socketio_port
 appServerSocketIO = SocketIO(commandArgs.app_server_socketio_host, commandArgs.app_server_socketio_port, LoggingNamespace)
@@ -100,7 +95,7 @@ print "finished initializing app server socket io"
 
 def getVideoPort():
 
-    url = '%s://%s/get_video_port/%s' % (infoServerProtocol, infoServer, commandArgs.camera_id)
+    url = '%s://%s/get_video_port/%s' % (apiServerProtocol, apiServer, commandArgs.camera_id)
     response = robot_util.getWithRetry(url)
     return json.loads(response)['mpeg_stream_port']
 
@@ -108,19 +103,19 @@ def getVideoPort():
 
 def getAudioPort():
 
-    url = '%s://%s/get_audio_port/%s' % (infoServerProtocol, infoServer, commandArgs.camera_id)
+    url = '%s://%s/get_audio_port/%s' % (apiServerProtocol, apiServer, commandArgs.camera_id)
     response = robot_util.getWithRetry(url)
     return json.loads(response)['audio_stream_port']
 
 
 def getRobotID():
 
-    url = '%s://%s/get_robot_id/%s' % (infoServerProtocol, infoServer, commandArgs.camera_id)
+    url = '%s://%s/get_robot_id/%s' % (apiServerProtocol, apiServer, commandArgs.camera_id)
     response = robot_util.getWithRetry(url)
     return json.loads(response)['robot_id']
 
 def getWebsocketRelayHost():
-    url = '%s://%s/get_websocket_relay_host/%s' % (infoServerProtocol, infoServer, commandArgs.camera_id)
+    url = '%s://%s/get_websocket_relay_host/%s' % (apiServerProtocol, apiServer, commandArgs.camera_id)
     response = robot_util.getWithRetry(url)
     return json.loads(response)
 
