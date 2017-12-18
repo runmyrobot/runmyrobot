@@ -4,5 +4,6 @@
 # (2) use sudo to create a crontab entry: @reboot /bin/bash /home/pi/start_robot
 
 cd /home/pi/runmyrobot
+nohup scripts/repeat_start python reverse_ssh.py YOURROBOTID &> /dev/null &
 nohup scripts/repeat_start python controller.py YOURROBOTID &> /dev/null &
 nohup scripts/repeat_start python send_video.py YOURCAMERAID 0 &> /dev/null &
