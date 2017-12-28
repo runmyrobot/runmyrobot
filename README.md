@@ -44,10 +44,11 @@ The RasPi will need the following things install so it can talk to your motor an
 
 (4) Install alsa-lib
 ```
-cd /usr/local/src 
-wget ftp://ftp.alsa-project.org/pub/lib/alsa-lib-1.0.25.tar.bz2 
-tar xjf alsa-lib-1.0.25.tar.bz2
-cd /usr/local/src/alsa-lib-1.0.25 
+mkdir ~/libsrc
+cd ~/libsrc
+wget ftp://ftp.alsa-project.org/pub/lib/alsa-lib-1.1.5.tar.bz2 
+tar xjf alsa-lib-1.1.5.tar.bz2
+cd alsa-lib-1.1.5 
 ./configure --host=arm-unknown-linux-gnueabi 
 make -j4 
 sudo make install
@@ -55,7 +56,7 @@ sudo make install
 
 (5) Install x264
 ```
-cd /usr/local/src
+cd ~/libsrc
 git clone git://git.videolan.org/x264
 cd x264
 ./configure --host=arm-unknown-linux-gnueabi --enable-static --disable-opencl
@@ -65,7 +66,7 @@ sudo make install
 
 (6) Install FFmpeg
 ```
-cd /usr/local/src
+cd ~/libsrc
 git clone https://github.com/FFmpeg/FFmpeg.git
 cd FFmpeg
 ./configure --arch=armel --target-os=linux --enable-gpl --enable-libx264 --enable-nonfree --enable-gnutls --extra-libs=-ldl
