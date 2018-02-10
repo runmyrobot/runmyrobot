@@ -52,13 +52,14 @@ parser.add_argument('--dry-run', dest='dry_run', action='store_true')
 parser.add_argument('--mic-channels', type=int, help='microphone channels, typically 1 or 2', default=1)
 parser.add_argument('--audio-input-device', default='Microphone (HD Webcam C270)') # currently, this option is only used for windows screen capture
 parser.add_argument('--stream-key', default='hello')
+parser.add_argument('--mic-gain', default=80, type=int) #control sensitivity of microphone
 
 commandArgs = parser.parse_args()
 robotSettings = None
 resolutionChanged = False
 currentXres = None
 currentYres = None
-server = 'runmyrobot.com'
+server = 'letsrobot.tv'
 infoServer = commandArgs.info_server
 apiServer = commandArgs.api_server
 
@@ -70,6 +71,8 @@ from socketIO_client import SocketIO, LoggingNamespace
 # enable raspicam driver in case a raspicam is being used
 os.system("sudo modprobe bcm2835-v4l2")
 
+# --mic-gain microphone sensitivity
+os.system("amixer -c %d cset numid=3 %d%%" % (commandArgs.audio-device-number, commandArgs.mic-gain))
 
 #if commandArgs.env == "dev":
 #    print "using dev port 8122"
