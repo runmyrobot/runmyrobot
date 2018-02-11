@@ -56,6 +56,7 @@ parser.add_argument('--right-wheel-backward-speed', type=int)
 parser.add_argument('--left-wheel-forward-speed', type=int)
 parser.add_argument('--left-wheel-backward-speed', type=int)
 parser.add_argument('--led-max-brightness', type=int)
+parser.add_argument('--speaker-device', default=2, type=int)
 
 
 
@@ -82,7 +83,7 @@ os.system("amixer set PCM -- 100%d%%" % commandArgs.tts_volume)
     #os.system("amixer set PCM -- -100")
 
 # tested for USB audio device
-os.system("amixer -c 2 cset numid=3 %d%%" % commandArgs.tts_volume)
+os.system("amixer -c %d cset numid=3 %d%%" % (commandArgs.speaker_device, commandArgs.tts_volume))
 
 
 infoServer = commandArgs.info_server
