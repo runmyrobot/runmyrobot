@@ -72,7 +72,7 @@ from socketIO_client import SocketIO, LoggingNamespace
 os.system("sudo modprobe bcm2835-v4l2")
 
 # --mic-gain microphone sensitivity
-os.system("amixer -c %d cset numid=3 %d%%" % (commandArgs.audio-device-number, commandArgs.mic-gain))
+os.system("amixer -c %d cset numid=3 %d%%" % (commandArgs.audio_device_number, commandArgs.mic_gain))
 
 #if commandArgs.env == "dev":
 #    print "using dev port 8122"
