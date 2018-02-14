@@ -1173,18 +1173,16 @@ def onHandleChatDisconnect(*args):
     print
     print "chat socket.io disconnect"
     print
-
-
-
     
 def onHandleControlDisconnect(*args):
     print
     print "control socket.io disconnect"
     print
-    
+    newControlHostPort = getControlHostPort() #Reget control port will start if it closed for whatever reason
+    if controlHostPort['port'] != newControlHostPort['port']: #See if the port is not the same as before
+	print "restart: control host port changed"
+	sys.exit(1) #Auto restart script will restart if the control port is not the same (which is unlikely)
 
-
-    
 #from communication import socketIO
 controlSocketIO.on('command_to_robot', onHandleCommand)
 controlSocketIO.on('disconnect', onHandleControlDisconnect)
