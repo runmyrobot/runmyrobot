@@ -5,9 +5,13 @@
 LetsRobot.tv is a site for interacts with other using telepresence robots. User create their own robots and add them to the site.
 https://letsrobot.tv
 
+You can find additional documentation including information about our API on our [readme.io](https://letsrobot.readme.io/) page as well. 
+
 
 <h2> Quick Install </h2>
 
+The quckest option is to just download our complete image with everything already compiled: 
+[Download the Let's Robot Image] (https://drive.google.com/open?id=1pH-xN40-iPPhvj9dFYjv4AI26jw4qc40)
 
 Copy this into the terminal, and follow the instructions.
 This script has been tested on a Raspberry Pi 3, with a fresh flash of "2017-04-10-raspbian-jessie-lite".
