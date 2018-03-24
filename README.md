@@ -10,11 +10,11 @@ You can find additional documentation including information about our API on our
 
 <h2> Quick Install </h2>
 
-The quickest option is to just download our complete image with everything already compiled:
+The quickest option is to just download our complete image with everything already compiled and flash this to an SD card for your raspberry pi or other linux based computer:
 
 [Download the Let's Robot Image](https://drive.google.com/open?id=1pH-xN40-iPPhvj9dFYjv4AI26jw4qc40)
 
-- or - 
+--- or ---- 
 
 Copy this into the terminal on your raspberry pi (or robot's OS), and follow the instructions.
 This script has been tested on a Raspberry Pi 3, with a fresh flash of "2017-04-10-raspbian-jessie-lite".
