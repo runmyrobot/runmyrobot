@@ -172,11 +172,20 @@ def startVideoCaptureLinux():
         print "saturation"
         os.system("v4l2-ctl -c saturation={saturation}".format(saturation=robotSettings.saturation))
 
-    
-    videoCommandLine = 'ffmpeg -f v4l2 -framerate 25 -video_size {xres}x{yres} -r 25 -i /dev/video{video_device_number} {rotation_option} -f mpegts -codec:v mpeg1video -b:v {kbps}k -bf 0 -muxdelay 0.001 http://{video_host}:{video_port}/{stream_key}/{xres}/{yres}/'.format(video_device_number=robotSettings.video_device_number, rotation_option=rotationOption(), kbps=robotSettings.kbps, video_host=videoHost, video_port=videoPort, xres=robotSettings.xres, yres=robotSettings.yres, stream_key=robotSettings.stream_key)
-
-    print videoCommandLine
-    return subprocess.Popen(shlex.split(videoCommandLine))
+    videoCommandLine1 = '/usr/local/bin/ffmpeg -f v4l2 -framerate 25 -video_size {xres}x{yres} -r 25 -i /dev/video{video_device_number} {rotation_option} -f mpegts -codec:v mpeg1video -b:v {kbps}k -bf 0 -muxdelay 0.001 http://{video_host}:{video_port}/{stream_key}/{xres}/{yres}/'.format(video_device_number=robotSettings.video_device_number, rotation_option=rotationOption(), kbps=robotSettings.kbps, video_host=videoHost, video_port=videoPort, xres=robotSettings.xres, yres=robotSettings.yres, stream_key=robotSettings.stream_key)
+    videoCommandLine2 = 'ffmpeg -f v4l2 -framerate 25 -video_size {xres}x{yres} -r 25 -i /dev/video{video_device_number} {rotation_option} -f mpegts -codec:v mpeg1video -b:v {kbps}k -bf 0 -muxdelay 0.001 http://{video_host}:{video_port}/{stream_key}/{xres}/{yres}/'.format(video_device_number=robotSettings.video_device_number, rotation_option=rotationOption(), kbps=robotSettings.kbps, video_host=videoHost, video_port=videoPort, xres=robotSettings.xres, yres=robotSettings.yres, stream_key=robotSettings.stream_key)
+    try:
+        subprocess.Popen("ffmpeg")
+	print "ffmpeg found at ffmpeg"
+	return subprocess.Popen(shlex.split(videoCommandLine2))
+    except:
+        print "ffmpeg not found at ffmpeg"
+        try:
+            subprocess.Popen("/usr/local/bin/ffmpeg")
+	    print "ffmpeg found at /usr/local/bin/ffmpeg"
+	    return subprocess.Popen(shlex.split(videoCommandLine1))
+        except:
+            print "ffmpeg not found at /usr/local/bin/ffmpeg"
     
 
 def startAudioCaptureLinux():
@@ -188,10 +197,20 @@ def startAudioCaptureLinux():
     if robotSettings.audio_device_name is not None:
 	audioDevNum = audio_util.getAudioDeviceByName(robotSettings.audio_device_name)
 
-    audioCommandLine = '/usr/local/bin/ffmpeg -f alsa -ar 44100 -ac %d -i hw:%d -f mpegts -codec:a mp2 -b:a 32k -muxdelay 0.001 http://%s:%s/%s/640/480/' % (robotSettings.mic_channels, audioDevNum, audioHost, audioPort, robotSettings.stream_key)
-
-    print audioCommandLine
-    return subprocess.Popen(shlex.split(audioCommandLine))
+    audioCommandLine1 = '/usr/local/bin/ffmpeg -f alsa -ar 44100 -ac %d -i hw:%d -f mpegts -codec:a mp2 -b:a 32k -muxdelay 0.001 http://%s:%s/%s/640/480/' % (robotSettings.mic_channels, audioDevNum, audioHost, audioPort, robotSettings.stream_key)
+    audioCommandLine2 = 'ffmpeg -f alsa -ar 44100 -ac %d -i hw:%d -f mpegts -codec:a mp2 -b:a 32k -muxdelay 0.001 http://%s:%s/%s/640/480/' % (robotSettings.mic_channels, audioDevNum, audioHost, audioPort, robotSettings.stream_key)
+    try:
+        subprocess.Popen("ffmpeg")
+	print "ffmpeg found at ffmpeg"
+	return subprocess.Popen(shlex.split(audioCommandLine2))
+    except:
+        print "ffmpeg not found at ffmpeg"
+        try:
+            subprocess.Popen("/usr/local/bin/ffmpeg")
+	    print "ffmpeg found at /usr/local/bin/ffmpeg"
+	    return subprocess.Popen(shlex.split(audioCommandLine1))
+        except:
+            print "ffmpeg not found at /usr/local/bin/ffmpeg"
 
 
 
