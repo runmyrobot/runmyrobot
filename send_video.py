@@ -53,6 +53,7 @@ parser.add_argument('--mic-channels', type=int, help='microphone channels, typic
 parser.add_argument('--audio-input-device', default='Microphone (HD Webcam C270)') # currently, this option is only used for windows screen capture
 parser.add_argument('--stream-key', default='hello')
 parser.add_argument('--mic-gain', default=80, type=int) #control sensitivity of microphone
+parser.add_argument('--pipe-audio', dest='arecord', action='store_false')
 
 commandArgs = parser.parse_args()
 robotSettings = None
@@ -197,21 +198,27 @@ def startAudioCaptureLinux():
     if robotSettings.audio_device_name is not None:
 	audioDevNum = audio_util.getAudioDeviceByName(robotSettings.audio_device_name)
 
-    audioCommandLine1 = '/usr/local/bin/ffmpeg -f alsa -ar 44100 -ac %d -i hw:%d -f mpegts -codec:a mp2 -b:a 32k -muxdelay 0.001 http://%s:%s/%s/640/480/' % (robotSettings.mic_channels, audioDevNum, audioHost, audioPort, robotSettings.stream_key)
+    audioCommandLine1 = ' -f alsa -ar 44100 -ac %d -i hw:%d -f mpegts -codec:a mp2 -b:a 32k -muxdelay 0.001 http://%s:%s/%s/640/480/' % (robotSettings.mic_channels, audioDevNum, audioHost, audioPort, robotSettings.stream_key)
     audioCommandLine2 = 'ffmpeg -f alsa -ar 44100 -ac %d -i hw:%d -f mpegts -codec:a mp2 -b:a 32k -muxdelay 0.001 http://%s:%s/%s/640/480/' % (robotSettings.mic_channels, audioDevNum, audioHost, audioPort, robotSettings.stream_key)
+    ffmpegLocation = ''
     try:
         subprocess.Popen("ffmpeg")
 	print "ffmpeg found at ffmpeg"
-	return subprocess.Popen(shlex.split(audioCommandLine2))
+	ffmpegLocation = 'ffmpeg'
     except:
         print "ffmpeg not found at ffmpeg"
         try:
             subprocess.Popen("/usr/local/bin/ffmpeg")
 	    print "ffmpeg found at /usr/local/bin/ffmpeg"
-	    return subprocess.Popen(shlex.split(audioCommandLine1))
+	    ffmpegLocation = '/usr/local/bin/ffmpeg'
         except:
             print "ffmpeg not found at /usr/local/bin/ffmpeg"
-
+    audioCommandLine1 = '%s -f alsa -ar 44100 -ac %d -i hw:%d -f mpegts -codec:a mp2 -b:a 32k -muxdelay 0.001 http://%s:%s/%s/640/480/' % (ffmpegLocation, robotSettings.mic_channels, audioDevNum, audioHost, audioPort, robotSettings.stream_key)
+    audioCommandLine2 = 'arecord -Dhw:%d -c%d -r32000 -fS16_LE | %s -acodec pcm_s16le -i - -ab 32k -bufsize 32k -f mpegts -codec:a mp2 -b:a 32k -muxdelay 0.001 http://%s:%s/%s/640/480/' % (audioDevNum, robotSettings.mic_channels, ffmpegLocation, audioHost, audioPort, robotSettings.stream_key)
+    if robotSettings.arecord:
+        return subprocess.Popen(shlex.split(audioCommandLine2))
+    else:
+        return subprocess.Popen(shlex.split(audioCommandLine1))
 
 
 def rotationOption():
