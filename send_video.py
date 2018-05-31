@@ -198,8 +198,6 @@ def startAudioCaptureLinux():
     if robotSettings.audio_device_name is not None:
 	audioDevNum = audio_util.getAudioDeviceByName(robotSettings.audio_device_name)
 
-    audioCommandLine1 = ' -f alsa -ar 44100 -ac %d -i hw:%d -f mpegts -codec:a mp2 -b:a 32k -muxdelay 0.001 http://%s:%s/%s/640/480/' % (robotSettings.mic_channels, audioDevNum, audioHost, audioPort, robotSettings.stream_key)
-    audioCommandLine2 = 'ffmpeg -f alsa -ar 44100 -ac %d -i hw:%d -f mpegts -codec:a mp2 -b:a 32k -muxdelay 0.001 http://%s:%s/%s/640/480/' % (robotSettings.mic_channels, audioDevNum, audioHost, audioPort, robotSettings.stream_key)
     ffmpegLocation = ''
     try:
         subprocess.Popen("ffmpeg")
@@ -216,9 +214,11 @@ def startAudioCaptureLinux():
     audioCommandLine1 = '%s -f alsa -ar 44100 -ac %d -i hw:%d -f mpegts -codec:a mp2 -b:a 32k -muxdelay 0.001 http://%s:%s/%s/640/480/' % (ffmpegLocation, robotSettings.mic_channels, audioDevNum, audioHost, audioPort, robotSettings.stream_key)
     audioCommandLine2 = 'arecord -Dhw:%d -c%d -r32000 -fS16_LE | %s -acodec pcm_s16le -i - -ab 32k -bufsize 32k -f mpegts -codec:a mp2 -b:a 32k -muxdelay 0.001 http://%s:%s/%s/640/480/' % (audioDevNum, robotSettings.mic_channels, ffmpegLocation, audioHost, audioPort, robotSettings.stream_key)
     if robotSettings.arecord:
-        return subprocess.Popen(shlex.split(audioCommandLine2))
-    else:
+        print audioCommandLine1
         return subprocess.Popen(shlex.split(audioCommandLine1))
+    else:
+        print audioCommandLine2
+        return subprocess.Popen(shlex.split(audioCommandLine2))
 
 
 def rotationOption():
