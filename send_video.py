@@ -173,8 +173,8 @@ def startVideoCaptureLinux():
         print "saturation"
         os.system("v4l2-ctl -c saturation={saturation}".format(saturation=robotSettings.saturation))
 
-    videoCommandLine1 = '/usr/local/bin/ffmpeg -f v4l2 -framerate 25 -video_size {xres}x{yres} -r 25 -i /dev/video{video_device_number} {rotation_option} -f mpegts -codec:v mpeg1video -b:v {kbps}k -bf 0 -muxdelay 0.001 http://{video_host}:{video_port}/{stream_key}/{xres}/{yres}/'.format(video_device_number=robotSettings.video_device_number, rotation_option=rotationOption(), kbps=robotSettings.kbps, video_host=videoHost, video_port=videoPort, xres=robotSettings.xres, yres=robotSettings.yres, stream_key=robotSettings.stream_key)
-    videoCommandLine2 = 'ffmpeg -f v4l2 -framerate 25 -video_size {xres}x{yres} -r 25 -i /dev/video{video_device_number} {rotation_option} -f mpegts -codec:v mpeg1video -b:v {kbps}k -bf 0 -muxdelay 0.001 http://{video_host}:{video_port}/{stream_key}/{xres}/{yres}/'.format(video_device_number=robotSettings.video_device_number, rotation_option=rotationOption(), kbps=robotSettings.kbps, video_host=videoHost, video_port=videoPort, xres=robotSettings.xres, yres=robotSettings.yres, stream_key=robotSettings.stream_key)
+    videoCommandLine1 = '/usr/local/bin/ffmpeg -f v4l2 -threads 4 -video_size {xres}x{yres} -i /dev/video{video_device_number} {rotation_option} -f mpegts -framerate 25 -codec:v mpeg1video -b:v {kbps}k -bf 0 -muxdelay 0.001 http://{video_host}:{video_port}/{stream_key}/{xres}/{yres}/'.format(video_device_number=robotSettings.video_device_number, rotation_option=rotationOption(), kbps=robotSettings.kbps, video_host=videoHost, video_port=videoPort, xres=robotSettings.xres, yres=robotSettings.yres, stream_key=robotSettings.stream_key)
+    videoCommandLine2 = 'ffmpeg -f v4l2 -threads 4 -video_size {xres}x{yres} -i /dev/video{video_device_number} {rotation_option} -f mpegts -framerate 25 -codec:v mpeg1video -b:v {kbps}k -bf 0 -muxdelay 0.001 http://{video_host}:{video_port}/{stream_key}/{xres}/{yres}/'.format(video_device_number=robotSettings.video_device_number, rotation_option=rotationOption(), kbps=robotSettings.kbps, video_host=videoHost, video_port=videoPort, xres=robotSettings.xres, yres=robotSettings.yres, stream_key=robotSettings.stream_key)
     try:
         subprocess.Popen("ffmpeg")
 	print "ffmpeg found at ffmpeg"
@@ -212,7 +212,7 @@ def startAudioCaptureLinux():
         except:
             print "ffmpeg not found at /usr/local/bin/ffmpeg"
     audioCommandLine1 = '%s -f alsa -ar 44100 -ac %d -i hw:%d -f mpegts -codec:a mp2 -b:a 32k -muxdelay 0.001 http://%s:%s/%s/640/480/' % (ffmpegLocation, robotSettings.mic_channels, audioDevNum, audioHost, audioPort, robotSettings.stream_key)
-    audioCommandLine2 = 'arecord -D hw:%d -f cd -r 32000 | %s -i - -ar 32000 -threads 4 -f mpegts -codec:a mp2 -b:a 128k -muxdelay 0.001 http://%s:%s/%s/640/480/' % (audioDevNum, ffmpegLocation, audioHost, audioPort, robotSettings.stream_key)
+    audioCommandLine2 = 'arecord -D hw:%d -c %d -f S16_LE -r 32000 | %s -i - -ar 32000 -threads 4 -f mpegts -codec:a mp2 -b:a 128k -bufsize 8192k -muxdelay 0.001 http://%s:%s/%s/640/480/' % (audioDevNum, robotSettings.mic_channels, ffmpegLocation, audioHost, audioPort, robotSettings.stream_key)
     if robotSettings.arecord:
         print audioCommandLine1
         return subprocess.Popen(shlex.split(audioCommandLine1))
