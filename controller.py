@@ -57,7 +57,8 @@ parser.add_argument('--left-wheel-forward-speed', type=int)
 parser.add_argument('--left-wheel-backward-speed', type=int)
 parser.add_argument('--led-max-brightness', type=int)
 parser.add_argument('--speaker-device', default=2, type=int)
-
+parser.add_argument('--tts-delay-enabled', dest='tts_delay_enabled', action='store_true')
+parser.add_argument('--tts-delay-seconds', dest='tts_delay_seconds', type=int, default=5)
 
 
 commandArgs = parser.parse_args()
@@ -460,6 +461,9 @@ if commandArgs.enable_chat_server_connection:
 else:
     print "chat server connection disabled"
 
+if commandArgs.tts_delay_enabled:
+    userSocket = SocketIO('https://letsrobot.tv', 8000, LoggingNamespace)
+
 print "connecting to app server socket.io"
 appServerSocketIO = SocketIO(infoServer, 8022, LoggingNamespace)
 print "finished connecting to app server"
@@ -636,11 +640,19 @@ def say(message):
 
     os.remove(tempFilePath)
 
-    
-                
 def handle_chat_message(args):
-
     print "chat message received:", args
+    if commandArgs.tts_delay_enabled:
+        processing.append(args['_id'])
+        time.sleep(commandArgs.tts_delay_seconds)
+        processing.remove(args['_id'])
+        if args['_id'] in deleted:
+            deleted.remove(args['_id'])
+            print args['_id'] + ' was deleted before TTS played!'
+            exit()
+        else:
+            deleted.remove(args['_id'])
+
     rawMessage = args['message']
     withoutName = rawMessage.split(']')[1:]
     message = "".join(withoutName)
@@ -648,7 +660,7 @@ def handle_chat_message(args):
     if message[1] == ".":
        exit()
     elif commandArgs.anon_tts != True and args['anonymous'] == True:
-       exit()   
+       exit()
     elif commandArgs.filter_url_tts == True and re.search(urlRegExp, message):
        exit()
     else:
@@ -659,8 +671,8 @@ def moveMDD10(command, speedPercent):
     if command == 'F':
 	   GPIO.output(DIG1, GPIO.LOW)
 	   GPIO.output(DIG2, GPIO.LOW)
-	   p1.start(speedPercent)  # set speed for M1 
-	   p2.start(speedPercent)  # set speed for M2 
+	   p1.start(speedPercent)  # set speed for M1
+	   p2.start(speedPercent)  # set speed for M2
 	   time.sleep(straightDelay)
     if command == 'B':
 	   GPIO.output(DIG1, GPIO.HIGH)
@@ -684,7 +696,7 @@ def moveMDD10(command, speedPercent):
 
 def moveAdafruitPWM(command):
     print "move adafruit pwm command", command
-        
+
     if command == 'L':
         pwm.setPWM(1, 0, 300) # turn left
         pwm.setPWM(0, 0, 445) # drive forward
@@ -713,7 +725,7 @@ def moveAdafruitPWM(command):
         pwm.setPWM(1, 0, 400) # turn neurtral
         pwm.setPWM(0, 0, 335) # drive neutral
 
-        
+
     if command == 'F':
         pwm.setPWM(0, 0, 445) # drive forward
         time.sleep(0.3)
@@ -734,15 +746,15 @@ def moveAdafruitPWM(command):
         pwm.setPWM(2, 0, 400)
 
     if command == 'POS60':
-        pwm.setPWM(2, 0, 490)        
+        pwm.setPWM(2, 0, 490)
 
     if command == 'NEG60':
-        pwm.setPWM(2, 0, 100)                
+        pwm.setPWM(2, 0, 100)
 
 
 
-        
-    
+
+
 def moveGoPiGo2(command):
     if command == 'L':
         gopigo.left_rot()
@@ -1133,8 +1145,12 @@ def onHandleExclusiveControl(*args):
 def onHandleChatMessage(*args):
    thread.start_new_thread(handle_chat_message, args)
 
+processing = [];
+deleted = [];
+def onHandleChatMessageRemoved(*args):
+    if args[0]['message_id'] in processing and args[0] not in deleted:
+        deleted.append(args[0]['message_id'])
 
-   
 def onHandleAppServerConnect(*args):
     print
     print "chat socket.io connect"
@@ -1192,13 +1208,15 @@ appServerSocketIO.on('connect', onHandleAppServerConnect)
 appServerSocketIO.on('reconnect', onHandleAppServerReconnect)
 appServerSocketIO.on('disconnect', onHandleAppServerDisconnect)
 
+if commandArgs.tts_delay_enabled:
+    userSocket.on('message_removed', onHandleChatMessageRemoved)
 
 if commandArgs.enable_chat_server_connection:
     chatSocket.on('chat_message_with_name', onHandleChatMessage)
     chatSocket.on('connect', onHandleChatConnect)
     chatSocket.on('reconnect', onHandleChatReconnect)    
     chatSocket.on('disconnect', onHandleChatDisconnect)
-    
+
 
 def startReverseSshProcess(*args):
    thread.start_new_thread(handleStartReverseSshProcess, args)
@@ -1368,8 +1386,12 @@ def waitForControlServer():
 
 def waitForChatServer():
     while True:
-        chatSocket.wait(seconds=1)        
-        
+        chatSocket.wait(seconds=1)
+
+def waitForUserServer():
+    while True:
+        userSocket.wait(seconds=1)
+
 def startListenForAppServer():
    thread.start_new_thread(waitForAppServer, ())
 
@@ -1379,12 +1401,18 @@ def startListenForControlServer():
 def startListenForChatServer():
    thread.start_new_thread(waitForChatServer, ())
 
+def startListenForUserServer():
+    thread.start_new_thread(waitForUserServer, ())
+
 
 startListenForControlServer()
 startListenForAppServer()
 
 if commandArgs.enable_chat_server_connection:
     startListenForChatServer()
+
+if commandArgs.tts_delay_enabled:
+    startListenForUserServer()
 
 while True:
     time.sleep(1)
