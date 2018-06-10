@@ -22,8 +22,8 @@ parser.add_argument('--serial-device', help="Serial device", default='/dev/ttyAC
 parser.add_argument('--male', dest='male', action='store_true')
 parser.add_argument('--female', dest='male', action='store_false')
 parser.add_argument('--voice-number', type=int, default=1)
-parser.add_argument('--led', help="Type of LED for example max7219", default=None)
-parser.add_argument('--ledrotate', help="Rotates the LED matrix. Example: 180", default=None)
+parser.add_argument('--ledmatrix', help="Type of LED for example max7219", default=None)
+parser.add_argument('--ledmatrix-rotate', help="Rotates the LED matrix. Example: 180", default=None)
 parser.add_argument('--tts-volume', type=int, default=80)
 parser.add_argument('--secret-key', default=None)
 parser.add_argument('--turn-delay', type=float, default=0.4)
@@ -127,8 +127,6 @@ elif commandArgs.type == 'screencap':
     pass
 elif commandArgs.type == 'adafruit_pwm':
     from Adafruit_PWM_Servo_Driver import PWM
-elif commandArgs.led == 'max7219':
-    import spidev
 elif commandArgs.type == 'owi_arm':
     import owi_arm
 elif commandArgs.type == 'mdd10':
@@ -136,6 +134,15 @@ elif commandArgs.type == 'mdd10':
 else:
     print "invalid --type in command line"
     exit(0)
+
+# led specific inializations
+if commandArgs.ledmatrix == 'max7219':
+    try:
+        import spidev
+    except ImportError:
+        print "You need to install spidev (sudo pip install https://codeload.github.com/doceme/py-spidev/zip/master)\n Ctrl-C to quit"
+        while True:
+            pass # Halt program	to avoid error down the line.
 
 serialDevice = commandArgs.serial_device
 
@@ -272,7 +279,7 @@ if commandArgs.type == 'mdd10' :
   p2 = GPIO.PWM(AN2, 100)
   
 #LED controlling
-if commandArgs.led == 'max7219':
+if commandArgs.ledmatrix == 'max7219':
     spi = spidev.SpiDev()
     spi.open(0,0)
     #VCC -> RPi Pin 2
@@ -303,53 +310,51 @@ if commandArgs.led == 'max7219':
     LEDEmoteSad = [0x0,0x0,0x24,0x0,0x0,0x3C,0x42,0x0]
     LEDEmoteTongue = [0x0,0x0,0x24,0x0,0x42,0x3C,0xC,0x0]
     LEDEmoteSuprise = [0x0,0x0,0x24,0x0,0x18,0x24,0x24,0x18]
-    if commandArgs.ledrotate == '180':
+    if commandArgs.ledmatrix_rotate == '180':
         LEDEmoteSmile = LEDEmoteSmile[::-1]
         LEDEmoteSad = LEDEmoteSad[::-1]
         LEDEmoteTongue = LEDEmoteTongue[::-1]
         LEDEmoteSuprise = LEDEmoteSuprise[::-1]
-    
-def SetLED_On():
-  if commandArgs.led == 'max7219':
-    for i in range(len(columns)):
-        spi.xfer([columns[i],LEDOn[i]])
-def SetLED_Off():
-  if commandArgs.led == 'max7219': 
-    for i in range(len(columns)):
-        spi.xfer([columns[i],LEDOff[i]])
-def SetLED_E_Smiley():
-  if commandArgs.led == 'max7219':
-    for i in range(len(columns)):
-        spi.xfer([columns[i],LEDEmoteSmile[i]]) 
-def SetLED_E_Sad():
-  if commandArgs.led == 'max7219':
-    for i in range(len(columns)):
-        spi.xfer([columns[i],LEDEmoteSad[i]])
-def SetLED_E_Tongue():
-  if commandArgs.led == 'max7219':
-    for i in range(len(columns)):
-        spi.xfer([columns[i],LEDEmoteTongue[i]])
-def SetLED_E_Suprised():
-  if commandArgs.led == 'max7219':
-    for i in range(len(columns)):
-        spi.xfer([columns[i],LEDEmoteSuprise[i]])
-def SetLED_Low():
-  if commandArgs.led == 'max7219':
-    # brightness MIN
-    spi.writebytes([0x0a])
-    spi.writebytes([0x00])
-def SetLED_Med():
-  if commandArgs.led == 'max7219':
-    #brightness MED
-    spi.writebytes([0x0a])
-    spi.writebytes([0x06])
-def SetLED_Full():
-  if commandArgs.led == 'max7219':
-    # brightness MAX
-    spi.writebytes([0x0a])
-    spi.writebytes([0x0F])
-        
-SetLED_Off()
+    def SetLED_On():
+        if commandArgs.ledmatrix == 'max7219':
+            for i in range(len(columns)):
+                spi.xfer([columns[i],LEDOn[i]])
+    def SetLED_Off():
+        if commandArgs.ledmatrix == 'max7219': 
+            for i in range(len(columns)):
+                spi.xfer([columns[i],LEDOff[i]])
+    def SetLED_E_Smiley():
+        if commandArgs.ledmatrix == 'max7219':
+            for i in range(len(columns)):
+                spi.xfer([columns[i],LEDEmoteSmile[i]]) 
+    def SetLED_E_Sad():
+        if commandArgs.ledmatrix == 'max7219':
+            for i in range(len(columns)):
+                spi.xfer([columns[i],LEDEmoteSad[i]])
+    def SetLED_E_Tongue():
+        if commandArgs.ledmatrix == 'max7219':
+            for i in range(len(columns)):
+                spi.xfer([columns[i],LEDEmoteTongue[i]])
+    def SetLED_E_Suprised():
+        if commandArgs.ledmatrix == 'max7219':
+            for i in range(len(columns)):
+                spi.xfer([columns[i],LEDEmoteSuprise[i]])
+    def SetLED_Low():
+        #brightness MIN
+        if commandArgs.ledmatrix == 'max7219':
+            spi.writebytes([0x0a])
+            spi.writebytes([0x00])
+    def SetLED_Med():
+        #brightness MED
+        if commandArgs.ledmatrix == 'max7219':
+            spi.writebytes([0x0a])
+            spi.writebytes([0x06])
+    def SetLED_Full():
+        #brightness MAX
+        if commandArgs.ledmatrix == 'max7219':
+            spi.writebytes([0x0a])
+            spi.writebytes([0x0F])
+    SetLED_Off()
 
 steeringSpeed = 90
 steeringHoldingSpeed = 90
@@ -972,7 +977,7 @@ def handle_command(args):
 	        if commandArgs.type == 'pololu':
 		        runPololu(command)
             
-            if commandArgs.led == 'max7219':
+            if commandArgs.ledmatrix == 'max7219':
                 if command == 'LED_OFF':
                     SetLED_Off()
                 if command == 'LED_FULL':
