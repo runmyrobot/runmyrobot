@@ -31,55 +31,23 @@ To edit your start_robot file, put this into the terminal.
 
 <h2> Manual Install </h2>
 
-<h3> Installing robot control and video scripts </h3>
 
+We recommend using [Raspian Lite](https://www.raspberrypi.org/downloads/raspbian/), however any version of [Raspian](https://www.raspberrypi.org/downloads/raspbian/) or [NOOBS](https://www.raspberrypi.org/downloads/noobs/) should work. 
 
-The RasPi will need the following things install so it can talk to your motor and talk to the internet.
+Make sure the Raspberry Pi software is up to date. 
+```sudo apt-get update```
 
-(1) Install [motor HAT software](https://learn.adafruit.com/adafruit-dc-and-stepper-motor-hat-for-raspberry-pi/installing-software):
+Install ffmpeg and other software needed to run our code. 
+```sudo apt-get install ffmpeg python-serial python-dev libgnutls28-dev espeak python-smbus python-pip git```
 
+Download the Let’s Robot / Run My Robot software from our github
+```git clone https://github.com/runmyrobot/runmyrobot```
 
-(2) Install python serial, gnutls, python-dev, espeak, and python-smbus:
+Go into the /runmyrobot directory
+```cd runmyrobot```
 
-```apt-get install python-serial python-dev libgnutls28-dev espeak python-smbus python-pip git```
-
-
-(3) Install socket.io client for python:
-
-```pip install socketIO-client```
-
-
-(4) Install alsa-lib
-```
-cd /usr/local/src 
-wget ftp://ftp.alsa-project.org/pub/lib/alsa-lib-1.0.25.tar.bz2 
-tar xjf alsa-lib-1.0.25.tar.bz2
-cd /usr/local/src/alsa-lib-1.0.25 
-./configure --host=arm-unknown-linux-gnueabi 
-make -j4 
-sudo make install
-```
-
-(5) Install x264
-```
-cd /usr/local/src
-git clone git://git.videolan.org/x264
-cd x264
-./configure --host=arm-unknown-linux-gnueabi --enable-static --disable-opencl
-make -j4
-sudo make install
-```
-
-(6) Install FFmpeg
-```
-cd /usr/local/src
-git clone https://github.com/FFmpeg/FFmpeg.git
-cd FFmpeg
-./configure --arch=armel --target-os=linux --enable-gpl --enable-libx264 --enable-nonfree --enable-gnutls --extra-libs=-ldl
-make -j4
-sudo make install
-```
-
+Install requirements
+```sudo python -m pip install -r requirements.txt```
 
 
 <h2> Bring you Bot to life: Programs to run on the Raspberry Pi </h2>
