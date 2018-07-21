@@ -35,19 +35,34 @@ To edit your start_robot file, put this into the terminal.
 We recommend using [Raspian Lite](https://www.raspberrypi.org/downloads/raspbian/), however any version of [Raspian](https://www.raspberrypi.org/downloads/raspbian/) or [NOOBS](https://www.raspberrypi.org/downloads/noobs/) should work. 
 
 Make sure the Raspberry Pi software is up to date. 
-```sudo apt-get update```
+
+```
+sudo apt-get update
+```
 
 Install ffmpeg and other software needed to run our code. 
-```sudo apt-get install ffmpeg python-serial python-dev libgnutls28-dev espeak python-smbus python-pip git```
+
+```
+sudo apt-get install ffmpeg python-serial python-dev libgnutls28-dev espeak python-smbus python-pip git
+```
 
 Download the Let’s Robot / Run My Robot software from our github
-```git clone https://github.com/runmyrobot/runmyrobot```
+
+```
+git clone https://github.com/runmyrobot/runmyrobot
+```
 
 Go into the /runmyrobot directory
-```cd runmyrobot```
+
+```
+cd runmyrobot
+```
 
 Install requirements
-```sudo python -m pip install -r requirements.txt```
+
+```
+sudo python -m pip install -r requirements.txt
+```
 
 
 <h2> Bring you Bot to life: Programs to run on the Raspberry Pi </h2>
