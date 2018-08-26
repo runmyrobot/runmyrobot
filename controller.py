@@ -59,7 +59,7 @@ parser.add_argument('--led-max-brightness', type=int)
 parser.add_argument('--speaker-device', default=2, type=int)
 parser.add_argument('--tts-delay-enabled', dest='tts_delay_enabled', action='store_true')
 parser.add_argument('--tts-delay-seconds', dest='tts_delay_seconds', type=int, default=5)
-
+parser.add_argument('--woot-room', help="Room to enable woot events", default='')
 
 commandArgs = parser.parse_args()
 print commandArgs
@@ -461,7 +461,7 @@ if commandArgs.enable_chat_server_connection:
 else:
     print "chat server connection disabled"
 
-if commandArgs.tts_delay_enabled:
+if commandArgs.tts_delay_enabled or commandArgs.woot_room != '':
     userSocket = SocketIO('https://letsrobot.tv', 8000, LoggingNamespace)
 
 print "connecting to app server socket.io"
@@ -640,8 +640,20 @@ def say(message):
 
     os.remove(tempFilePath)
 
+def handle_user_socket_chat_message(args):
+    if args['name'] == 'LetsBot' and args['room'] == commandArgs.woot_room:
+        message = args['message']
+        messageSplit = message.split(' ')
+        if len(messageSplit) == 8:
+            if messageSplit[1] == 'wooted' and messageSplit[3] == 'robits' and messageSplit[4] == 'to' and messageSplit[6] == '!!' and messageSplit[7] == '': # yes.
+                process_woot(messageSplit[0], int(messageSplit[2]))
+
+def process_woot(username, amount): # do stuff with woots here!!
+    print 'woot!! username: ', username, ' amount: ', amount
+
 def handle_chat_message(args):
     print "chat message received:", args
+
     if commandArgs.tts_delay_enabled:
         processing.append(args['_id'])
         time.sleep(commandArgs.tts_delay_seconds)
@@ -1145,6 +1157,9 @@ def onHandleExclusiveControl(*args):
 def onHandleChatMessage(*args):
    thread.start_new_thread(handle_chat_message, args)
 
+def onHandleUserSocketChatMessage(*args):
+       thread.start_new_thread(handle_user_socket_chat_message, args)
+
 processing = [];
 deleted = [];
 def onHandleChatMessageRemoved(*args):
@@ -1210,6 +1225,9 @@ appServerSocketIO.on('disconnect', onHandleAppServerDisconnect)
 
 if commandArgs.tts_delay_enabled:
     userSocket.on('message_removed', onHandleChatMessageRemoved)
+
+if commandArgs.woot_room != '':
+    userSocket.on('chat_message_with_name', onHandleUserSocketChatMessage)
 
 if commandArgs.enable_chat_server_connection:
     chatSocket.on('chat_message_with_name', onHandleChatMessage)
@@ -1411,7 +1429,7 @@ startListenForAppServer()
 if commandArgs.enable_chat_server_connection:
     startListenForChatServer()
 
-if commandArgs.tts_delay_enabled:
+if commandArgs.tts_delay_enabled or commandArgs.woot_room != '':
     startListenForUserServer()
 
 while True:
