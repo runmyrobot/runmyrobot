@@ -16,6 +16,7 @@ import robot_util
 
 parser = argparse.ArgumentParser(description='start robot control program')
 parser.add_argument('robot_id', help='Robot ID')
+parser.add_argument('--uname', help="your lets robot username", default='Jill')
 parser.add_argument('--info-server', help="Server that robot will connect to for information about servers and things", default='letsrobot.tv')
 parser.add_argument('--type', help="Serial or motor_hat or gopigo2 or gopigo3 or l298n or motozero or pololu or mdd10", default='motor_hat')
 parser.add_argument('--serial-device', help="Serial device", default='/dev/ttyACM0')
@@ -356,7 +357,7 @@ steeringHoldingSpeed = 90
 
 global drivingSpeed
 
-
+tablemode = 0
 #drivingSpeed = 90
 drivingSpeed = commandArgs.driving_speed
 handlingCommand = False
@@ -652,6 +653,7 @@ def process_woot(username, amount): # do stuff with woots here!!
     print 'woot!! username: ', username, ' amount: ', amount
 
 def handle_chat_message(args):
+    global tablemode
     print "chat message received:", args
 
     if commandArgs.tts_delay_enabled:
@@ -669,6 +671,17 @@ def handle_chat_message(args):
     withoutName = rawMessage.split(']')[1:]
     message = "".join(withoutName)
     urlRegExp = "(http|ftp|https)://([\w_-]+(?:(?:\.[\w_-]+)+))([\w.,@?^=%&:/~+#-]*[\w@?^=%&/~+#-])?"
+    if args['name'] == commandArgs.uname:
+       if message == ' .table on':
+          say("table top mode on")
+          tablemode = 1
+       elif message == ' .table off':
+          say("table top mode off")
+          tablemode = 0
+       elif message[1] == ".":
+          exit()
+       else:
+          say(message)
     if message[1] == ".":
        exit()
     elif commandArgs.anon_tts != True and args['anonymous'] == True:
@@ -881,7 +894,11 @@ def handle_command(args):
             print('got command', args)
 
             command = args['command']
-
+            if tablemode == 1:
+                if command == "F":
+                    return
+                if command == "B":
+                    return
             # don't turn set handlingCommand true for
             # commands that persist for a while and are not exclusive
             # so others are allowed to run
