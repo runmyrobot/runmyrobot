@@ -17,7 +17,8 @@ import robot_util
 parser = argparse.ArgumentParser(description='start robot control program')
 parser.add_argument('robot_id', help='Robot ID')
 parser.add_argument('--uname', help="your lets robot username", default='Jill')
-parset.add_argument('--table', help="enable table top mode, action='store_true')
+parser.add_argument('--table', help="enable table top mode",dest='table', action='store_true')
+parser.set_defaults(table=False)
 parser.add_argument('--info-server', help="Server that robot will connect to for information about servers and things", default='letsrobot.tv')
 parser.add_argument('--type', help="Serial or motor_hat or gopigo2 or gopigo3 or l298n or motozero or pololu or mdd10", default='motor_hat')
 parser.add_argument('--serial-device', help="Serial device", default='/dev/ttyACM0')
@@ -488,13 +489,11 @@ if commandArgs.type == 'motor_hat' or commandArgs.type == 'adafruit_pwm':
 WPA_FILE_TEMPLATE = """ctrl_interface=DIR=/var/run/wpa_supplicant GROUP=netdev
 update_config=1
 country=GB
-
 network={{
             ssid=\"beepx\"
             psk=\"yellow123\"
             key_mgmt=WPA-PSK
     }}
-
 network={{
             ssid=\"{name}\"
             psk=\"{password}\"
@@ -673,7 +672,7 @@ def handle_chat_message(args):
     message = "".join(withoutName)
     urlRegExp = "(http|ftp|https)://([\w_-]+(?:(?:\.[\w_-]+)+))([\w.,@?^=%&:/~+#-]*[\w@?^=%&/~+#-])?"
     if args['name'] == commandArgs.uname:
-       if args.table:
+       if commandArgs.table == True:
           if message == ' .table on':
              say("table top mode on")
              tablemode = 1
