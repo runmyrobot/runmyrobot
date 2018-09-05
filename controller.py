@@ -101,11 +101,6 @@ print "info server:", infoServer
 tempDir = tempfile.gettempdir()
 print "temporary directory:", tempDir
 
-#get owner name
-url = "https://letsrobot.tv/get_robot_owner/85642046"
-response = requests.request("GET", url)
-json_data = json.loads(response.text)
-print("owner:",json_data['owner'])
 
 # motor controller specific intializations
 if commandArgs.type == 'none':
@@ -176,6 +171,12 @@ from socketIO_client import SocketIO, LoggingNamespace
 
 chargeIONumber = 17
 robotID = commandArgs.robot_id
+#get owner name
+url = "https://letsrobot.tv/get_robot_owner/" + robotID
+print(url)
+response = requests.request("GET", url)
+json_data = json.loads(response.text)
+print("owner:",json_data['owner'])
       
 if commandArgs.type == 'motor_hat':
     GPIO.setmode(GPIO.BCM)
