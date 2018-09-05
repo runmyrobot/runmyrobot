@@ -13,10 +13,10 @@ import argparse
 import random
 import telly
 import robot_util
+import requests
 
 parser = argparse.ArgumentParser(description='start robot control program')
 parser.add_argument('robot_id', help='Robot ID')
-parser.add_argument('--uname', help="your lets robot username", default='Jill')
 parser.add_argument('--table', help="enable table top mode",dest='table', action='store_true')
 parser.set_defaults(table=False)
 parser.add_argument('--info-server', help="Server that robot will connect to for information about servers and things", default='letsrobot.tv')
@@ -101,6 +101,11 @@ print "info server:", infoServer
 tempDir = tempfile.gettempdir()
 print "temporary directory:", tempDir
 
+#get owner name
+url = "https://letsrobot.tv/get_robot_owner/85642046"
+response = requests.request("GET", url)
+json_data = json.loads(response.text)
+print("owner:",json_data['owner'])
 
 # motor controller specific intializations
 if commandArgs.type == 'none':
@@ -671,14 +676,14 @@ def handle_chat_message(args):
     withoutName = rawMessage.split(']')[1:]
     message = "".join(withoutName)
     urlRegExp = "(http|ftp|https)://([\w_-]+(?:(?:\.[\w_-]+)+))([\w.,@?^=%&:/~+#-]*[\w@?^=%&/~+#-])?"
-    if args['name'] == commandArgs.uname:
+    if args['name'] == json_data['owner']:
        if commandArgs.table == True:
           if message == ' .table on':
-             say("table top mode on")
              tablemode = 1
+             say("table top mode  is now on")
           elif message == ' .table off':
-             say("table top mode off")
              tablemode = 0
+             say("table top mode is now off")
        elif message[1] == ".":
           exit()
        else:
