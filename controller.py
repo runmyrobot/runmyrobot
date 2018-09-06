@@ -689,7 +689,7 @@ def handle_chat_message(args):
           exit()
        else:
           say(message)
-    if message[1] == ".":
+    elif message[1] == ".":
        exit()
     elif commandArgs.anon_tts != True and args['anonymous'] == True:
        exit()
