@@ -685,7 +685,7 @@ def handle_chat_message(args):
           elif message == ' .table off':
              tablemode = 0
              say("table top mode is now off")
-       elif message[1] == ".":
+       if message[1] == ".":
           exit()
        else:
           say(message)
