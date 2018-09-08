@@ -20,7 +20,7 @@ parser.add_argument('robot_id', help='Robot ID')
 parser.add_argument('--table', help="enable table top mode",dest='table', action='store_true')
 parser.set_defaults(table=False)
 parser.add_argument('--info-server', help="Server that robot will connect to for information about servers and things", default='letsrobot.tv')
-parser.add_argument('--type', help="Serial or motor_hat or gopigo2 or gopigo3 or l298n or motozero or pololu or mdd10", default='motor_hat')
+parser.add_argument('--type', help="Serial or motor_hat or gopigo2 or gopigo3 or l298n or motozero or pololu or pololu14870 or mdd10", default='motor_hat')
 parser.add_argument('--serial-device', help="Serial device", default='/dev/ttyACM0')
 parser.add_argument('--male', dest='male', action='store_true')
 parser.add_argument('--female', dest='male', action='store_false')
@@ -63,6 +63,7 @@ parser.add_argument('--speaker-device', default=2, type=int)
 parser.add_argument('--tts-delay-enabled', dest='tts_delay_enabled', action='store_true')
 parser.add_argument('--tts-delay-seconds', dest='tts_delay_seconds', type=int, default=5)
 parser.add_argument('--woot-room', help="Room to enable woot events", default='')
+parser.add_argument('--pololu-speed', help='Pololu 14870 speed', type=int, default=480)
 
 commandArgs = parser.parse_args()
 print commandArgs
@@ -126,6 +127,8 @@ elif commandArgs.type == 'motozero':
     pass
 elif commandArgs.type == 'pololu':
     pass
+elif commandArgs.type == 'pololu14870':
+    from dual_max14870_rpi import motors, MAX_SPEED
 elif commandArgs.type == 'screencap':
     pass
 elif commandArgs.type == 'adafruit_pwm':
@@ -215,6 +218,9 @@ if commandArgs.type == "pololu":
         print "Running in test mode."
         print "Ctrl-C to quit"
    
+if commandArgs.type == 'pololu14870':
+    motors.enable()
+
 if commandArgs.type == 'motozero':
     GPIO.cleanup()
     GPIO.setmode(GPIO.BCM)
@@ -805,8 +811,24 @@ def moveGoPiGo2(command):
         time.sleep(0.35)
         gopigo.stop()
 
-
-
+    
+def movePololu14870(command):
+    if command == 'L':
+        motors.setSpeeds(-pololu_speed, pololu_speed)
+        time.sleep(0.15)
+        motors.setSpeeds(0,0)
+    if command == 'R':
+        motors.setSpeeds(pololu_speed, -pololu_speed)
+        time.sleep(0.15)
+        motors.setSpeeds(0,0)
+    if command == 'F':
+        motors.setSpeeds(pololu_speed, pololu_speed)
+        time.sleep(0.35)
+        motors.setSpeeds(0,0)
+    if command == 'B':
+        motors.setSpeeds(-pololu_speed, -pololu_speed)
+        time.sleep(0.35)
+        motors.setSpeeds(0,0)
         
 def changeVolumeHighThenNormal(seconds):
 
@@ -936,6 +958,9 @@ def handle_command(args):
 
             if commandArgs.type == 'gopigo3':
                 moveGoPiGo3(command)
+
+            if commandArgs.type == 'pololu14870':
+                movePololu14870(command)
                 
             if commandArgs.type == 'owi_arm':
                 owi_arm.handleOwiArm(command)
