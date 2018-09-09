@@ -644,12 +644,12 @@ def say(message):
 
     else:
         # espeak tts
-        for hardwareNumber in (2, 0, 3, 1, 4):
-            print 'plughw:%d,0' % hardwareNumber
-            if commandArgs.male:
-                os.system('cat ' + tempFilePath + ' | espeak --stdout | aplay -D plughw:%d,0' % hardwareNumber)
-            else:
-                os.system('cat ' + tempFilePath + ' | espeak -ven-us+f%d -s170 --stdout | aplay -D plughw:%d,0' % (commandArgs.voice_number, hardwareNumber))
+        #for hardwareNumber in (2, 0, 3, 1, 4):
+        print 'plughw:%d,0' % hardwareNumber
+        if commandArgs.male:
+            os.system('cat ' + tempFilePath + ' | espeak --stdout | aplay -D plughw:%d,0' % hardwareNumber)
+        else:
+            os.system('cat ' + tempFilePath + ' | espeak -ven-us+f%d -s170 --stdout | aplay -D plughw:%d,0' % (commandArgs.voice_number, hardwareNumber))
 
     os.remove(tempFilePath)
 
