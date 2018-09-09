@@ -3,7 +3,7 @@ import re
 
 def getAudioDeviceByName(name):
 
-	text = subprocess.check_output(['aplay', '-l'])
+	text = subprocess.check_output(['arecord', '-l'])
 	lines = text.splitlines()
 	for line in lines:
 		if name in line:
