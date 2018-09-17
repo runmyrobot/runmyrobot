@@ -46,8 +46,8 @@ def sendSerialCommand(ser, command):
     ser.write(command.lower().encode("utf8") + "\r\n") # write a string
     #ser.write(s)
     ser.flush()
-    ser.reset_input_buffer()
-    ser.reset_output_buffer()
+    #ser.reset_input_buffer()
+    #ser.reset_output_buffer()
     #while ser.in_waiting > 0:
         #print "read:", ser.read()
 
