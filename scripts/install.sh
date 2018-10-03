@@ -47,7 +47,7 @@ echo '#!/bin/bash' > ~/start_robot
 echo '# suggested use for this:' >> ~/start_robot
 echo '# (1) Put in the ids for your robot, YOURROBOTID and YOURCAMERAID' >> ~/start_robot
 echo '# (2) use sudo to create a crontab entry: @reboot /bin/bash /home/pi/start_robot' >> ~/start_robot
-echo 'dt=$(date "%d-%m-%Y %H:%M:%S")' >> ~/start_robot
+echo 'dt=$(date +"%d-%m-%Y %H:%M:%S")' >> ~/start_robot
 echo 'cd /home/pi/runmyrobot' >> ~/start_robot
 echo "nohup scripts/repeat_start python controller.py ${input_robot} --type serial --serial-device /dev/ttyUSB0 &> '/home/pi/logs/controller_$dt.log' &" >> ~/start_robot
 echo "nohup scripts/repeat_start python send_video.py ${input_camera} 0 --mic-channels 2 --audio-device-name C920 --pipe-audio &> '/home/pi/logs/video_$dt.log' &" >> ~/start_robot
