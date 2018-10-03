@@ -71,6 +71,9 @@ sudo python -m pip install -r requirements.txt
 # Add start_robot script to crontab, it might throw an error, but it works anyways
 sudo crontab -l | { cat; echo "@reboot /bin/bash /home/pi/start_robot"; } | sudo crontab -
 
+# Make start_robot executable
+chmod +x ~/start_robot
+
 echo
 echo
 
