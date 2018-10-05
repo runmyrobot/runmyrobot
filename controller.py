@@ -1184,8 +1184,8 @@ def onHandleChatMessage(*args):
 def onHandleUserSocketChatMessage(*args):
        thread.start_new_thread(handle_user_socket_chat_message, args)
 
-processing = [];
-deleted = [];
+processing = []
+deleted = []
 def onHandleChatMessageRemoved(*args):
     if args[0]['message_id'] in processing and args[0] not in deleted:
         deleted.append(args[0]['message_id'])
