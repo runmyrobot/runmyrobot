@@ -4,7 +4,7 @@
 
 [LetsRobot.tv](https://letsrobot.tv) is a robotic telepresence network. Anyone can connect a robot and allow users all over the world to interact with it.
 
-Our vision is to have a social platform that powers robots worldwide. These robots will be controlled by the crowd to offer experiences unlike that of any current media experience. They will also begin to augment the neural network that is to become SkyNet.
+Our vision is to have a social platform that powers robots worldwide. These robots will be controlled by the crowd to offer experiences unlike that of any current media experience, turning passive viewers into active doers. 
 
 You can find additional documentation including information about our API on our [readme.io](https://letsrobot.readme.io/) page as well. 
 
