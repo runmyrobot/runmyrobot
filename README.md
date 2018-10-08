@@ -2,163 +2,242 @@
 
 <h1> Open Robot Control Code For Connecting to LetsRobot.tv </h1>
 
-LetsRobot.tv is a site for interacts with other using telepresence robots. User create their own robots and add them to the site.
-https://letsrobot.tv
+[LetsRobot.tv](https://letsrobot.tv) is a robotic telepresence network. Anyone can connect a robot and allow users all over the world to interact with it.
+
+Our vision is to have a social platform that powers robots worldwide. These robots will be controlled by the crowd to offer experiences unlike that of any current media experience, turning passive viewers into active doers. 
 
 You can find additional documentation including information about our API on our [readme.io](https://letsrobot.readme.io/) page as well. 
 
 
-<h2> Quick Install </h2>
+## Initializing and Setting up the Raspberry Pi
 
-The quickest option is to just download our complete image with everything already compiled and flash this to an SD card for your raspberry pi or other linux based computer:
+The brain of your robot is the Raspberry Pi, it connects everything to LetsRobot.tv and runs all of the hardware. The first step is to set up your Pi.
 
-[Download the Let's Robot Image](https://drive.google.com/open?id=1pH-xN40-iPPhvj9dFYjv4AI26jw4qc40)
 
---- or ---- 
+### Flash a MicroSD Card
+Start by flashing an 8GB microSD card on your PC or Mac. You will need a micro SD card reader, or an adapter and a standard SD card reader.
 
-Copy this into the terminal on your raspberry pi (or robot's OS), and follow the instructions.
-This script has been tested on a Raspberry Pi 3, with a fresh flash of "2017-04-10-raspbian-jessie-lite".
+Download [Etcher](https://etcher.io) and flash an 8GB (or more) micro SD card with the [Raspian Stretch Lite disk image (.img file)](https://www.raspberrypi.org/downloads/raspbian/). You can also do it [manually](https://howchoo.com/g/ndg2mtbmnmn/how-to-install-raspbian-stretch-on-the-raspberry-pi). 
+
+For these instructions we are using the non GUI (Graphical User Interface) and instead setting things up using the command line. The reason for this is so that you begin to familiarize yourself with programming and navigating the brain of your robot this way. There are many ways to do this part but learning to navigate the terminal and command line will be important for your learning process.
+
+### Connect to your Raspberry Pi
+
+If it is your first time with a Raspberry Pi you should connect an HDMI monitor and keyboard as well as power the Pi with a quality micro USB cord with a power supply that is providing 5V and at least 2.0 amps. The [official Raspberry Pi power supply](https://www.raspberrypi.org/products/raspberry-pi-universal-power-supply/) provides 5V 2.5 amps.
+
+*One of the major issues most robot builders come across is poor quality USB Power packs and USB cables. Many batteries will not actually provide the amperage they say they are rated for. The Raspberry Pi should optimally be run at a steady 5V 2.4amps*
+
+<block>
+#### FYI: Common Raspberry Pi Commands
+
+Welcome to Linux, here are the basics of understanding [common commands](https://howchoo.com/g/ythizdrmnwu/the-most-common-raspberry-pi-commands-and-what-they-do)
+</block>
+
+
+
+### Your first prompt will be the login
+
+Username: pi
+Password: raspberry
+
+### Set Up your Raspberry Pi using raspi-config
+
+Enter raspi-config by entering the following at the command prompt:
+
+`sudo raspi-config`
+
+
+* Setup Locale, Timezone, and Wifi Country
+As soon as you start raspi-config it will prompt you to set these.
+
+
+* Change your password!
+This is very important as others can break into your network simply by using your robot as the gateway.
+
+<img src="https://files.readme.io/f05d505-Screen_Shot_2018-10-04_at_3.19.57_PM.png">
+
+If that fails to connect try these [instructions](https://www.raspberrypi.org/documentation/configuration/wireless/wireless-cli.md).  
+
+* Network Options
+Add your wifi SSID and Password
+
+<img src="https://files.readme.io/98772c6-Screen_Shot_2018-10-04_at_3.20.37_PM.png">
+
+* Enable SSH in Interfacing Options
+You will want to be able to connect to your robot using your computer (if for no other reason to copy and paste the command line instructions to avoid typos)
+
+* You may want to also enable I2C here if you plan on using the Adafruit Motor Hat*
+
+<img src="https://files.readme.io/e84f8b3-Screen_Shot_2018-10-04_at_3.21.54_PM.png">
+
+* Exit the Raspi-config and reboot
+
+To exit use your right arrow key to move and select <Back> , hit enter.
+Then do the same thing to select the <Finish>
+
+Type the following into the command prompt:
+
+`sudo reboot`
+
+When you reboot to the command line your IP address should be shown in the last few messages before the login prompt. Write it down.
+
+### Connect via SSH to the Raspberry Pi
+
+Switch over to your computer on the same Wifi network. 
+
+Open the Terminal program on your PC or Mac.
+
+`ssh pi@YOUR-PI-IPADDRESS`
+
+Then enter your login:
 
 ```
-sudo wget https://raw.githubusercontent.com/runmyrobot/runmyrobot/master/scripts/install.sh -O /tmp/install.sh && bash /tmp/install.sh
+username: pi 
+password: the new password you just set
 ```
 
-After end installtion, all the files needed should be installed and ready for use, but you still might need to change some arguments in your "/home/pi/start_robot" file, to make it suit your robot.
+* copy and paste all of the commands below into the terminal instead of typing them arduously line by line.
 
-To edit your start_robot file, put this into the terminal.
-
-```sudo nano /home/pi/start_robot```
-
-<h2> Manual Install </h2>
+### Update your Raspberry Pi
 
 
-We recommend using [Raspian Lite](https://www.raspberrypi.org/downloads/raspbian/), however any version of [Raspian](https://www.raspberrypi.org/downloads/raspbian/) or [NOOBS](https://www.raspberrypi.org/downloads/noobs/) should work. 
+`sudo apt-get update`
 
-Make sure the Raspberry Pi software is up to date. 
 
-```
-sudo apt-get update
-```
+### Install ffmpeg and other software needed to run our code. 
 
-Install ffmpeg and other software needed to run our code. 
-
+Make sure you don’t get any errors in the console when doing the step below. If you have an issue, you can run this line again, and that will usually fix it!
 ```
 sudo apt-get install ffmpeg python-serial python-dev libgnutls28-dev espeak python-smbus python-pip git
 ```
-
 Download the Let’s Robot / Run My Robot software from our github
-
 ```
 git clone https://github.com/runmyrobot/runmyrobot
 ```
-
 Go into the /runmyrobot directory
-
 ```
 cd runmyrobot
 ```
-
 Install requirements
-
 ```
 sudo python -m pip install -r requirements.txt
 ```
 
+## Create A Robot on Your LetsRobot.tv Account
 
-<h2> Bring you Bot to life: Programs to run on the Raspberry Pi </h2>
+Load LetsRobot.tv and select *sign up / log in* on the upper right of the page.
 
-Start by cloning the runmyrobot repository
+<img src="https://files.readme.io/b1461ca-Screen_Shot_2018-10-04_at_4.57.38_PM.png"> <br/>
+Login or create an account
+
+
+    
+<img src="https://files.readme.io/aed48a3-Screen_Shot_2018-10-04_at_5.00.17_PM.png"> 
+<br/>Navigate to your profile and click + Add a new Robot!
+
+<img src="https://files.readme.io/044ef8f-Screen_Shot_2018-10-04_at_5.00.32_PM.png">Now edit your new robot.
+
+<br/>
+<img src="https://files.readme.io/0837418-Screen_Shot_2018-10-04_at_5.02.04_PM.png">
+<br />
+
+Fill out the Name and Description, then select the recommended resolution (if using the C920).
+
+<img src="https://files.readme.io/72d2d17-Screen_Shot_2018-10-04_at_5.02.35_PM.png">
+
+Enter a Stream Key and **BE SURE TO SAVE**
+    
+
+
+## Setting up your start_robot file on the Raspberry Pi
+Back on the Pi once you have accessed it by SSH again, copy the start_robot script to your home directory. 
+
+`cp ~/runmyrobots/scipts/start_robot ~`
+
+You will need to edit start_robot in order to sync it with your robot:
+
+`nano ~/start_robot `
+
+Once you open it up, it will look something like this:
 ```
-cd ~
-git clone https://github.com/runmyrobot/runmyrobot
-cd runmyrobot
-```
+#!/bin/bash
+# suggested use for this:
+# (1) Put in the id's for your robot, YOURROBOTID and YOURCAMERAID
+# (2) use sudo to create a crontab entry: @reboot /bin/bash /home/pi/start_robot
 
-Go to new robot page to create a robot. If you already have one, got to manage robots. There you'll find your Robot ID and Camera ID.
-
-These two scripts need to be running in the background to bring your robot to life: controller.py, send_video.py. Here are instructions about how to start them.
-
-Copy the 'start_robot' Script from runmyrobot/Scripts to the pi home folder
-
-```cp ~/runmyrobot/scripts/start_robot ~/```
-
-Edit the script so you can adjust some settings for controller.py and send_video.py:
-
-```nano ~/start_robot```
-
-Edit the YOURROBOTID to your robot ID.
-
-Edit the YOURCAMERAID to your camera ID.
-
-You are getting both IDs when you are creating a new bot on the website.
-
-The second parameter on send_video.py 0 is assuming you have one camera plugged into your Pi and you are using it, which is usually the case.
-
-There are more parameter possible for controller.py:
-
-```robot_id```
-
-Your Robot ID. Required
-
-```--env prod | dev```
-
-Environment for example dev or prod | default='prod'
-
-```--type motor_hat | serial | l298n | motozero```
-
-What type of motor controller should be used | default='motor_hat'
-
-```--serial-device /dev/ttyACM0```
-
-Serial device | default='/dev/ttyACM0'
-
-```--male```
-
-Use TTS with a male voice
-
-```--female```
-
-Use TTS with a female voice
-
-```--voice-number 1```
-
-What voice should be used | default=1
-
-```--led max7219```
-
-What LEDs should be used (if any) | default=none
-
-```--ledrotate 180```
-
-Rotates the LED matrix | default=none
-
-Example start_robot:
-
-```
 cd /home/pi/runmyrobot
-nohup scripts/repeat_start python controller.py YOURROBOTID --type motor_hat --male --voice-number 1 --led max7219 --ledrotate 180 &> /dev/null &
+nohup scripts/repeat_start python controller.py YOURROBOTID &> /dev/null &
 nohup scripts/repeat_start python send_video.py YOURCAMERAID 0 &> /dev/null &
 ```
 
-<h3> Start script on boot </h3>
-Use crontab to start the start_robot script on booting:
+You will need to replace “YOURROBOTID” and “YOURCAMERAID” with the numbers generated from the site for your robot. You also need to add your stream key. If you haven’t done that step, go to your letsrobot.tv profile and add a robot (Be sure to click the SAVE button). 
+
+Move your cursor to the bottom and delete/backspace everything in this file. Copy and Paste the following:
 
 ```
-crontab -e
+#!/bin/bash
+# suggested use for this:
+# (1) Put in the id's for your robot, YOURROBOTID and YOURCAMERAID
+# (2) use sudo to create a crontab entry: @reboot /bin/bash /home/pi/start_robot
+#
+
+cd /home/pi/runmyrobot
+nohup scripts/repeat_start python controller.py YOURROBOTID --type none --filter-url-tts --tts-volume 80 --female --voice 1 &> /dev/null &
+nohup scripts/repeat_start python send_video.py YOURCAMERAID 0 --stream-key YOURSTREAMKEY --audio-device-name C920 --pipe-audio --mic-channels 2 &> /dev/null &
 ```
 
-insert following line and save:
+This has all the arguments (--ARGUMENT <variable>) to set up the a bot with the C920 camera with onboard stereo mic and the USB speaker. This disables the motor controller. You'll change the --type <argument> to the correct motor controller or serial input command.
 
+In order to exit the nano editor, control + x
+
+Once you have your start_robot file filled in appropriately to have it run on startup run the following:
 ```
+crontab -e 
+```
+Note: If you accidently use the wrong editor try 
+
+`EDITOR=nano crontab -e`
+
+and insert the following text at the bottom
+
+`@reboot /bin/bash /home/pi/start_robot`
+
+Example: 
+```
+# Edit this file to introduce tasks to be run by cron.
+#
+# Each task to run has to be defined through a single line
+# indicating with different fields when the task will be run
+# and what command to run for the task
+#
+# To define the time you can provide concrete values for
+# minute (m), hour (h), day of month (dom), month (mon),
+# and day of week (dow) or use '*' in these fields (for 'any').#
+# Notice that tasks will be started based on the cron's system
+# daemon's notion of time and timezones.
+#
+# Output of the crontab jobs (including errors) is sent through
+# email to the user the crontab file belongs to (unless redirected).
+#
+# For example, you can run a backup of all your user accounts
+# at 5 a.m every week with:
+# 0 5 * * 1 tar -zcf /var/backups/home.tgz /home/
+#
+# For more information see the manual pages of crontab(5) and cron(8)
+#
+# m h  dom mon dow   command
+
 @reboot /bin/bash /home/pi/start_robot
 ```
 
-That's it!
 
-<h2> How does this work </h2>
+Now just plug in the Camera and USB Speaker and reboot
 
-We use ffmpeg to stream audio and socket.io to send control messages.
+`sudo reboot`
 
+Hopefully you’ll hear your robot say “OK” and everything will be working!
+
+If not, it is time to checking the [Technical FAQ](doc:technical-faq) and [Troubleshooting Tips](doc:troubleshooting-tips). Also drop in to our [Discord Channel](https://discord.gg/uGmTWd) and ask for help.
 <h2> How to contribute </h2>
 
 The is a community project. Making your own bot? Adding your own control stuff? Cool! We'd like to hear from you.
@@ -229,5 +308,6 @@ The robot client streams ffmpeg output to the video/audio service
 
 <h4>Control Service</h4>
 Relays control messages sent from the web clients to the robot
+
 
 
