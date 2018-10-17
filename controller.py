@@ -460,21 +460,21 @@ chatHostPort = getChatHostPort()
 
 
 print "connecting to control socket.io", controlHostPort
-controlSocketIO = SocketIO(controlHostPort['host'], controlHostPort['port'], LoggingNamespace)
+controlSocketIO = SocketIO(controlHostPort['host'], controlHostPort['port'], LoggingNamespace, transports='websocket')
 print "finished using socket io to connect to control host port", controlHostPort
 
 if commandArgs.enable_chat_server_connection:
     print "connecting to chat socket.io", chatHostPort
-    chatSocket = SocketIO(chatHostPort['host'], chatHostPort['port'], LoggingNamespace)
+    chatSocket = SocketIO(chatHostPort['host'], chatHostPort['port'], LoggingNamespace, transports='websocket')
     print 'finished using socket io to connect to chat ', chatHostPort
 else:
     print "chat server connection disabled"
 
 if commandArgs.tts_delay_enabled or commandArgs.woot_room != '':
-    userSocket = SocketIO('https://letsrobot.tv', 8000, LoggingNamespace)
+    userSocket = SocketIO('https://letsrobot.tv', 8000, LoggingNamespace, transports='websocket')
 
 print "connecting to app server socket.io"
-appServerSocketIO = SocketIO(infoServer, 8022, LoggingNamespace)
+appServerSocketIO = SocketIO(infoServer, 8022, LoggingNamespace, transports='websocket')
 print "finished connecting to app server"
 
 def setServoPulse(channel, pulse):
