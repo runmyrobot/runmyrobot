@@ -961,7 +961,8 @@ def handle_command(args):
             if commandArgs.type == 'serial':
                 try:
                     robot_util.sendSerialCommand(ser, command)
-                except:
+                except Exception as exception:
+                    print exception
                     setup_serial()
 
             if commandArgs.type == 'motor_hat' and motorsEnabled:
