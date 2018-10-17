@@ -437,10 +437,18 @@ def serial_ports():
     return result
 
 ser = None
+lastPorts = []
+firstPortScan = True
 
 def setup_serial():
     global ser
+    global lastPorts
+    global firstPortScan
     ports = serial_ports()
+    if firstPortScan == False and lastPorts == ports:
+        return
+    firstPortScan = False
+    lastPorts = ports
     if len(ports) == 0:
         print "error: could not find any valid serial port"
         return
@@ -1523,5 +1531,5 @@ while True:
         if platform.system() == 'Linux':
             ipInfoUpdate()
 
-
+    setup_serial()
     waitCounter += 1
