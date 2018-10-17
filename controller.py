@@ -14,6 +14,7 @@ import random
 import telly
 import robot_util
 import requests
+import glob
 
 parser = argparse.ArgumentParser(description='start robot control program')
 parser.add_argument('robot_id', help='Robot ID')
@@ -407,37 +408,55 @@ armServo = [300, 300, 300]
 #    print "invalid environment"
 #    sys.exit(0)
 
+def serial_ports():
+    """ Lists serial port names
+
+        :raises EnvironmentError:
+            On unsupported or unknown platforms
+        :returns:
+            A list of the serial ports available on the system
+    """
+    if sys.platform.startswith('win'):
+        ports = ['COM%s' % (i + 1) for i in range(256)]
+    elif sys.platform.startswith('linux') or sys.platform.startswith('cygwin'):
+        # this excludes your current terminal "/dev/tty"
+        ports = glob.glob('/dev/tty[A-Za-z]*')
+    elif sys.platform.startswith('darwin'):
+        ports = glob.glob('/dev/tty.*')
+    else:
+        raise EnvironmentError('Unsupported platform')
+
+    result = []
+    for port in ports:
+        try:
+            s = serial.Serial(port)
+            s.close()
+            result.append(port)
+        except (OSError, serial.SerialException):
+            pass
+    return result
+
+ser = None
+
+def setup_serial():
+    global ser
+    ports = serial_ports()
+    if len(ports) == 0:
+        print "error: could not find any valid serial port"
+        return
+    port = ports[0]
+    if serialDevice in ports:
+        port = serialDevice
+
+    print ports
+    print port
+    serialBaud = 9600
+    ser = serial.Serial(port, serialBaud, timeout=1)
 
 if commandArgs.type == 'serial':
-    # initialize serial connection
-    serialBaud = 9600
-    print "baud:", serialBaud
-    #ser = serial.Serial('/dev/tty.usbmodem12341', 19200, timeout=1)  # open serial
-    ser = None
-    try:
-        ser = serial.Serial(serialDevice, serialBaud, timeout=1)  # open serial
-    except:
-        print "error: could not open serial port"
-        try:
-            ser = serial.Serial('/dev/ttyACM0', serialBaud, timeout=1)  # open serial
-        except:
-            print "error: could not open serial port /dev/ttyACM0"
-            try:
-                ser = serial.Serial('/dev/ttyUSB0', serialBaud, timeout=1)  # open serial
-            except:
-                print "error: could not open serial port /dev/ttyUSB0"
-                try:
-                    ser = serial.Serial('/dev/ttyUSB1', serialBaud, timeout=1)  # open serial
-                except:
-                    print "error: could not open serial port /dev/ttyUSB1"
-                    try:
-                        ser = serial.Serial('/dev/ttyUSB2', serialBaud, timeout=1)  # open serial
-                    except:
-                        print "error: could not open serial port /dev/ttyUSB2"
+    setup_serial()
 
-    if ser is None:
-        print "error: could not find any valid serial port"
-    else:
+    if ser is not None:
         telly.sendSettings(ser, commandArgs)
 
 
@@ -941,7 +960,11 @@ def handle_command(args):
                 owi_arm.handleOwiArm(command)
 
             if commandArgs.type == 'serial':
-                robot_util.sendSerialCommand(ser, command)
+                try:
+                    robot_util.sendSerialCommand(ser, command)
+                except Exception as exception:
+                    print exception
+                    setup_serial()
 
             if commandArgs.type == 'motor_hat' and motorsEnabled:
                 motorA.setSpeed(drivingSpeed)
