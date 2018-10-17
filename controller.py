@@ -470,10 +470,10 @@ if commandArgs.type == 'serial':
     setup_serial()
 
     if ser is not None:
-        telly.sendSettings(ser, commandArgs)
-
-
-
+        try:
+            telly.sendSettings(ser, commandArgs)
+        except Exception as exception:
+            print exception
 
 def getControlHostPort():
 
