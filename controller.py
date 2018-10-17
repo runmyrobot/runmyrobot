@@ -439,6 +439,7 @@ def serial_ports():
 ser = None
 
 def setup_serial():
+    global ser
     ports = serial_ports()
     if len(ports) == 0:
         print "error: could not find any valid serial port"
