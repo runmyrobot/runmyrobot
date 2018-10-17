@@ -459,7 +459,12 @@ def setup_serial():
     print ports
     print port
     serialBaud = 9600
-    ser = serial.Serial(port, serialBaud, timeout=1)
+    if ser is not None:
+        try:
+            ser.close()
+        except:
+            print "closing serial failed continuing"
+    ser = serial.Serial(port, serialBaud, timeout=1, write_timeout=1)
 
 if commandArgs.type == 'serial':
     setup_serial()
