@@ -443,8 +443,14 @@ def setup_serial():
     if len(ports) == 0:
         print "error: could not find any valid serial port"
         return
+    port = ports[0]
+    if serialDevice in ports:
+        port = serialDevice
+
     print ports
-    ser = ports[0]
+    print port
+    serialBaud = 9600
+    ser = serial.Serial(port, serialBaud, timeout=1)
 
 if commandArgs.type == 'serial':
     setup_serial()
