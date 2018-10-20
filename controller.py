@@ -1264,7 +1264,13 @@ def onHandleChatDisconnect(*args):
     print
     print "chat socket.io disconnect"
     print
-    
+
+def onHandleControlConnect(*args):
+    controlSocketIO.emit('robot_id', robotID)
+
+def onHandleControlReconnect(*args):
+    controlSocketIO.emit('robot_id', robotID)
+
 def onHandleControlDisconnect(*args):
     print
     print "control socket.io disconnect"
@@ -1277,6 +1283,8 @@ def onHandleControlDisconnect(*args):
 #from communication import socketIO
 controlSocketIO.on('command_to_robot', onHandleCommand)
 controlSocketIO.on('disconnect', onHandleControlDisconnect)
+controlSocketIO.on('connect', onHandleControlConnect)
+controlSocketIO.on('reconnect', onHandleControlReconnect)
 
 appServerSocketIO.on('exclusive_control', onHandleExclusiveControl)
 appServerSocketIO.on('connect', onHandleAppServerConnect)
