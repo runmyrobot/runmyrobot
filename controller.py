@@ -1536,5 +1536,4 @@ while True:
         if platform.system() == 'Linux':
             ipInfoUpdate()
 
-    setup_serial()
     waitCounter += 1
