@@ -43,13 +43,15 @@ sleep 1s
 
 
 # Write the start_robot file with the ID for robot and camera in
-echo '#!/bin/bash' > ~/start_robot
-echo '# suggested use for this:' >> ~/start_robot
-echo '# (1) Put in the ids for your robot, YOURROBOTID and YOURCAMERAID' >> ~/start_robot
-echo '# (2) use sudo to create a crontab entry: @reboot /bin/bash /home/pi/start_robot' >> ~/start_robot
-echo 'cd /home/pi/runmyrobot' >> ~/start_robot
-echo "nohup scripts/repeat_start python controller.py ${input_robot} --type serial --serial-device /dev/ttyUSB0 &> /dev/null &" >> ~/start_robot
-echo "nohup scripts/repeat_start python send_video.py ${input_camera} 0 --mic-channels 2 --audio-device-name C920 --pipe-audio &> /dev/null &" >> ~/start_robot
+echo > start_robot <<EOF
+#!/bin/bash
+# suggested use for this:
+# (1) Put in the ids for your robot, YOURROBOTID and YOURCAMERAID
+# (2) use sudo to create a crontab entry: @reboot /bin/bash /home/pi/start_robot
+cd /home/pi/runmyrobot
+nohup scripts/repeat_start python controller.py ${input_robot} --type serial --serial-device /dev/ttyUSB0 &> /dev/null &
+nohup scripts/repeat_start python send_video.py ${input_camera} 0 --mic-channels 2 --audio-device-name C920 --pipe-audio &> /dev/null &
+EOF
 
 # Make sure the system is up to date
 sudo apt-get -y update
