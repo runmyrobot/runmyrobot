@@ -43,7 +43,7 @@ sleep 1s
 
 
 # Write the start_robot file with the ID for robot and camera in
-echo > start_robot <<EOF
+cat > start_robot <<EOF
 #!/bin/bash
 # suggested use for this:
 # (1) Put in the ids for your robot, YOURROBOTID and YOURCAMERAID
