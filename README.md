@@ -152,7 +152,7 @@ Enter a Stream Key and **BE SURE TO SAVE**
 ## Setting up your start_robot file on the Raspberry Pi
 Back on the Pi once you have accessed it by SSH again, copy the start_robot script to your home directory. 
 
-`cp ~/runmyrobots/scipts/start_robot ~`
+`cp ~/runmyrobot/scripts/start_robot ~`
 
 You will need to edit start_robot in order to sync it with your robot:
 
