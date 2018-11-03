@@ -464,7 +464,7 @@ def setup_serial():
             ser.close()
         except:
             print "closing serial failed continuing"
-    ser = serial.Serial(port, serialBaud, timeout=1, write_timeout=1)
+    ser = serial.Serial(port, serialBaud, timeout=1)
 
 if commandArgs.type == 'serial':
     setup_serial()
