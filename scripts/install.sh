@@ -43,17 +43,15 @@ sleep 1s
 
 
 # Write the start_robot file with the ID for robot and camera in
-echo '#!/bin/bash' > ~/start_robot
-echo '# suggested use for this:' >> ~/start_robot
-echo '# (1) Put in the ids for your robot, YOURROBOTID and YOURCAMERAID' >> ~/start_robot
-echo '# (2) use sudo to create a crontab entry: @reboot /bin/bash /home/pi/start_robot' >> ~/start_robot
-echo 'dt=$(date +"%d-%m-%Y %H:%M:%S")' >> ~/start_robot
-echo 'cd /home/pi/runmyrobot' >> ~/start_robot
-echo "nohup scripts/repeat_start python controller.py ${input_robot} --type serial --serial-device /dev/ttyUSB0 &> '/home/pi/logs/controller_$dt.log' &" >> ~/start_robot
-echo "nohup scripts/repeat_start python send_video.py ${input_camera} 0 --mic-channels 2 --audio-device-name C920 --pipe-audio &> '/home/pi/logs/video_$dt.log' &" >> ~/start_robot
-
-#make logs directory
-mkdir ~/logs
+cat > start_robot <<EOF
+#!/bin/bash
+# suggested use for this:
+# (1) Put in the ids for your robot, YOURROBOTID and YOURCAMERAID
+# (2) use sudo to create a crontab entry: @reboot /bin/bash /home/pi/start_robot
+cd /home/pi/runmyrobot
+nohup scripts/repeat_start python controller.py ${input_robot} --type serial --serial-device /dev/ttyUSB0 &> /dev/null &
+nohup scripts/repeat_start python send_video.py ${input_camera} 0 --mic-channels 2 --audio-device-name C920 --pipe-audio &> /dev/null &
+EOF
 
 # Make sure the system is up to date
 sudo apt-get -y update
@@ -68,8 +66,8 @@ git clone https://github.com/runmyrobot/runmyrobot
 cd runmyrobot/
 sudo python -m pip install -r requirements.txt
 
-# Add start_robot script to crontab, it might throw an error, but it works anyways
-sudo crontab -l | { cat; echo "@reboot /bin/bash /home/pi/start_robot"; } | sudo crontab -
+# Add start_robot script to crontab
+(crontab -l 2>/dev/null; echo "@reboot /home/pi/start_robot") | crontab -
 
 # Make start_robot executable
 chmod +x ~/start_robot
