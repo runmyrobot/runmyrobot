@@ -980,8 +980,9 @@ def handle_command(args):
                     setup_serial()
 
             if commandArgs.type == 'motor_hat' and motorsEnabled:
-                motorA.setSpeed(drivingSpeed)
-                motorB.setSpeed(drivingSpeed)
+                for motorIndex in range(4):
+                    mh.getMotor(motorIndex).setSpeed(drivingSpeed)
+
                 if command == 'F':
                     drivingSpeed = drivingSpeedActuallyUsed
                     for motorIndex in range(4):
@@ -1343,8 +1344,6 @@ def turnOffMotorsMDD10():
 if commandArgs.type == 'motor_hat':
     if motorsEnabled:
         atexit.register(turnOffMotors)
-        motorA = mh.getMotor(1)
-        motorB = mh.getMotor(2)
 
 def ipInfoUpdate():
     appServerSocketIO.emit('ip_information',
