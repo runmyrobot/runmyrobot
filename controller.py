@@ -35,6 +35,7 @@ parser.add_argument('--straight-delay', type=float, default=0.5)
 parser.add_argument('--driving-speed', type=int, default=90)
 parser.add_argument('--day-speed', type=int, default=255)
 parser.add_argument('--night-speed', type=int, default=255)
+parser.add_argument('--turning-speed', type=int, default=250)
 parser.add_argument('--forward', default='[-1,1,-1,1]')
 parser.add_argument('--left', default='[1,1,1,1]')
 parser.add_argument('--festival-tts', dest='festival_tts', action='store_true')
@@ -372,8 +373,7 @@ drivingSpeed = commandArgs.driving_speed
 handlingCommand = False
 
 
-# Marvin
-turningSpeedActuallyUsed = 250
+turningSpeedActuallyUsed = commandArgs.turning_speed
 dayTimeDrivingSpeedActuallyUsed = commandArgs.day_speed
 nightTimeDrivingSpeedActuallyUsed = commandArgs.night_speed
 
