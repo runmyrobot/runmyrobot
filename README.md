@@ -8,6 +8,19 @@ Our vision is to have a social platform that powers robots worldwide. These robo
 
 You can find additional documentation including information about our API on our [readme.io](https://letsrobot.readme.io/) page as well. 
 
+<h3> We are officially testing the new robot side code </h3>
+We've re-written the entire robot side code to be more modular and easily extendable. It's still in the testing phase, but everything needed to run a robot is there. If you would like to help us test it out, we've put it on a new repo here: [https://github.com/letsRobot/letsrobot](https://github.com/letsRobot/letsrobot)
+
+A few highlights: 
+* Everything is modular, with a .conf file instead of using text parameters 
+* Extending scripts is done in separate files
+* Default support for more robots
+* Includes most features avaible with current repo
+
+We are also developing a GUI to help make the setup process easier.
+Shout out to Nocturnal, Roy, and Skeeter for making a more awesome developer friendly tool! 
+
+We still need to test on more robots before we can make the official switch, and we still need to do more documentation. We highly encourage you to give this a shot and let us know if you run into any issues. 
 
 ## Initializing and Setting up the Raspberry Pi
 
